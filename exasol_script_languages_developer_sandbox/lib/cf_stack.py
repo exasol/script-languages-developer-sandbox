@@ -5,10 +5,6 @@ from exasol_script_languages_developer_sandbox.lib.random_string_generator impor
 from exasol_script_languages_developer_sandbox.lib.render_template import render_template
 
 
-def STACK_NAME():
-    return f"EC2-SLC-DEV-SANDBOX-{get_random_str(5)}"
-
-
 class CloudformationStack:
     """
     This class provides access to an AWS Cloudformation stack
@@ -18,13 +14,17 @@ class CloudformationStack:
         self._aws_access = aws_access
         self._stack_name = None
 
+    @staticmethod
+    def _generate_stack_name():
+        return f"EC2-SLC-DEV-SANDBOX-{get_random_str(5)}"
+
     @property
     def stack_name(self):
         return self._stack_name
 
     def launch_ec2_stack(self, ec2_key_name) -> None:
         yml = render_template("ec2_cloudformation.jinja.yaml", key_name=ec2_key_name)
-        self._stack_name = STACK_NAME()
+        self._stack_name = self._generate_stack_name()
         self._aws_access.upload_cloudformation_stack(yml, self._stack_name)
         logging.info(f"Deployed cloudformation stack {self._stack_name}")
 
