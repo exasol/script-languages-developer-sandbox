@@ -18,6 +18,10 @@ class CloudformationStack:
         self._aws_access = aws_access
         self._stack_name = None
 
+    @property
+    def stack_name(self):
+        return self._stack_name
+
     def launch_ec2_stack(self, ec2_key_name) -> None:
         yml = render_template("ec2_cloudformation.jinja.yaml", key_name=ec2_key_name)
         self._stack_name = STACK_NAME()
