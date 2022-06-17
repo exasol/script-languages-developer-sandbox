@@ -12,7 +12,7 @@ class KeyFileManager:
                  external_ec2_key_name: Optional[str], external_ec2_key_file: Optional[str]):
         self._ec2_key_file = external_ec2_key_file
         self._aws_access = aws_access
-        self._remove_key_file = False
+        self._remove_key_on_close = False
         if self._ec2_key_file is None:
             logging.debug("Creating new key-pair")
             self._key_name = f"ec2-key-{get_random_str(10)}"

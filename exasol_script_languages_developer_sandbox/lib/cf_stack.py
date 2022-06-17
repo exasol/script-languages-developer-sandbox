@@ -16,6 +16,10 @@ class CloudformationStack:
 
     @staticmethod
     def _generate_stack_name():
+        """
+        Create a new stack name. We append a random number as suffix,
+        so that in theory multiple instances can be created.
+        """
         return f"EC2-SLC-DEV-SANDBOX-{get_random_str(5)}"
 
     @property
