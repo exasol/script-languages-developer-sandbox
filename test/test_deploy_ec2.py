@@ -10,7 +10,7 @@ from test.cloudformation_validation import validate_using_cfn_lint
 
 @pytest.fixture
 def ec2_cloudformation_yml():
-    return render_template("ec2_cloudformation.jinja.yaml", key_name="test_key")
+    return render_template("ec2_cloudformation.jinja.yaml", key_name="test_key", user_name="test_user")
 
 
 def test_deploy_ec2_upload_invoked(ec2_cloudformation_yml):
@@ -20,7 +20,7 @@ def test_deploy_ec2_upload_invoked(ec2_cloudformation_yml):
     """
     aws_access_mock = MagicMock()
     cf_access = CloudformationStack(aws_access_mock)
-    cf_access.launch_ec2_stack("test_key")
+    cf_access.launch_ec2_stack("test_key", "test_user")
     aws_access_mock.upload_cloudformation_stack.assert_called_once_with(ec2_cloudformation_yml, cf_access.stack_name)
 
 

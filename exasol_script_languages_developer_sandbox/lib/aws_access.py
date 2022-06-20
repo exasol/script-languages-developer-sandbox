@@ -105,6 +105,14 @@ class AwsAccess(object):
         cloud_client = self._get_aws_client("ec2")
         return cloud_client.describe_instances(InstanceIds=[instance_id])["Reservations"][0]["Instances"][0]
 
+    def get_user(self) -> str:
+        """
+        Return the current IAM user name.
+        """
+        iam_client = self._get_aws_client("iam")
+        cu = iam_client.get_user()
+        return cu["User"]["UserName"]
+
     def _get_aws_client(self, service_name: str) -> Any:
         if self._aws_profile is None:
             return boto3.client(service_name)

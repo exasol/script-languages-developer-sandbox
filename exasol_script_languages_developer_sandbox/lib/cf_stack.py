@@ -26,8 +26,8 @@ class CloudformationStack:
     def stack_name(self):
         return self._stack_name
 
-    def launch_ec2_stack(self, ec2_key_name) -> None:
-        yml = render_template("ec2_cloudformation.jinja.yaml", key_name=ec2_key_name)
+    def launch_ec2_stack(self, ec2_key_name, user_name: str) -> None:
+        yml = render_template("ec2_cloudformation.jinja.yaml", key_name=ec2_key_name, user_name=user_name)
         self._stack_name = self._generate_stack_name()
         self._aws_access.upload_cloudformation_stack(yml, self._stack_name)
         logging.info(f"Deployed cloudformation stack {self._stack_name}")

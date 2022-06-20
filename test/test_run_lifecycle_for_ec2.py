@@ -2,10 +2,10 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from exasol_script_languages_developer_sandbox.lib.run_setup_ec2 import run_setup_ec2, execute_setup_ec2
+from exasol_script_languages_developer_sandbox.lib.run_setup_ec2 import run_lifecycle_for_ec2
 
 
-def test_run_setup_ec2_success():
+def test_run_lifecycle_for_ec2():
     """"
     Test that the EC2 deployment and cleanup works as expected. The test calls execute_setup_ec2() and simulates
     the return states from AWS (2x pending, 1x running) for the EC2 instance.
@@ -27,7 +27,7 @@ def test_run_setup_ec2_success():
             {"State": {"Name": "running"}, "PublicDnsName": "public_host"}
         ]
     aws_access_mock.describe_instance.side_effect = instances_states
-    res_gen = execute_setup_ec2(aws_access_mock, "test_key_file_loc", "test_key")
+    res_gen = run_lifecycle_for_ec2(aws_access_mock, "test_key_file_loc", "test_key")
     res = next(res_gen)
     assert not aws_access_mock.create_new_ec2_key_pair.called
     assert aws_access_mock.upload_cloudformation_stack.called
