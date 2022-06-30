@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess
 from exasol_script_languages_developer_sandbox.lib.random_string_generator import get_random_str
@@ -19,7 +20,7 @@ class CloudformationStack:
         self._user_name = user_name
 
     @staticmethod
-    def _generate_stack_name():
+    def _generate_stack_name() -> str:
         """
         Create a new stack name. We append a random number as suffix,
         so that in theory multiple instances can be created.
@@ -27,7 +28,7 @@ class CloudformationStack:
         return f"EC2-SLC-DEV-SANDBOX-{get_random_str(5)}"
 
     @property
-    def stack_name(self):
+    def stack_name(self) -> Optional[str]:
         return self._stack_name
 
     def __enter__(self):

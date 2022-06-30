@@ -12,11 +12,10 @@ def test_external_keys(tmp_path):
     tmp_file = tmp_path / "tst.pem"
     with open(tmp_file, "w") as f:
         f.write("secret")
-    km = KeyFileManager(aws_access_mock, "test_key", str(tmp_file))
-    assert km.key_name == "test_key"
-    assert km.key_file_location == str(tmp_file)
-    assert not km._remove_key_on_close
-    km.close()
+    with KeyFileManager(aws_access_mock, "test_key", str(tmp_file)) as km:
+        assert km.key_name == "test_key"
+        assert km.key_file_location == str(tmp_file)
+        assert not km._remove_key_on_close
     assert not aws_access_mock.delete_ec2_key_pair.called
     assert os.path.exists(str(tmp_file))
 
@@ -27,16 +26,17 @@ def test_generated_key():
        """
     aws_access_mock = MagicMock()
     aws_access_mock.create_new_ec2_key_pair.return_value = "secret_abc"
-    km = KeyFileManager(aws_access_mock, None, None)
-    assert len(km.key_name) > 0
-    aws_access_mock.create_new_ec2_key_pair.assert_called_once_with(key_name=km.key_name)
-    assert km._remove_key_on_close
-    with open(km.key_file_location, "r") as f:
-        content = f.read()
-        assert content == "secret_abc"
+    key_name = ""
+    with KeyFileManager(aws_access_mock, None, None) as km:
+        assert len(km.key_name) > 0
+        aws_access_mock.create_new_ec2_key_pair.assert_called_once_with(key_name=km.key_name)
+        assert km._remove_key_on_close
+        key_name = km.key_name
+        with open(km.key_file_location, "r") as f:
+            content = f.read()
+            assert content == "secret_abc"
 
-    # Now call close. After that we expect that the key has been removed from AWS and the temporary file was removed.
-    km.close()
-    aws_access_mock.delete_ec2_key_pair.assert_called_once_with(key_name=km.key_name)
+        # Now call close. After that we expect that the key has been removed from AWS and the temporary file was removed.
+    aws_access_mock.delete_ec2_key_pair.assert_called_once_with(key_name=key_name)
     assert not os.path.exists(km.key_file_location)
 

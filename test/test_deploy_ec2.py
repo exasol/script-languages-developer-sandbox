@@ -19,9 +19,10 @@ def test_deploy_ec2_upload_invoked(ec2_cloudformation_yml):
     with expected values when we run run_deploy_ci_build()
     """
     aws_access_mock = MagicMock()
-    cf_access = CloudformationStack(aws_access_mock)
-    cf_access.launch_ec2_stack("test_key", "test_user")
-    aws_access_mock.upload_cloudformation_stack.assert_called_once_with(ec2_cloudformation_yml, cf_access.stack_name)
+    with CloudformationStack(aws_access_mock, "test_key", "test_user") as cf_access:
+        pass
+    aws_access_mock.upload_cloudformation_stack.assert_called_once_with(ec2_cloudformation_yml,
+                                                                        cf_access.stack_name)
 
 
 def test_deploy_ec2_template(ec2_cloudformation_yml):
