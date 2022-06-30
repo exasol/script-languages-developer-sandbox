@@ -7,12 +7,16 @@ from exasol_script_languages_developer_sandbox.lib.render_template import render
 
 class CloudformationStack:
     """
-    This class provides access to an AWS Cloudformation stack
+    This class provides instantiation and destruction  of an AWS Cloudformation stack.
+    It is implemented as ContextManager, so that if it enters the context, the instance will be created,
+    and when exiting the stack will be destroyed.
     """
 
-    def __init__(self, aws_access: AwsAccess):
+    def __init__(self, aws_access: AwsAccess, ec2_key_name: str, user_name: str):
         self._aws_access = aws_access
         self._stack_name = None
+        self._ec2_key_name = ec2_key_name
+        self._user_name = user_name
 
     @staticmethod
     def _generate_stack_name():
@@ -26,11 +30,12 @@ class CloudformationStack:
     def stack_name(self):
         return self._stack_name
 
-    def launch_ec2_stack(self, ec2_key_name, user_name: str) -> None:
-        yml = render_template("ec2_cloudformation.jinja.yaml", key_name=ec2_key_name, user_name=user_name)
+    def __enter__(self):
+        yml = render_template("ec2_cloudformation.jinja.yaml", key_name=self._ec2_key_name, user_name=self._user_name)
         self._stack_name = self._generate_stack_name()
         self._aws_access.upload_cloudformation_stack(yml, self._stack_name)
         logging.info(f"Deployed cloudformation stack {self._stack_name}")
+        return self
 
     def get_ec2_instance_id(self) -> str:
         stack_resources = self._aws_access.get_all_stack_resources(self._stack_name)
@@ -42,6 +47,9 @@ class CloudformationStack:
         ec2_instance_id = ec2_instance[0]["PhysicalResourceId"]
         logging.info(f"Started EC2 with physical id {ec2_instance_id}")
         return ec2_instance_id
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
 
     def close(self) -> None:
         if self._stack_name is not None:

@@ -16,9 +16,7 @@ def run_lifecycle_for_ec2(aws_access: AwsAccess,
                           ec2_key_file: Optional[str], ec2_key_name: Optional[str]) -> Tuple[str, str, str, str]:
     km = KeyFileManager(aws_access, ec2_key_name, ec2_key_file)
     with closing(km):
-        cf_stack = CloudformationStack(aws_access)
-        with closing(cf_stack):
-            cf_stack.launch_ec2_stack(km.key_name, aws_access.get_user())
+        with CloudformationStack(aws_access, km.key_name, aws_access.get_user()) as cf_stack:
             ec2_instance_id = cf_stack.get_ec2_instance_id()
 
             logging.info(f"Waiting for EC2 instance ({ec2_instance_id}) to start...")
