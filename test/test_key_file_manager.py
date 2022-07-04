@@ -21,9 +21,9 @@ def test_external_keys(tmp_path):
 
 
 def test_generated_key():
-    """"
-       Test that generated key files will be created on AWS and removed when calling close().
-       """
+    """
+    Test that generated key files will be created on AWS and removed when calling close().
+    """
     aws_access_mock = MagicMock()
     aws_access_mock.create_new_ec2_key_pair.return_value = "secret_abc"
     key_name = ""
@@ -36,7 +36,7 @@ def test_generated_key():
             content = f.read()
             assert content == "secret_abc"
 
-        # Now call close. After that we expect that the key has been removed from AWS and the temporary file was removed.
+    # Now call close. After that we expect that the key has been removed from AWS and the temporary file was removed.
     aws_access_mock.delete_ec2_key_pair.assert_called_once_with(key_name=key_name)
     assert not os.path.exists(km.key_file_location)
 
