@@ -1,16 +1,8 @@
 from unittest.mock import MagicMock
 
-import pytest
-
 from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess
 from exasol_script_languages_developer_sandbox.lib.cf_stack import CloudformationStack
-from exasol_script_languages_developer_sandbox.lib.render_template import render_template
 from test.cloudformation_validation import validate_using_cfn_lint
-
-
-@pytest.fixture
-def ec2_cloudformation_yml():
-    return render_template("ec2_cloudformation.jinja.yaml", key_name="test_key", user_name="test_user")
 
 
 def test_deploy_ec2_upload_invoked(ec2_cloudformation_yml):
