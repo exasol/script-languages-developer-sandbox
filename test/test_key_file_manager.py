@@ -1,8 +1,7 @@
-import contextlib
 import os
 from unittest.mock import MagicMock
 
-from exasol_script_languages_developer_sandbox.lib.key_file_manager import KeyFileManager
+from exasol_script_languages_developer_sandbox.lib.key_file_manager import KeyFileManager, KeyFileManagerContextManager
 
 
 def test_external_keys(tmp_path):
@@ -13,7 +12,7 @@ def test_external_keys(tmp_path):
     tmp_file = tmp_path / "tst.pem"
     with open(tmp_file, "w") as f:
         f.write("secret")
-    with contextlib.closing(KeyFileManager(aws_access_mock, "test_key", str(tmp_file))) as km:
+    with KeyFileManagerContextManager(KeyFileManager(aws_access_mock, "test_key", str(tmp_file))) as km:
         assert km.key_name == "test_key"
         assert km.key_file_location == str(tmp_file)
         assert not km._remove_key_on_close
@@ -28,7 +27,7 @@ def test_generated_key():
     aws_access_mock = MagicMock()
     aws_access_mock.create_new_ec2_key_pair.return_value = "secret_abc"
     key_name = ""
-    with contextlib.closing(KeyFileManager(aws_access_mock, None, None)) as km:
+    with KeyFileManagerContextManager(KeyFileManager(aws_access_mock, None, None)) as km:
         assert len(km.key_name) > 0
         aws_access_mock.create_new_ec2_key_pair.assert_called_once_with(key_name=km.key_name)
         assert km._remove_key_on_close

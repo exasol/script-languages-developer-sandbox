@@ -46,3 +46,18 @@ class KeyFileManager:
         if self._remove_key_on_close:
             os.remove(self._ec2_key_file)
             self._aws_access.delete_ec2_key_pair(key_name=self._key_name)
+
+
+class KeyFileManagerContextManager:
+    """
+    The ContextManager-wrapper for KeyFileManager
+    """
+    def __init__(self, key_file_manager: KeyFileManager):
+        self._key_file_manager = key_file_manager
+
+    def __enter__(self) -> KeyFileManager:
+        self._key_file_manager.create_key_if_needed()
+        return self._key_file_manager
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        self._key_file_manager.close()

@@ -1,11 +1,10 @@
-import contextlib
 import logging
 import signal
 from typing import Optional, Tuple, Any
 
 from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess
 from exasol_script_languages_developer_sandbox.lib.cf_stack import CloudformationStack
-from exasol_script_languages_developer_sandbox.lib.key_file_manager import KeyFileManager
+from exasol_script_languages_developer_sandbox.lib.key_file_manager import KeyFileManager, KeyFileManagerContextManager
 
 
 def unpack_ec2_instance_description(ec2_instance_description: Any) -> Tuple[str, str]:
@@ -14,7 +13,7 @@ def unpack_ec2_instance_description(ec2_instance_description: Any) -> Tuple[str,
 
 def run_lifecycle_for_ec2(aws_access: AwsAccess,
                           ec2_key_file: Optional[str], ec2_key_name: Optional[str]) -> Tuple[str, str, str, str]:
-    with contextlib.closing(KeyFileManager(aws_access, ec2_key_name, ec2_key_file)) as km:
+    with KeyFileManagerContextManager(KeyFileManager(aws_access, ec2_key_name, ec2_key_file)) as km:
         with CloudformationStack(aws_access, km.key_name, aws_access.get_user()) as cf_stack:
             ec2_instance_id = cf_stack.get_ec2_instance_id()
 
