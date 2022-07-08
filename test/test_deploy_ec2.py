@@ -1,7 +1,8 @@
 from unittest.mock import MagicMock
 
 from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess
-from exasol_script_languages_developer_sandbox.lib.cf_stack import CloudformationStack
+from exasol_script_languages_developer_sandbox.lib.cf_stack import CloudformationStack, \
+    CloudformationStackContextManager
 from test.cloudformation_validation import validate_using_cfn_lint
 
 
@@ -11,7 +12,8 @@ def test_deploy_ec2_upload_invoked(ec2_cloudformation_yml):
     with expected values when we run run_deploy_ci_build()
     """
     aws_access_mock = MagicMock()
-    with CloudformationStack(aws_access_mock, "test_key", "test_user") as cf_access:
+    with CloudformationStackContextManager(CloudformationStack(aws_access_mock, "test_key", "test_user")) \
+            as cf_access:
         pass
     aws_access_mock.upload_cloudformation_stack.assert_called_once_with(ec2_cloudformation_yml,
                                                                         cf_access.stack_name)

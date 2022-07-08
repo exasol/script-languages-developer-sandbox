@@ -1,12 +1,8 @@
-import time
-from typing import Any
-
-import boto3
 import botocore
 import pytest
 
-from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess
-from exasol_script_languages_developer_sandbox.lib.cf_stack import CloudformationStack
+from exasol_script_languages_developer_sandbox.lib.cf_stack import CloudformationStack, \
+    CloudformationStackContextManager
 from exasol_script_languages_developer_sandbox.lib.run_setup_ec2 import run_lifecycle_for_ec2, \
     unpack_ec2_instance_description
 from test.aws_local_stack_access import AwsLocalStackAccess
@@ -105,7 +101,8 @@ Resources:
 
 def test_cloudformation_access_with_local_stack(local_stack):
     aws_access = AwsLocalStackAccess(None)
-    with CloudformationStack(aws_access, "test_key", aws_access.get_user()) as cf_stack:
+    with CloudformationStackContextManager(CloudformationStack(aws_access, "test_key", aws_access.get_user())) \
+            as cf_stack:
         ec2_instance_id = cf_stack.get_ec2_instance_id()
         ec2_instance_description = aws_access.describe_instance(ec2_instance_id)
         status, host_name = unpack_ec2_instance_description(ec2_instance_description)
