@@ -9,12 +9,7 @@ from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess
 from exasol_script_languages_developer_sandbox.lib.cf_stack import CloudformationStack
 from exasol_script_languages_developer_sandbox.lib.run_setup_ec2 import run_lifecycle_for_ec2, \
     unpack_ec2_instance_description
-
-
-class AwsLocalStackAccess(AwsAccess):
-    def _get_aws_client(self, service_name: str) -> Any:
-        return boto3.client(service_name, endpoint_url="http://localhost:4566", aws_access_key_id="test",
-                            aws_secret_access_key="test", region_name="eu-central-1")
+from test.aws_local_stack_access import AwsLocalStackAccess
 
 
 def test_ec2_lifecycle_with_local_stack(local_stack):

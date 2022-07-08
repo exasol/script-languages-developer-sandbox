@@ -31,7 +31,7 @@ class CloudformationStack:
     def stack_name(self) -> Optional[str]:
         return self._stack_name
 
-    def __enter__(self):
+    def upload_cloudformation_stack(self):
         yml = render_template("ec2_cloudformation.jinja.yaml", key_name=self._ec2_key_name, user_name=self._user_name)
         self._stack_name = self._generate_stack_name()
         self._aws_access.upload_cloudformation_stack(yml, self._stack_name)
@@ -49,9 +49,21 @@ class CloudformationStack:
         logging.info(f"Started EC2 with physical id {ec2_instance_id}")
         return ec2_instance_id
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.close()
-
     def close(self) -> None:
         if self._stack_name is not None:
             self._aws_access.delete_stack(self._stack_name)
+
+
+class CloudformationStackContextManager:
+    """
+    The ContextManager-wrapper for CloudformationStack
+    """
+    def __init__(self, cf_stack: CloudformationStack):
+        self._cf_stack = cf_stack
+
+    def __enter__(self) -> CloudformationStack:
+        self._cf_stack.upload_cloudformation_stack()
+        return self._cf_stack
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        self._cf_stack.close()
