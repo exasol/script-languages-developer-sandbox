@@ -1,7 +1,7 @@
 import logging
 import os
 from tempfile import mkstemp
-from typing import Optional, Any
+from typing import Optional
 
 from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess
 from exasol_script_languages_developer_sandbox.lib.random_string_generator import get_random_str
@@ -9,9 +9,10 @@ from exasol_script_languages_developer_sandbox.lib.random_string_generator impor
 
 class KeyFileManager:
     """
-    Manages access to an AWS KeyFile (EC2). If a keyname and keyfile is given in constructor, this one will be used, and not be deleted.
-    If no keyname is given in constructor, a new EC2 key will be generated and written to a temporary file. This key and temporary file will then be deleted during close.
-    The class is implemented as a context manager: The generation and deletion of the key/temporary file occurs during enter/exit.
+    Manages access to an AWS KeyFile (EC2). If a keyname and keyfile is given in constructor,
+    this one will be used, and not be deleted.
+    If no keyname is given in constructor, a new EC2 key will be generated and written to a temporary file:
+    This key and temporary file will then be deleted during close.
     """
     def __init__(self, aws_access: AwsAccess,
                  external_ec2_key_name: Optional[str], external_ec2_key_file: Optional[str]):
@@ -20,7 +21,7 @@ class KeyFileManager:
         self._remove_key_on_close = False
         self._key_name = external_ec2_key_name
 
-    def __enter__(self) -> Any:
+    def create_key_if_needed(self) -> None:
         if self._ec2_key_file is None:
             logging.debug("Creating new key-pair")
             self._key_name = f"ec2-key-{get_random_str(10)}"
@@ -32,7 +33,6 @@ class KeyFileManager:
             os.chmod(self._ec2_key_file, 0o400)
         else:
             logging.debug("Using existing key-pair")
-        return self
 
     @property
     def key_file_location(self) -> Optional[str]:
@@ -41,9 +41,6 @@ class KeyFileManager:
     @property
     def key_name(self) -> Optional[str]:
         return self._key_name
-
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
-        self.close()
 
     def close(self) -> None:
         if self._remove_key_on_close:
