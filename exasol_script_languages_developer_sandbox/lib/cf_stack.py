@@ -35,17 +35,10 @@ class CloudformationStack:
     def stack_name(self) -> Optional[str]:
         return self._stack_name
 
-    def _check_if_stack_exists(self, stack_name: str) -> bool:
-        try:
-            result = self._aws_access.get_all_stack_resources(stack_name)
-            return any([res["ResourceStatus"] != "DELETE_COMPLETE" for res in result])
-        except botocore.exceptions.ClientError:
-            return False
-
     def _find_new_stack_name(self):
         for i in range(_MAX_ATTEMPTS_TO_FIND_STACK_NAME):
             stack_name = self._generate_stack_name()
-            if not self._check_if_stack_exists(stack_name):
+            if not self._aws_access.stack_exists(stack_name=stack_name):
                 return stack_name
 
     def upload_cloudformation_stack(self):

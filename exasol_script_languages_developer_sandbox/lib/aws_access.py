@@ -2,6 +2,7 @@ import logging
 from typing import Optional, Any, List, Dict
 
 import boto3
+import botocore
 
 from exasol_script_languages_developer_sandbox.lib.deployer import Deployer
 
@@ -72,14 +73,7 @@ class AwsAccess(object):
         cloud_client = self._get_aws_client("cloudformation")
         cloud_client.validate_template(TemplateBody=cloudformation_yml)
 
-    def get_all_stack_resources(self, stack_name: str) -> List[Dict[str, str]]:
-        """
-        This functions uses Boto3 to get all AWS Cloudformation resources for a specific Cloudformation stack,
-        identified by parameter `stack_name`.
-        The AWS API truncates at a size of 1MB, and in order to get all chunks the method must be called
-        passing the previous retrieved token until no token is returned.
-        """
-        logging.debug(f"Running get_all_codebuild_projects for aws profile {self.aws_profile_for_logging}")
+    def _get_stack_resources(self, stack_name: str) -> List[Dict[str, str]]:
         cf_client = self._get_aws_client('cloudformation')
         current_result = cf_client.list_stack_resources(StackName=stack_name)
         result = current_result["StackResourceSummaries"]
@@ -88,6 +82,27 @@ class AwsAccess(object):
             current_result = cf_client.list_stack_resources(StackName=stack_name, nextToken=current_result["nextToken"])
             result.extend(current_result["StackResourceSummaries"])
         return result
+
+    def get_all_stack_resources(self, stack_name: str) -> List[Dict[str, str]]:
+        """
+        This functions uses Boto3 to get all AWS Cloudformation resources for a specific Cloudformation stack,
+        identified by parameter `stack_name`.
+        The AWS API truncates at a size of 1MB, and in order to get all chunks the method must be called
+        passing the previous retrieved token until no token is returned.
+        """
+        logging.debug(f"Running get_all_codebuild_projects for aws profile {self.aws_profile_for_logging}")
+        return self._get_stack_resources(stack_name=stack_name)
+
+    def stack_exists(self, stack_name: str) -> bool:
+        """
+        This functions uses Boto3 to check if stack with name `stack_name` exists.
+        """
+        logging.debug(f"Running stack_exists for aws profile {self.aws_profile_for_logging}")
+        try:
+            result = self._get_stack_resources(stack_name=stack_name)
+            return any([res["ResourceStatus"] != "DELETE_COMPLETE" for res in result])
+        except botocore.exceptions.ClientError:
+            return False
 
     def delete_stack(self, stack_name: str) -> None:
         """

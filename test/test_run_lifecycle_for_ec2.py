@@ -6,7 +6,7 @@ from exasol_script_languages_developer_sandbox.lib.run_setup_ec2 import run_life
 
 
 def test_run_lifecycle_for_ec2():
-    """"
+    """
     Test that the EC2 deployment and cleanup works as expected. The test calls execute_setup_ec2() and simulates
     the return states from AWS (2x pending, 1x running) for the EC2 instance.
     At the end it expects that the AWS Cloudformation stack was deleted.
@@ -16,10 +16,12 @@ def test_run_lifecycle_for_ec2():
     stack_resources_mock = \
         [
             {"ResourceType": "AWS::EC2::Instance",
+             "ResourceStatus": "CREATE_COMPLETE",
              "PhysicalResourceId": "abc"}
         ]
 
     aws_access_mock.get_all_stack_resources.return_value = stack_resources_mock
+    aws_access_mock.stack_exists.return_value = False
     instances_states =\
         [
             {"State": {"Name": "pending"}, "PublicDnsName": "public_host"},
