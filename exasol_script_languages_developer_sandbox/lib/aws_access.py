@@ -85,7 +85,7 @@ class AwsAccess(object):
         result = current_result["StackResourceSummaries"]
 
         while "nextToken" in current_result:
-            current_result = cf_client.list_projects(StackName=stack_name, nextToken=current_result["nextToken"])
+            current_result = cf_client.list_stack_resources(StackName=stack_name, nextToken=current_result["nextToken"])
             result.extend(current_result["StackResourceSummaries"])
         return result
 

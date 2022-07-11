@@ -24,7 +24,7 @@ class KeyFileManager:
     def create_key_if_needed(self) -> None:
         if self._ec2_key_file is None:
             logging.debug("Creating new key-pair")
-            self._key_name = f"ec2-key-{get_random_str(10)}"
+            self._key_name = f"ec2-key-{get_random_str()}"
             ec2_key_file_handle, self._ec2_key_file = mkstemp(text=True)
             with os.fdopen(ec2_key_file_handle, 'w') as f:
                 f.write(self._aws_access.create_new_ec2_key_pair(key_name=self._key_name))

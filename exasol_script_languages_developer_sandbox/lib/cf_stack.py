@@ -1,9 +1,13 @@
 import logging
 from typing import Optional
 
+import botocore
+
 from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess
-from exasol_script_languages_developer_sandbox.lib.random_string_generator import get_random_str
+from exasol_script_languages_developer_sandbox.lib.random_string_generator import get_random_str_of_length_n
 from exasol_script_languages_developer_sandbox.lib.render_template import render_template
+
+_MAX_ATTEMPTS_TO_FIND_STACK_NAME = 3
 
 
 class CloudformationStack:
@@ -25,15 +29,28 @@ class CloudformationStack:
         Create a new stack name. We append a random number as suffix,
         so that in theory multiple instances can be created.
         """
-        return f"EC2-SLC-DEV-SANDBOX-{get_random_str(5)}"
+        return f"EC2-SLC-DEV-SANDBOX-{get_random_str_of_length_n(5)}"
 
     @property
     def stack_name(self) -> Optional[str]:
         return self._stack_name
 
+    def _check_if_stack_exists(self, stack_name: str) -> bool:
+        try:
+            result = self._aws_access.get_all_stack_resources(stack_name)
+            return any([res["ResourceStatus"] != "DELETE_COMPLETE" for res in result])
+        except botocore.exceptions.ClientError:
+            return False
+
+    def _find_new_stack_name(self):
+        for i in range(_MAX_ATTEMPTS_TO_FIND_STACK_NAME):
+            stack_name = self._generate_stack_name()
+            if not self._check_if_stack_exists(stack_name):
+                return stack_name
+
     def upload_cloudformation_stack(self):
         yml = render_template("ec2_cloudformation.jinja.yaml", key_name=self._ec2_key_name, user_name=self._user_name)
-        self._stack_name = self._generate_stack_name()
+        self._stack_name = self._find_new_stack_name()
         self._aws_access.upload_cloudformation_stack(yml, self._stack_name)
         logging.info(f"Deployed cloudformation stack {self._stack_name}")
         return self
