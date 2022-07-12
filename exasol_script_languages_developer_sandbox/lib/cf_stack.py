@@ -1,8 +1,6 @@
 import logging
 from typing import Optional
 
-import botocore
-
 from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess
 from exasol_script_languages_developer_sandbox.lib.random_string_generator import get_random_str_of_length_n
 from exasol_script_languages_developer_sandbox.lib.render_template import render_template
@@ -17,19 +15,23 @@ class CloudformationStack:
     and when exiting the stack will be destroyed.
     """
 
-    def __init__(self, aws_access: AwsAccess, ec2_key_name: str, user_name: str):
+    def __init__(self, aws_access: AwsAccess, ec2_key_name: str, user_name: str, stack_prefix: Optional[str]):
         self._aws_access = aws_access
         self._stack_name = None
         self._ec2_key_name = ec2_key_name
         self._user_name = user_name
+        if stack_prefix is None:
+            self._stack_prefix = "EC2-SLC-DEV-SANDBOX-"
+        else:
+            self._stack_prefix = stack_prefix
 
-    @staticmethod
-    def _generate_stack_name() -> str:
+    def _generate_stack_name(self) -> str:
         """
         Create a new stack name. We append a random number as suffix,
         so that in theory multiple instances can be created.
         """
-        return f"EC2-SLC-DEV-SANDBOX-{get_random_str_of_length_n(5)}"
+
+        return f"{self._stack_prefix}{get_random_str_of_length_n(5)}"
 
     @property
     def stack_name(self) -> Optional[str]:

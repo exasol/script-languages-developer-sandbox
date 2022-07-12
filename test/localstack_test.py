@@ -13,7 +13,7 @@ def test_ec2_lifecycle_with_local_stack(local_stack):
     This test uses localstack to simulate lifecycle of an EC-2 instance
     """
     print("run ec2_setup!")
-    execution_generator = run_lifecycle_for_ec2(AwsLocalStackAccess(None), None, None)
+    execution_generator = run_lifecycle_for_ec2(AwsLocalStackAccess(None), None, None, None)
     res = next(execution_generator)
     while res[0] == "pending":
         res = next(execution_generator)
@@ -101,7 +101,7 @@ Resources:
 
 def test_cloudformation_access_with_local_stack(local_stack):
     aws_access = AwsLocalStackAccess(None)
-    with CloudformationStackContextManager(CloudformationStack(aws_access, "test_key", aws_access.get_user())) \
+    with CloudformationStackContextManager(CloudformationStack(aws_access, "test_key", aws_access.get_user(), None)) \
             as cf_stack:
         ec2_instance_id = cf_stack.get_ec2_instance_id()
         ec2_instance_description = aws_access.describe_instance(ec2_instance_id)

@@ -13,9 +13,11 @@ def unpack_ec2_instance_description(ec2_instance_description: Any) -> Tuple[str,
 
 
 def run_lifecycle_for_ec2(aws_access: AwsAccess,
-                          ec2_key_file: Optional[str], ec2_key_name: Optional[str]) -> Tuple[str, str, str, str]:
+                          ec2_key_file: Optional[str], ec2_key_name: Optional[str],
+                          stack_prefix: Optional[str]) -> Tuple[str, str, str, str]:
     with KeyFileManagerContextManager(KeyFileManager(aws_access, ec2_key_name, ec2_key_file)) as km:
-        with CloudformationStackContextManager(CloudformationStack(aws_access, km.key_name, aws_access.get_user())) \
+        with CloudformationStackContextManager(CloudformationStack(aws_access, km.key_name,
+                                                                   aws_access.get_user(), stack_prefix)) \
                 as cf_stack:
             ec2_instance_id = cf_stack.get_ec2_instance_id()
 
@@ -30,7 +32,7 @@ def run_lifecycle_for_ec2(aws_access: AwsAccess,
 
 
 def run_setup_ec2(aws_access: AwsAccess, ec2_key_file: Optional[str], ec2_key_name: Optional[str]) -> None:
-    execution_generator = run_lifecycle_for_ec2(aws_access, ec2_key_file, ec2_key_name)
+    execution_generator = run_lifecycle_for_ec2(aws_access, ec2_key_file, ec2_key_name, None)
     res = next(execution_generator)
     while res[0] == "pending":
         logging.info(f"EC2 instance not ready yet.")

@@ -12,11 +12,22 @@ def test_deploy_ec2_upload_invoked(ec2_cloudformation_yml):
     with expected values when we run run_deploy_ci_build()
     """
     aws_access_mock = MagicMock()
-    with CloudformationStackContextManager(CloudformationStack(aws_access_mock, "test_key", "test_user")) \
+    with CloudformationStackContextManager(CloudformationStack(aws_access_mock, "test_key", "test_user", None)) \
             as cf_access:
         pass
     aws_access_mock.upload_cloudformation_stack.assert_called_once_with(ec2_cloudformation_yml,
                                                                         cf_access.stack_name)
+
+
+def test_deploy_ec2_custom_prefix(ec2_cloudformation_yml):
+    """"
+    Test that the custom prefix will be used for the cloudformation stack name.
+    """
+    aws_access_mock = MagicMock()
+    aws_access_mock.stack_exists.return_value = False
+    with CloudformationStackContextManager(CloudformationStack(aws_access_mock,
+                                                               "test_key", "test_user", "test_prefix")) as cf_access:
+        assert cf_access.stack_name.startswith("test_prefix")
 
 
 def test_deploy_ec2_template(ec2_cloudformation_yml):

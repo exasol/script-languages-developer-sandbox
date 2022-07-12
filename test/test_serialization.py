@@ -48,7 +48,7 @@ def create_cloudformation_stack_and_serialize(tmp_location_key_manager: Path, tm
     key_file_manager.create_key_if_needed()
     with open(tmp_location_key_manager, "wb") as f:
         pickle.dump(key_file_manager, f)
-    cloudformation = CloudformationStack(aws_access, key_file_manager.key_name, aws_access.get_user())
+    cloudformation = CloudformationStack(aws_access, key_file_manager.key_name, aws_access.get_user(), None)
     cloudformation.upload_cloudformation_stack()
     with open(tmp_location_cloudformation, "wb") as f:
         pickle.dump(cloudformation, f)
