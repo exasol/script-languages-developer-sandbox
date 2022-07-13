@@ -2,6 +2,7 @@ import contextlib
 import os.path
 import pickle
 import sys
+import traceback
 from pathlib import Path
 
 from exasol_script_languages_developer_sandbox.lib.cf_stack import CloudformationStack
@@ -20,8 +21,8 @@ def create_key_pair_and_serialize(tmp_location: Path, q: mp.Queue):
         with open(tmp_location, "wb") as f:
             pickle.dump(key_file_manager, f)
     except Exception as e:
-        sys.stderr.write("failed to execute create_key_pair_and_serialize\n")
-        sys.stderr.write(str(e))
+        traceback.print_exc()
+        raise e
 
 
 def test_keypair_manager_with_local_stack(tmp_path, local_stack):
@@ -62,8 +63,8 @@ def create_cloudformation_stack_and_serialize(tmp_location_key_manager: Path, tm
         q.put(cloudformation.stack_name)
         q.put(cloudformation.get_ec2_instance_id())
     except Exception as e:
-        sys.stderr.write("failed to execute create_cloudformation_stack_and_serialize\n")
-        sys.stderr.write(str(e))
+        traceback.print_exc()
+        raise e
 
 
 def test_cloudformation_stack_with_local_stack(tmp_path, local_stack):
