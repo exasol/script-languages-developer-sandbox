@@ -1,6 +1,7 @@
 import contextlib
 import os.path
 import pickle
+import sys
 from pathlib import Path
 
 from exasol_script_languages_developer_sandbox.lib.cf_stack import CloudformationStack
@@ -10,13 +11,17 @@ import multiprocessing as mp
 
 
 def create_key_pair_and_serialize(tmp_location: Path, q: mp.Queue):
-    aws_access = AwsLocalStackAccess(None)
-    key_file_manager = KeyFileManager(aws_access, None, None)
-    key_file_manager.create_key_if_needed()
-    q.put(key_file_manager.key_name)
-    q.put(key_file_manager.key_file_location)
-    with open(tmp_location, "wb") as f:
-        pickle.dump(key_file_manager, f)
+    try:
+        aws_access = AwsLocalStackAccess(None)
+        key_file_manager = KeyFileManager(aws_access, None, None)
+        key_file_manager.create_key_if_needed()
+        q.put(key_file_manager.key_name)
+        q.put(key_file_manager.key_file_location)
+        with open(tmp_location, "wb") as f:
+            pickle.dump(key_file_manager, f)
+    except Exception as e:
+        sys.stderr.write("failed to execute create_key_pair_and_serialize\n")
+        sys.stderr.write(str(e))
 
 
 def test_keypair_manager_with_local_stack(tmp_path, local_stack):
@@ -32,7 +37,6 @@ def test_keypair_manager_with_local_stack(tmp_path, local_stack):
     key_name = q.get()
     key_file_location = q.get()
 
-
     with open(tmp_file, "rb") as f:
         with contextlib.closing(pickle.load(f)) as key_file_manager:
             restored_key_name = key_file_manager.key_name
@@ -45,17 +49,21 @@ def test_keypair_manager_with_local_stack(tmp_path, local_stack):
 
 def create_cloudformation_stack_and_serialize(tmp_location_key_manager: Path, tmp_location_cloudformation: Path,
                                               q: mp.Queue):
-    aws_access = AwsLocalStackAccess(None)
-    key_file_manager = KeyFileManager(aws_access, None, None)
-    key_file_manager.create_key_if_needed()
-    with open(tmp_location_key_manager, "wb") as f:
-        pickle.dump(key_file_manager, f)
-    cloudformation = CloudformationStack(aws_access, key_file_manager.key_name, aws_access.get_user(), None)
-    cloudformation.upload_cloudformation_stack()
-    with open(tmp_location_cloudformation, "wb") as f:
-        pickle.dump(cloudformation, f)
-    q.put(cloudformation.stack_name)
-    q.put(cloudformation.get_ec2_instance_id())
+    try:
+        aws_access = AwsLocalStackAccess(None)
+        key_file_manager = KeyFileManager(aws_access, None, None)
+        key_file_manager.create_key_if_needed()
+        with open(tmp_location_key_manager, "wb") as f:
+            pickle.dump(key_file_manager, f)
+        cloudformation = CloudformationStack(aws_access, key_file_manager.key_name, aws_access.get_user(), None)
+        cloudformation.upload_cloudformation_stack()
+        with open(tmp_location_cloudformation, "wb") as f:
+            pickle.dump(cloudformation, f)
+        q.put(cloudformation.stack_name)
+        q.put(cloudformation.get_ec2_instance_id())
+    except Exception as e:
+        sys.stderr.write("failed to execute create_cloudformation_stack_and_serialize\n")
+        sys.stderr.write(str(e))
 
 
 def test_cloudformation_stack_with_local_stack(tmp_path, local_stack):

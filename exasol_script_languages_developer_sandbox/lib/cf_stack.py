@@ -20,10 +20,7 @@ class CloudformationStack:
         self._stack_name = None
         self._ec2_key_name = ec2_key_name
         self._user_name = user_name
-        if stack_prefix is None:
-            self._stack_prefix = "EC2-SLC-DEV-SANDBOX-"
-        else:
-            self._stack_prefix = stack_prefix
+        self._stack_prefix = stack_prefix or "EC2-SLC-DEV-SANDBOX-"
 
     def _generate_stack_name(self) -> str:
         """
