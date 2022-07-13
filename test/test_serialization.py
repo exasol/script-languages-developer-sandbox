@@ -27,9 +27,11 @@ def test_keypair_manager_with_local_stack(tmp_path, local_stack):
     q = mp.Queue()
     p = mp.Process(target=create_key_pair_and_serialize, args=(tmp_file, q))
     p.start()
+    p.join()
+    assert p.exitcode == 0
     key_name = q.get()
     key_file_location = q.get()
-    p.join()
+
 
     with open(tmp_file, "rb") as f:
         with contextlib.closing(pickle.load(f)) as key_file_manager:
@@ -66,9 +68,10 @@ def test_cloudformation_stack_with_local_stack(tmp_path, local_stack):
     p = mp.Process(target=create_cloudformation_stack_and_serialize,
                    args=(tmp_file_key_file, tmp_file_cloud_formation, q))
     p.start()
+    p.join()
+    assert p.exitcode == 0
     stack_name = q.get()
     ec2_instance_id = q.get()
-    p.join()
 
     with open(tmp_file_cloud_formation, "rb") as f:
         with contextlib.closing(pickle.load(f)) as cloudformation:
