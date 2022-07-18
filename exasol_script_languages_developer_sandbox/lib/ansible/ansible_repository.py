@@ -1,7 +1,6 @@
 import shutil
 from pathlib import Path
-
-import jinja2
+from importlib.resources import open_text, contents
 
 
 class AnsibleRepository:
@@ -16,13 +15,11 @@ class AnsibleResourceRepository(AnsibleRepository):
         self._path = path
 
     def copy_to(self, target: Path) -> None:
-        loader = jinja2.PackageLoader("exasol_script_languages_developer_sandbox", package_path=self._path)
-        env = jinja2.Environment(loader=loader, autoescape=jinja2.select_autoescape(), keep_trailing_newline=True)
-        for ansible_file in loader.list_templates():
-            t = env.get_template(ansible_file)
-            content = t.render()
-            with open(target / ansible_file, "w") as f:
-                f.write(content)
+        for ansible_file in contents(f"exasol_script_languages_developer_sandbox.{self._path}"):
+            with open_text(f"exasol_script_languages_developer_sandbox.{self._path}", ansible_file) as ansible_file_io:
+                content = ansible_file_io.read()
+                with open(target / ansible_file, "w") as f:
+                    f.write(content)
 
 
 default_repository = AnsibleResourceRepository("ansible")

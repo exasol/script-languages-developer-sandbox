@@ -3,6 +3,7 @@ from setuptools import setup
 
 packages = \
 ['exasol_script_languages_developer_sandbox',
+ 'exasol_script_languages_developer_sandbox.ansible',
  'exasol_script_languages_developer_sandbox.cli',
  'exasol_script_languages_developer_sandbox.cli.commands',
  'exasol_script_languages_developer_sandbox.cli.options',
@@ -10,8 +11,7 @@ packages = \
  'exasol_script_languages_developer_sandbox.lib.ansible']
 
 package_data = \
-{'': ['*'],
- 'exasol_script_languages_developer_sandbox': ['ansible/*', 'templates/*']}
+{'': ['*'], 'exasol_script_languages_developer_sandbox': ['templates/*']}
 
 install_requires = \
 ['ansible-runner>=2.2.1,<3.0.0',
