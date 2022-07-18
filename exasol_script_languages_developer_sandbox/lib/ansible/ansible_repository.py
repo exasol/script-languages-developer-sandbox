@@ -1,6 +1,6 @@
 import shutil
 from pathlib import Path
-from importlib.resources import open_text, contents
+from importlib.resources import open_text, contents, is_resource
 
 
 class AnsibleRepository:
@@ -12,14 +12,15 @@ class AnsibleRepository:
 class AnsibleResourceRepository(AnsibleRepository):
 
     def __init__(self, path: str):
-        self._path = path
+        self._path = f"exasol_script_languages_developer_sandbox.{path}"
 
     def copy_to(self, target: Path) -> None:
-        for ansible_file in contents(f"exasol_script_languages_developer_sandbox.{self._path}"):
-            with open_text(f"exasol_script_languages_developer_sandbox.{self._path}", ansible_file) as ansible_file_io:
-                content = ansible_file_io.read()
-                with open(target / ansible_file, "w") as f:
-                    f.write(content)
+        for ansible_file in contents(self._path):
+            if is_resource(self._path, ansible_file):
+                with open_text(self._path, ansible_file) as ansible_file_io:
+                    content = ansible_file_io.read()
+                    with open(target / ansible_file, "w") as f:
+                        f.write(content)
 
 
 default_repository = AnsibleResourceRepository("ansible")
