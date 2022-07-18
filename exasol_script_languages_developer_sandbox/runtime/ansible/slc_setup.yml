@@ -3,7 +3,6 @@
   vars:
       ansible_python_interpreter: /usr/bin/python3
   remote_user: ubuntu
-
   tasks:
   - import_tasks: slc_setup_tasks.yml
     become: yes

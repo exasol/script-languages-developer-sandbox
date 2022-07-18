@@ -16,14 +16,19 @@ class AnsibleResourceRepository(AnsibleRepository):
 
     def copy_to(self, target: Path) -> None:
         for ansible_file in contents(self._path):
+            if ansible_file == "__init__.py":
+                continue
             if is_resource(self._path, ansible_file):
                 with open_text(self._path, ansible_file) as ansible_file_io:
                     content = ansible_file_io.read()
+                    target_file_path = target / ansible_file
+                    if target_file_path.exists():
+                        raise RuntimeError(f"Repository target: {target_file_path} already exists.")
                     with open(target / ansible_file, "w") as f:
                         f.write(content)
 
 
-default_repository = AnsibleResourceRepository("ansible")
+default_repositories = (AnsibleResourceRepository("runtime.ansible"), AnsibleResourceRepository("runtime.dependencies"))
 
 
 class AnsibleDirectoryRepository(AnsibleRepository):

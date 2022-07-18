@@ -1,0 +1,13 @@
+- name: Update and upgrade apt packages
+  apt:
+    upgrade: yes
+    update_cache: yes
+- name: Read apt dependencies
+  include_vars:
+    file: apt_dependencies.yml
+- name: Install apt packages
+  apt:
+    name: "{{apt_dependencies}}"
+    state: present
+- name: Install Poetry
+  shell: "curl -sSL https://install.python-poetry.org | python3 - -y"

@@ -3,12 +3,14 @@ from setuptools import setup
 
 packages = \
 ['exasol_script_languages_developer_sandbox',
- 'exasol_script_languages_developer_sandbox.ansible',
  'exasol_script_languages_developer_sandbox.cli',
  'exasol_script_languages_developer_sandbox.cli.commands',
  'exasol_script_languages_developer_sandbox.cli.options',
  'exasol_script_languages_developer_sandbox.lib',
- 'exasol_script_languages_developer_sandbox.lib.ansible']
+ 'exasol_script_languages_developer_sandbox.lib.ansible',
+ 'exasol_script_languages_developer_sandbox.runtime',
+ 'exasol_script_languages_developer_sandbox.runtime.ansible',
+ 'exasol_script_languages_developer_sandbox.runtime.dependencies']
 
 package_data = \
 {'': ['*'], 'exasol_script_languages_developer_sandbox': ['templates/*']}
@@ -18,7 +20,9 @@ install_requires = \
  'ansible>=6.1.0,<7.0.0',
  'boto3>=1.22.0,<2.0.0',
  'click>=8.1.3,<9.0.0',
- 'jinja2>=3.1.0']
+ 'jinja2>=3.1.0',
+ 'script-languages @ '
+ 'git+https://github.com/exasol/script-languages-release.git@develop']
 
 setup_kwargs = {
     'name': 'exasol-script-languages-developer-sandbox',

@@ -5,8 +5,8 @@ import pytest
 from docker.types import Mount
 
 from exasol_script_languages_developer_sandbox.lib.ansible.ansible_access import AnsibleAccess
-from exasol_script_languages_developer_sandbox.lib.ansible.ansible_repository import \
-    AnsibleDirectoryRepository, default_repository
+from exasol_script_languages_developer_sandbox.lib.ansible.ansible_repository import AnsibleDirectoryRepository, \
+    default_repositories
 from exasol_script_languages_developer_sandbox.lib.ansible.ansible_run_context import AnsibleRunContext
 from exasol_script_languages_developer_sandbox.lib.run_install_dependencies import run_install_dependencies
 
@@ -33,8 +33,8 @@ def test_install_dependencies(docker_test_container):
     Test install dependencies, using test setup
     """
     ansible_test_dir = Path(__file__).parent / "ansible"
-    repos = (default_repository, AnsibleDirectoryRepository(ansible_test_dir))
+    repos = default_repositories + (AnsibleDirectoryRepository(ansible_test_dir),)
     ansible_run_context = AnsibleRunContext(playbook="slc_setup_test.yml",
                                             extra_vars={"test_docker_container": docker_test_container.name})
-    run_install_dependencies(AnsibleAccess(), ansible_repositories=repos,
-                             host_infos=tuple(), ansible_run_context=ansible_run_context)
+    run_install_dependencies(AnsibleAccess(), host_infos=tuple(), ansible_run_context=ansible_run_context,
+                             ansible_repositories=repos)

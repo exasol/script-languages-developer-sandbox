@@ -16,6 +16,7 @@ boto3 = "^1.22.0"
 jinja2 = ">=3.1.0"
 ansible-runner = "^2.2.1"
 ansible = "^6.1.0"
+script-languages = { git = "https://github.com/exasol/script-languages-release.git", branch = "develop"}
 
 
 [build-system]

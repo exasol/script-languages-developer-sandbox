@@ -21,6 +21,5 @@ def install_dependencies(
             ssh_private_key: str,
             log_level: str):
     set_log_level(log_level)
-    run_install_dependencies(AnsibleAccess(), (AnsibleResourceRepository("ansible"),),
-                             (HostInfo(host_name, ssh_private_key),),
+    run_install_dependencies(AnsibleAccess(), (HostInfo(host_name, ssh_private_key),),
                              AnsibleRunContext(playbook="slc_setup.yml", extra_vars=None))
