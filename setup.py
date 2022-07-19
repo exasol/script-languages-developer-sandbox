@@ -20,9 +20,9 @@ install_requires = \
  'ansible>=6.1.0,<7.0.0',
  'boto3>=1.22.0,<2.0.0',
  'click>=8.1.3,<9.0.0',
- 'jinja2>=3.1.0',
- 'script-languages @ '
- 'git+https://github.com/exasol/script-languages-release.git@develop']
+ 'exasol_script_languages_release @ '
+ 'git+https://github.com/exasol/script-languages-release.git@bug/679_use_a_duplicated_pyproject_toml',
+ 'jinja2>=3.1.0']
 
 setup_kwargs = {
     'name': 'exasol-script-languages-developer-sandbox',
