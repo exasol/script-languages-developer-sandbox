@@ -53,7 +53,7 @@ def test_install_dependencies_jupyterlab(docker_test_container):
     container.exec_run(jupyter_command, detach=True)
     time.sleep(5.0)
     container.reload()
-    docker_test_container_ip = docker_test_container.attrs['NetworkSettings']['IPAddress']
+    docker_test_container_ip = container.attrs['NetworkSettings']['IPAddress']
     http_conn = requests.get(f"http://{docker_test_container_ip}:8888/lab")
     assert http_conn.status_code == 200
 
