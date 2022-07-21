@@ -5,5 +5,5 @@ apt_dependencies:
 
 
 slc:
-  dest_folder: "{{slc_dest_folder | default(user_home + '/script-languages-release')}}"
+  dest_folder: "{{user_home}}/script-languages-release"
   version: "{{ slc_version | default('master') }}"

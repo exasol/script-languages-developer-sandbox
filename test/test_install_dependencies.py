@@ -35,7 +35,7 @@ def docker_test_container():
         repos = default_repositories + (AnsibleResourceRepository(test.ansible),)
         ansible_run_context = AnsibleRunContext(playbook="slc_setup_test.yml",
                                                 extra_vars={"test_docker_container": test_container.name,
-                                                            "slc_dest_folder": f"{tmp_dir}/script-languages-release"})
+                                                            "slc.dest_folder": f"{tmp_dir}/script-languages-release"})
         run_install_dependencies(AnsibleAccess(), host_infos=tuple(), ansible_run_context=ansible_run_context,
                                  ansible_repositories=repos)
         yield test_container, tmp_dir
