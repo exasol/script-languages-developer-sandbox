@@ -5,6 +5,8 @@ This package requires:
 * Docker (for integration tests)
 * AWS CLI
 
+## Overview
+
 This packages aims to create a virtual machine image, in different formats, which can be used to build easily Exasol's script-languages-container, which are the runtime container for UDF's.
 The idea is to setup an AWS EC-2 instance, using cloudformation templates, then install all dependencies via _Ansible_, generate an AMI image based on the final EC-2 instance, and finally export the AMI image to the virtual image formats.
 The virtual machine image provides:
