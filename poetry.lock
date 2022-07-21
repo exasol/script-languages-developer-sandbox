@@ -444,8 +444,8 @@ exasol_script_languages_container_tool = {url = "https://github.com/exasol/scrip
 [package.source]
 type = "git"
 url = "https://github.com/exasol/script-languages-release.git"
-reference = "bug/679_use_a_duplicated_pyproject_toml"
-resolved_reference = "351ddd1eab1f0f3d04d501e0ada50cb5017a3966"
+reference = "develop"
+resolved_reference = "c85b8211a6af6318c389d9be1a45a34c37ae2857"
 
 [[package]]
 name = "gitdb"
@@ -1315,7 +1315,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8.0,<4.0"
-content-hash = "e78488717f9070b30743f894e5928ddff2c378b0c96e55119a89832a5f448e89"
+content-hash = "2b100518e4eaa07637e8efd22a0317471f87a443e5670a910d43398d70970e3e"
 
 [metadata.files]
 ansible = [

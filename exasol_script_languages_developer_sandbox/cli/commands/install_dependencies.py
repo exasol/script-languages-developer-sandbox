@@ -4,8 +4,6 @@ from exasol_script_languages_developer_sandbox.cli.cli import cli
 from exasol_script_languages_developer_sandbox.cli.common import add_options
 from exasol_script_languages_developer_sandbox.cli.options.logging import logging_options, set_log_level
 from exasol_script_languages_developer_sandbox.lib.ansible.ansible_access import AnsibleAccess
-from exasol_script_languages_developer_sandbox.lib.ansible.ansible_repository import AnsibleResourceRepository
-from exasol_script_languages_developer_sandbox.lib.ansible.ansible_run_context import AnsibleRunContext
 from exasol_script_languages_developer_sandbox.lib.host_info import HostInfo
 from exasol_script_languages_developer_sandbox.lib.run_install_dependencies import run_install_dependencies
 
@@ -20,6 +18,8 @@ def install_dependencies(
             host_name: str,
             ssh_private_key: str,
             log_level: str):
+    """
+    Debug command to ansible-installation onto an EC-2 instance.
+    """
     set_log_level(log_level)
-    run_install_dependencies(AnsibleAccess(), (HostInfo(host_name, ssh_private_key),),
-                             AnsibleRunContext(playbook="slc_setup.yml", extra_vars=None))
+    run_install_dependencies(AnsibleAccess(), (HostInfo(host_name, ssh_private_key),))

@@ -2,9 +2,9 @@
   hosts: ec2
   vars:
       ansible_python_interpreter: /usr/bin/python3
+      user_name: ubuntu
+      user_home: /home/ubuntu
+      need_sudo: yes
   remote_user: ubuntu
   tasks:
   - import_tasks: slc_setup_tasks.yml
-    become: yes
-  - import_tasks: install_docker.yml
-    become: yes

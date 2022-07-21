@@ -9,6 +9,9 @@ from exasol_script_languages_developer_sandbox.lib.render_template import render
 
 
 class AnsibleRunner:
+    """
+    Encapsulates invocation ansible access. It creates the inventory file, writing the host info, during run.
+    """
     def __init__(self, ansible_access: AnsibleAccess, work_dir: Path):
         self._ansible_access = ansible_access
         self._work_dir = work_dir

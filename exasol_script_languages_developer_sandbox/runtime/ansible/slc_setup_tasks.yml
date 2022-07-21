@@ -2,17 +2,17 @@
   apt:
     upgrade: yes
     update_cache: yes
-- name: Read apt dependencies
-  include_vars:
-    file: apt_dependencies.yml
-- name: Install apt packages
-  apt:
-    name: "{{apt_dependencies}}"
-    state: present
+  become: "{{need_sudo}}"
 - name: Install Poetry
-  shell: "curl -sSL https://install.python-poetry.org | python3 - -y"
-- name: Git checkout script-languages-release
-  ansible.builtin.git:
-    repo: 'https://github.com/exasol/script-languages-release.git'
-    dest: /home/ubuntu
-    version: "{{slc_version}}"
+  include_role:
+      name: poetry
+- name: Install Jupyter
+  include_role:
+        name: jupyter
+- name: Install Docker
+  include_role:
+        name: docker
+- name: Install Script_languages
+  include_role:
+      name: script_languages
+
