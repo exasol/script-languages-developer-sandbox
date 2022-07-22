@@ -10,7 +10,7 @@ from exasol_script_languages_developer_sandbox.lib.ansible.ansible_run_context i
 from exasol_script_languages_developer_sandbox.lib.host_info import HostInfo
 
 
-def run_install_dependencies(ansible_access: AnsibleAccess, host_infos: Tuple[HostInfo, ...],
+def run_install_dependencies(ansible_access: AnsibleAccess, host_infos: Tuple[HostInfo, ...] = tuple(),
                              ansible_run_context: AnsibleRunContext = default_ansible_run_context,
                              ansible_repositories: Tuple[AnsibleRepository, ...] = default_repositories) -> None:
     """
