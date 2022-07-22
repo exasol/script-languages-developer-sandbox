@@ -4,7 +4,7 @@
 jupyterlab:
   ip: '*'
   config: "{{user_home}}/.jupyter/jupyter_lab_config.py"
-  virtualenv: "{{user_home}}/jupytenv"
+  virtualenv: "{{user_home}}/jupyterenv"
   password: "{{ lookup('ansible.builtin.env', 'JUPYTER_LAB_PASSWORD', default='script-languages') }}"
   notebook_folder: "{{user_home}}/notebooks"
 

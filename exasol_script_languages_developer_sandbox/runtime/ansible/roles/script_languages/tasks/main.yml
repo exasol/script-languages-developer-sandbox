@@ -5,8 +5,9 @@
     name: "{{apt_dependencies}}"
     state: present
   become: "{{need_sudo}}"
+
 - name: Git checkout script-languages-release
   ansible.builtin.git:
     repo: 'https://github.com/exasol/script-languages-release.git'
-    dest: "{{slc.dest_folder}}"
-    version: "{{slc.version}}"
+    dest: "{{slc_dest_folder}}"
+    version: "{{slc_version}}"

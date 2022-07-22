@@ -21,6 +21,7 @@ def run_install_dependencies(ansible_access: AnsibleAccess, host_infos: Tuple[Ho
     The playbook is indicated by variable ansible_run_context, which also might contain additional ansible variables.
     """
     # TODO: Awaiting release 5.0.0 of slc!!!
+    # Check https://github.com/exasol/script-languages-developer-sandbox/issues/12)
     # new_extra_vars = {"slc_version": meta.version("exasol_script_languages_release")}
     new_extra_vars = {"slc_version": "master"}
     if ansible_run_context.extra_vars is not None:

@@ -33,13 +33,18 @@ def docker_test_container():
                                                       command="sleep infinity", detach=True, ports=mapped_ports)
         test_container.start()
         repos = default_repositories + (AnsibleResourceRepository(test.ansible),)
-        ansible_run_context = AnsibleRunContext(playbook="slc_setup_test.yml",
-                                                extra_vars={"test_docker_container": test_container.name,
-                                                            "slc.dest_folder": f"{tmp_dir}/script-languages-release"})
+        ansible_run_context = \
+            AnsibleRunContext(playbook="slc_setup_test.yml",
+                              extra_vars={"test_docker_container": test_container.name,
+                                          "slc_dest_folder": f"{tmp_dir}/script-languages-release"})
         run_install_dependencies(AnsibleAccess(), host_infos=tuple(), ansible_run_context=ansible_run_context,
                                  ansible_repositories=repos)
         yield test_container, tmp_dir
-        test_container.exec_run(f"rm -rf {tmp_dir}/script-languages-release") ##script-languages-release is created as root
+        # Note: script-languages-release will be cloned by ansible within the docker container.
+        #       Because the docker container runs as root, the repository will be owned by root.
+        #       For simplicity, we delete the folder from within the Docker container (as root).
+        #       Otherwise, we get a permission problem when tmp_dir tries to clean-up itself.
+        test_container.exec_run(f"rm -rf {tmp_dir}/script-languages-release")
         test_container.stop()
         test_container.remove()
 
@@ -48,7 +53,7 @@ def test_install_dependencies_jupyterlab(docker_test_container):
     """"
     Test that jupyterlab is configured properly
     """
-    jupyter_command = "/root/jupytenv/bin/jupyter-lab --notebook-dir=/root/notebooks --no-browser --allow-root"
+    jupyter_command = "/root/jupyterenv/bin/jupyter-lab --notebook-dir=/root/notebooks --no-browser --allow-root"
     container, _ = docker_test_container
     container.exec_run(jupyter_command, detach=True)
     time.sleep(5.0)

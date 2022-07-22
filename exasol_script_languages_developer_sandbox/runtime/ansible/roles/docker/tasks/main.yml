@@ -24,7 +24,7 @@
     update_cache: true
   become: "{{need_sudo}}"
 
-- name: adding docker users (for use without sudo)
+- name: Adding docker users (for use without sudo)
   user:
     name: "{{user_name}}"
     append: yes

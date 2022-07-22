@@ -12,7 +12,7 @@ class AnsibleRepository:
 
 class AnsibleResourceRepository(AnsibleRepository):
     """
-    Represents a repository containing ansible files (roles, playbooks, taks, etc.).
+    Represents a repository containing ansible files (roles, playbooks, tasks, etc.).
     The repository is expected to be located within a Python module.
     Supports copy of the ansible files to a target folder.
     """
