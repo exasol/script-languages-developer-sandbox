@@ -13,6 +13,11 @@ def ec2_cloudformation_yml():
     return render_template("ec2_cloudformation.jinja.yaml", key_name="test_key", user_name="test_user")
 
 
+@pytest.fixture
+def vm_bucket_cloudformation_yml():
+    return render_template("vm_bucket_cloudformation.jinja.yaml")
+
+
 @pytest.fixture(scope="session")
 def local_stack():
     """
