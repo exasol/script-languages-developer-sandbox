@@ -100,7 +100,7 @@ def test_run_ansible_check_default_repository():
         p = pathlib.Path(work_dir) / "slc_setup.yml"
         assert p.exists()
         p = pathlib.Path(work_dir) / "roles" / "script_languages" / "tasks" / "main.yml"
-        p.exists()
+        assert p.exists()
 
     run_install_dependencies(AnsibleTestAccess(check_playbook))
 
