@@ -3,7 +3,7 @@ import logging
 from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess
 from exasol_script_languages_developer_sandbox.lib.render_template import render_template
 
-STACK_NAME = "VM-Bucket"
+STACK_NAME = "VM-SLC-Bucket"
 
 
 def run_setup_vm_bucket(aws_access: AwsAccess) -> None:
