@@ -1,5 +1,5 @@
 Resources:
-  VMSLCBucket:
+  {{bucket_name}}:
     Type: 'AWS::S3::Bucket'
     Properties:
       PublicAccessBlockConfiguration:
@@ -15,6 +15,6 @@ Outputs:
       - ''
       - - 'https://'
         - !GetAtt
-          - VMSLCBucket
+          - {{bucket_name}}
           - DomainName
     Description: Name of S3 bucket
