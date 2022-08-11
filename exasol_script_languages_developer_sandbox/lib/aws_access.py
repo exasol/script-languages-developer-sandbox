@@ -1,10 +1,12 @@
 import logging
+import time
 from typing import Optional, Any, List, Dict
 
 import boto3
 import botocore
 
 from exasol_script_languages_developer_sandbox.lib.deployer import Deployer
+from exasol_script_languages_developer_sandbox.lib.vm_disk_image_format import VmDiskImageFormat
 
 
 class AwsAccess(object):
@@ -49,7 +51,7 @@ class AwsAccess(object):
             cfn_deployer = Deployer(cloudformation_client=cloud_client)
             result = cfn_deployer.create_and_wait_for_changeset(stack_name=stack_name, cfn_template=yml,
                                                                 parameter_values=[],
-                                                                capabilities=(), role_arn=None,
+                                                                capabilities=("CAPABILITY_IAM",), role_arn=None,
                                                                 notification_arns=None, tags=tuple())
         except Exception as e:
             logging.error(f"Error creating changeset for cloud formation template: {e}")
@@ -116,9 +118,47 @@ class AwsAccess(object):
         """
         Describes an AWS instance identified by parameter instance_id
         """
-        logging.debug(f"Running delete_ec2_key_pair for aws profile {self.aws_profile_for_logging}")
+        logging.debug(f"Running describe_instance for aws profile {self.aws_profile_for_logging}")
         cloud_client = self._get_aws_client("ec2")
         return cloud_client.describe_instances(InstanceIds=[instance_id])["Reservations"][0]["Instances"][0]
+
+    def create_image_from_ec2_instance(self, instance_id: str, name: str, description: str) -> str:
+        """
+        Creates an AMI image from an EC-2 instance
+        """
+        logging.debug(f"Running create_image_from_ec2_instance for aws profile {self.aws_profile_for_logging}")
+        cloud_client = self._get_aws_client("ec2")
+        result = cloud_client.create_image(Name=name, InstanceId=instance_id, Description=description, NoReboot=False)
+        return result["ImageId"]
+
+    def export_ami_image_to_vm(self, image_id: str, description: str, role_name:str, disk_format: VmDiskImageFormat,
+                               s3_bucket: str, s3_prefix: str) -> None:
+        """
+        Creates an AMI image from an EC-2 instance
+        """
+        logging.debug(f"Running create_image_from_ec2_instance for aws profile {self.aws_profile_for_logging}")
+        cloud_client = self._get_aws_client("ec2")
+        result = cloud_client.export_image(ImageId=image_id, Description=description,
+                                           RoleName=role_name, DiskImageFormat=disk_format.value,
+                                           S3ExportLocation={"S3Bucket": s3_bucket, "S3Prefix": s3_prefix})
+
+        export_image_task_id, status, status_message = \
+            result["ExportImageTaskId"], result["Status"], result["StatusMessage"]
+        logging.info(f"Started export of vm image to {s3_bucket}/{s3_prefix}. Status message is {status_message}.")
+        last_progress = None
+        last_status = status
+        while status == "active":
+            time.sleep(10)
+            result = cloud_client.describe_export_image_tasks(ExportImageTaskIds=[export_image_task_id])
+            assert "NextToken" not in result #We expect only one result
+            status, status_message, progress = result["Status"], result["StatusMessage"], result["Progress"]
+            if progress != last_progress or status != last_status:
+                logging.info(f"still running export of vm image to {s3_bucket}/{s3_prefix}. "
+                             f"Status message is {status_message}. Progess is '{progress}'")
+            last_progress = progress
+            last_status = status
+        if status != "completed":
+            raise RuntimeError(f"Export of VM failed: status message was {status_message}")
 
     def get_user(self) -> str:
         """

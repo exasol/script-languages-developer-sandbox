@@ -1,0 +1,53 @@
+import logging
+from typing import Tuple, Optional
+
+from exasol_script_languages_developer_sandbox.lib.ansible.ansible_access import AnsibleAccess
+from exasol_script_languages_developer_sandbox.lib.ansible.ansible_repository import AnsibleRepository, \
+    default_repositories
+from exasol_script_languages_developer_sandbox.lib.ansible.ansible_run_context import \
+    reset_password_ansible_run_context, default_ansible_run_context
+from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess
+
+from exasol_script_languages_developer_sandbox.lib.host_info import HostInfo
+from exasol_script_languages_developer_sandbox.lib.run_export_vm import export_vm
+from exasol_script_languages_developer_sandbox.lib.run_install_dependencies import run_install_dependencies
+from exasol_script_languages_developer_sandbox.lib.run_reset_password import run_reset_password
+from exasol_script_languages_developer_sandbox.lib.run_setup_ec2 import run_lifecycle_for_ec2
+
+
+def run_create_vm(aws_access: AwsAccess, ec2_key_file: Optional[str], ec2_key_name: Optional[str],
+                  ansible_access: AnsibleAccess, default_password: str,
+                  vm_image_formats: Tuple[str, ...],
+                  ansible_run_context=default_ansible_run_context,
+                  ansible_reset_password_context=reset_password_ansible_run_context,
+                  ansible_repositories: Tuple[AnsibleRepository, ...] = default_repositories) -> None:
+    """
+    Runs setup of an EC2 instance and then installs all dependencies via Ansible,
+    and finally exports the VM to the S3 Bucket (which must be already created by the stack ("VM-SLC-Bucket").
+    If anything goes wrong the cloudformation stack of the EC-2 instance is removed.
+    For debuging you can use the available debug commands.
+    """
+    execution_generator = run_lifecycle_for_ec2(aws_access, ec2_key_file, ec2_key_name, None)
+    res = next(execution_generator)
+    while res[0] == "pending":
+        logging.info(f"EC2 instance not ready yet.")
+        res = next(execution_generator)
+
+    ec2_instance_status, host_name, ec2_instance_id, key_file_location = res
+    if ec2_instance_status != "running":
+        logging.error(f"Error during startup of EC2 instance '{ec2_instance_id}'. Status is {ec2_instance_status}")
+        return
+
+    try:
+        run_install_dependencies(ansible_access, (HostInfo(host_name, key_file_location),),
+                                 ansible_run_context, ansible_repositories)
+        run_reset_password(ansible_access, default_password,
+                           (HostInfo(host_name, key_file_location),), ansible_reset_password_context,
+                           ansible_repositories)
+        export_vm(aws_access, ec2_instance_id, vm_image_formats)
+    finally:
+        #shutdown stack
+        next(execution_generator)
+
+
+
