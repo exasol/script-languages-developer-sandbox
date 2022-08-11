@@ -24,7 +24,7 @@ def run_create_vm(aws_access: AwsAccess, ec2_key_file: Optional[str], ec2_key_na
     """
     Runs setup of an EC2 instance and then installs all dependencies via Ansible,
     and finally exports the VM to the S3 Bucket (which must be already created by the stack ("VM-SLC-Bucket").
-    If anything goes wrong the cloudformation stack of the EC-2 instance is removed.
+    If anything goes wrong the cloudformation stack of the EC-2 instance will be removed.
     For debuging you can use the available debug commands.
     """
     execution_generator = run_lifecycle_for_ec2(aws_access, ec2_key_file, ec2_key_name, None)
@@ -33,12 +33,12 @@ def run_create_vm(aws_access: AwsAccess, ec2_key_file: Optional[str], ec2_key_na
         logging.info(f"EC2 instance not ready yet.")
         res = next(execution_generator)
 
-    ec2_instance_status, host_name, ec2_instance_id, key_file_location = res
-    if ec2_instance_status != "running":
-        logging.error(f"Error during startup of EC2 instance '{ec2_instance_id}'. Status is {ec2_instance_status}")
-        return
-
     try:
+        ec2_instance_status, host_name, ec2_instance_id, key_file_location = res
+        if ec2_instance_status != "running":
+            raise RuntimeError(f"Error during startup of EC2 instance '{ec2_instance_id}'. "
+                               f"Status is {ec2_instance_status}")
+
         run_install_dependencies(ansible_access, (HostInfo(host_name, key_file_location),),
                                  ansible_run_context, ansible_repositories)
         run_reset_password(ansible_access, default_password,
