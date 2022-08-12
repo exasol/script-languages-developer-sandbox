@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import List, Tuple
 
 
 class VmDiskImageFormat(Enum):
@@ -11,5 +12,9 @@ class VmDiskImageFormat(Enum):
     VHD = "VHD"
 
 
-def all_vm_disk_image_formats():
-    return [vm_format.value for vm_format in VmDiskImageFormat]
+def all_vm_disk_image_formats() -> Tuple[str, ...]:
+    return tuple(vm_format.value for vm_format in VmDiskImageFormat)
+
+
+def default_vm_disk_image_formats() -> Tuple[str, ...]:
+    return VmDiskImageFormat.VHD.value, VmDiskImageFormat.VMDK.value

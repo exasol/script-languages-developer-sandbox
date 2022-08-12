@@ -1,10 +1,9 @@
 from typing import Optional
 
-import click
-
 from exasol_script_languages_developer_sandbox.cli.cli import cli
 from exasol_script_languages_developer_sandbox.cli.common import add_options
 from exasol_script_languages_developer_sandbox.cli.options.aws_options import aws_options
+from exasol_script_languages_developer_sandbox.cli.options.ec2_options import ec2_key_options
 from exasol_script_languages_developer_sandbox.cli.options.logging import logging_options, set_log_level
 from exasol_script_languages_developer_sandbox.lib.ansible.ansible_access import AnsibleAccess
 from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess
@@ -15,10 +14,7 @@ from exasol_script_languages_developer_sandbox.lib.run_setup_ec2_and_install_dep
 @cli.command()
 @add_options(aws_options)
 @add_options(logging_options)
-@click.option('--ec2-key-file', required=False, type=click.Path(exists=True, file_okay=True, dir_okay=False),
-                 default=None, help="The EC2 key-pair-file to use. If not given a temporary key-pair-file will be created.")
-@click.option('--ec2-key-name', required=False, type=str,
-             default=None, help="The EC2 key-pair-name to use. Only needs to be set together with ec2-key-file.")
+@add_options(ec2_key_options)
 def setup_ec2_and_install_dependencies(
             aws_profile: str,
             ec2_key_file: Optional[str],

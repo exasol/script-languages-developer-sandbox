@@ -33,7 +33,8 @@ install_requires = \
  'exasol_script_languages_release @ '
  'git+https://github.com/exasol/script-languages-release.git@develop',
  'importlib_resources>=5.4.0',
- 'jinja2>=3.1.0']
+ 'jinja2>=3.1.0',
+ 'rich>=12.5.1,<13.0.0']
 
 setup_kwargs = {
     'name': 'exasol-script-languages-developer-sandbox',

@@ -5,3 +5,4 @@ from .setup_vm_bucket import setup_vm_bucket
 from .reset_password import reset_password
 from .export_vm import export_vm
 from .create_vm import create_vm
+from .show_aws_assets import show_aws_assets
