@@ -18,7 +18,7 @@ from exasol_script_languages_developer_sandbox.lib.print_assets import print_ass
 @click.option('--name-suffix', type=str, default="",
               help="An optional suffix appended to the search tag. Mostly for developer checks.")
 @click.option('--asset-type', default=all_asset_types(),
-              type=click.Choice(all_asset_types()), multiple=True,
+              type=click.Choice(list(all_asset_types())), multiple=True,
               help="The asset types to print. Can be declared multiple times.")
 def show_aws_assets(
             aws_profile: str,

@@ -11,8 +11,8 @@ ROLE_NAME = "VMImportRole"
 BUCKET_PREFIX = "slc_developer_sandbox"
 
 
-def get_bucket_prefix(slc_version: str, name_suffix:str):
-    return f"{BUCKET_PREFIX}/{slc_version}-{name_suffix}"
+def get_bucket_prefix(slc_version: str, name_suffix: str):
+    return f"{BUCKET_PREFIX}/{slc_version}-{name_suffix}/"
 
 
 def run_setup_vm_bucket(aws_access: AwsAccess) -> None:

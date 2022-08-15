@@ -14,9 +14,9 @@ from exasol_script_languages_developer_sandbox.lib.vm_slc_bucket import find_vm_
 
 
 class AssetTypes(Enum):
-    AMI = "ami",
-    VM_S3 = "s3-object",
-    SNAPSHOT = "snapshot",
+    AMI = "ami"
+    VM_S3 = "s3-object"
+    SNAPSHOT = "snapshot"
     EXPORT_IMAGE_TASK = "export-image-task"
 
 
@@ -43,6 +43,8 @@ def print_amis(aws_access: AwsAccess, filter_value: str):
                       ami["ImageLocation"], ami["CreationDate"], ami["State"])
 
     console.print(table)
+    console.print("You can de-register AMI images using AWS CLI: 'aws ec2 deregister-image --image-id [italic blue]Image-Id[/italic blue]'")
+    console.print()
 
 
 def print_snapshots(aws_access: AwsAccess, filter_value: str):
@@ -62,6 +64,9 @@ def print_snapshots(aws_access: AwsAccess, filter_value: str):
                       snapshot["VolumeId"], snapshot["StartTime"].strftime("%Y-%m-%d, %H:%M"), snapshot["State"])
 
     console.print(table)
+
+    console.print("You can remove snapshots using AWS CLI: 'aws ec2 delete-snapshot --snapshot-id  [italic blue]SnapshotId[/italic blue]'")
+    console.print()
 
 
 def print_export_image_tasks(aws_access: AwsAccess, filter_value: str):
@@ -89,6 +94,9 @@ def print_export_image_tasks(aws_access: AwsAccess, filter_value: str):
 
     console.print(table)
 
+    console.print("You can cancel active tasks using AWS CLI: 'aws ec2 cancel-export-task --export-task-id  [italic blue]ExportImageTaskId[/italic blue]'")
+    console.print()
+
 
 def print_s3_objects(aws_access: AwsAccess, slc_version: str, name_suffix: str):
     vm_bucket = find_vm_bucket(aws_access)
@@ -105,9 +113,10 @@ def print_s3_objects(aws_access: AwsAccess, slc_version: str, name_suffix: str):
     console = Console()
     s3_objects = aws_access.list_s3_objects(bucket=vm_bucket, prefix=prefix)
 
-    for s3_object in s3_objects:
-        obj_size = humanfriendly.format_size(s3_object["Size"])
-        table.add_row(s3_object["Key"], obj_size)
+    if s3_objects is not None:
+        for s3_object in s3_objects:
+            obj_size = humanfriendly.format_size(s3_object["Size"])
+            table.add_row(s3_object["Key"], obj_size)
 
     console.print(table)
 
