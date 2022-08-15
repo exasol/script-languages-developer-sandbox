@@ -11,10 +11,6 @@ ROLE_NAME = "VMImportRole"
 BUCKET_PREFIX = "slc_developer_sandbox"
 
 
-def get_bucket_prefix(bucket_prefix_appendix: str):
-    return f"{BUCKET_PREFIX}/{bucket_prefix_appendix}/"
-
-
 def run_setup_vm_bucket(aws_access: AwsAccess) -> None:
     yml = render_template("vm_bucket_cloudformation.jinja.yaml", bucket_name=BUCKET_NAME, role_name=ROLE_NAME)
     aws_access.upload_cloudformation_stack(yml, STACK_NAME)

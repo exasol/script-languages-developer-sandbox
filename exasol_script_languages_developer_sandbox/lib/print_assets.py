@@ -2,6 +2,7 @@ from typing import Tuple, Optional
 
 import humanfriendly
 
+from exasol_script_languages_developer_sandbox.lib.asset_id import AssetId
 from exasol_script_languages_developer_sandbox.lib.asset_printing.mark_down_printer import MarkdownPrintingFactory
 from exasol_script_languages_developer_sandbox.lib.asset_printing.printing_factory import PrintingFactory, TextObject, \
     HighlightedTextObject
@@ -10,9 +11,8 @@ from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess
 from enum import Enum
 
 from exasol_script_languages_developer_sandbox.lib.common import get_value_safe
-from exasol_script_languages_developer_sandbox.lib.render_template import render_template
 from exasol_script_languages_developer_sandbox.lib.tags import DEFAULT_TAG_KEY
-from exasol_script_languages_developer_sandbox.lib.vm_slc_bucket import find_vm_bucket, get_bucket_prefix
+from exasol_script_languages_developer_sandbox.lib.vm_slc_bucket import find_vm_bucket
 
 
 class AssetTypes(Enum):
@@ -20,6 +20,10 @@ class AssetTypes(Enum):
     VM_S3 = "s3-object"
     SNAPSHOT = "snapshot"
     EXPORT_IMAGE_TASK = "export-image-task"
+    CLOUDFORMATION = "cloudformation"
+    EC2_INSTANCE = "ec2-instance"
+    EC2_SECURITY_GROUP = "ec2-security-group"
+    EC2_KEY_PAIR = "ec2-key-pair"
 
 
 def all_asset_types() -> Tuple[str, ...]:
@@ -110,11 +114,11 @@ def print_export_image_tasks(aws_access: AwsAccess, filter_value: str, printing_
     text_print.print(tuple())
 
 
-def print_s3_objects(aws_access: AwsAccess, asset_id: Optional[str], printing_factory: PrintingFactory):
+def print_s3_objects(aws_access: AwsAccess, asset_id: Optional[AssetId], printing_factory: PrintingFactory):
     vm_bucket = find_vm_bucket(aws_access)
 
     if asset_id is not None:
-        prefix = get_bucket_prefix(asset_id)
+        prefix = asset_id.bucket_prefix
     else:
         prefix = ""
 
@@ -142,7 +146,46 @@ def print_s3_objects(aws_access: AwsAccess, asset_id: Optional[str], printing_fa
     table_printer.finish()
 
 
-def print_with_printer(aws_access: AwsAccess, asset_id: Optional[str],
+def cloudformation_stack_has_matching_tag(cloudformation_tag: dict, filter_value: str):
+    if filter_value == "*":
+        return True
+    else:
+        for tag in cloudformation_tag["Tags"]:
+            tag_key = tag["Key"]
+            tag_value = tag["Value"]
+            if tag_key == DEFAULT_TAG_KEY and tag_value == filter_value:
+                return True
+    return False
+
+
+def print_cloudformation_stacks(aws_access: AwsAccess, filter_value: str, printing_factory: PrintingFactory):
+    table_printer = printing_factory.create_table_printer(title=f"Cloudformation stacks (Filter={filter_value})")
+
+    table_printer.add_column("Stack-Id", style="blue", no_wrap=False)
+    table_printer.add_column("Stack-Name", style="blue", no_wrap=True)
+    table_printer.add_column("Description", no_wrap=False)
+    table_printer.add_column("StackStatus", no_wrap=True)
+    table_printer.add_column("CreationTime", no_wrap=True)
+
+    cloudformation_stack = aws_access.describe_stacks()
+
+    relevant_stacks = [stack for stack in
+                       cloudformation_stack if cloudformation_stack_has_matching_tag(stack, filter_value)]
+    for stack in relevant_stacks:
+        table_printer.add_row(stack["StackId"], stack["StackName"],
+                              get_value_safe("Description", stack), stack["StackStatus"],
+                              stack["CreationTime"].strftime("%Y-%m-%d, %H:%M"))
+
+    table_printer.finish()
+    text_print = printing_factory.create_text_printer()
+
+    text_print.print((TextObject("You can remove a cf stack using AWS CLI:\n"),
+                      TextObject("'aws cloudformation delete-stack --stack-name "),
+                      HighlightedTextObject("Stack-Name/Stack-Id"), TextObject("'")))
+    text_print.print(tuple())
+
+
+def print_with_printer(aws_access: AwsAccess, asset_id: Optional[AssetId],
                        asset_types: Tuple[str], filter_value: str, printing_factory: PrintingFactory):
     if AssetTypes.AMI.value in asset_types:
         print_amis(aws_access, filter_value, printing_factory)
@@ -152,14 +195,16 @@ def print_with_printer(aws_access: AwsAccess, asset_id: Optional[str],
         print_export_image_tasks(aws_access, filter_value, printing_factory)
     if AssetTypes.VM_S3.value in asset_types:
         print_s3_objects(aws_access, asset_id, printing_factory)
+    if AssetTypes.CLOUDFORMATION.value in asset_types:
+        print_cloudformation_stacks(aws_access, filter_value, printing_factory)
 
 
-def print_assets(aws_access: AwsAccess, asset_id: Optional[str], outfile: Optional[str],
+def print_assets(aws_access: AwsAccess, asset_id: Optional[AssetId], outfile: Optional[str],
                  asset_types: Tuple[str] = all_asset_types()):
-    if asset_id is not None:
+    if asset_id is None:
         filter_value = "*"
     else:
-        filter_value = render_template("aws_tag_value.jinja", asset_id=asset_id)
+        filter_value = asset_id.tag_value
 
     if outfile is not None:
         with open(outfile, "w") as f:

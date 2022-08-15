@@ -1,13 +1,15 @@
 import logging
 import signal
+import time
 import traceback
 from typing import Tuple, Optional
 
-from exasol_script_languages_developer_sandbox.lib.ansible.ansible_access import AnsibleAccess, AnsibleException
+from exasol_script_languages_developer_sandbox.lib.ansible.ansible_access import AnsibleAccess
 from exasol_script_languages_developer_sandbox.lib.ansible.ansible_repository import AnsibleRepository, \
     default_repositories
 from exasol_script_languages_developer_sandbox.lib.ansible.ansible_run_context import AnsibleRunContext, \
     default_ansible_run_context
+from exasol_script_languages_developer_sandbox.lib.asset_id import AssetId
 from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess
 
 from exasol_script_languages_developer_sandbox.lib.host_info import HostInfo
@@ -18,7 +20,7 @@ from exasol_script_languages_developer_sandbox.lib.run_setup_ec2 import run_life
 
 def run_setup_ec2_and_install_dependencies(aws_access: AwsAccess,
                                            ec2_key_file: Optional[str], ec2_key_name: Optional[str],
-                                           asset_id: str, ansible_access: AnsibleAccess,
+                                           asset_id: AssetId, ansible_access: AnsibleAccess,
                                            ansible_run_context: AnsibleRunContext = default_ansible_run_context,
                                            ansible_repositories: Tuple[AnsibleRepository, ...] = default_repositories
                                            ) -> None:
@@ -28,7 +30,7 @@ def run_setup_ec2_and_install_dependencies(aws_access: AwsAccess,
     gives you time to login into the machine and identify any setup issues.
     You can stop the EC-2 machine by pressing Ctrl-C.
     """
-    execution_generator = run_lifecycle_for_ec2(aws_access, ec2_key_file, ec2_key_name, None, asset_id)
+    execution_generator = run_lifecycle_for_ec2(aws_access, ec2_key_file, ec2_key_name, None, asset_id.tag_value)
     res = next(execution_generator)
     while res[0] == "pending":
         logging.info(f"EC2 instance not ready yet.")
@@ -39,6 +41,8 @@ def run_setup_ec2_and_install_dependencies(aws_access: AwsAccess,
         logging.error(f"Error during startup of EC2 instance '{ec2_instance_id}'. Status is {ec2_instance_status}")
         return
 
+    #Wait for the EC-2 instance to become ready.
+    time.sleep(10.0)
     try:
         run_install_dependencies(ansible_access, (HostInfo(host_name, key_file_location),),
                                  ansible_run_context, ansible_repositories)

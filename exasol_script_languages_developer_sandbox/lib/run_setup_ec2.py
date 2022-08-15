@@ -2,6 +2,7 @@ import logging
 import signal
 from typing import Optional, Tuple, Any
 
+from exasol_script_languages_developer_sandbox.lib.asset_id import AssetId
 from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess
 from exasol_script_languages_developer_sandbox.lib.cf_stack import CloudformationStack, \
     CloudformationStackContextManager
@@ -32,8 +33,8 @@ def run_lifecycle_for_ec2(aws_access: AwsAccess,
 
 
 def run_setup_ec2(aws_access: AwsAccess, ec2_key_file: Optional[str], ec2_key_name: Optional[str],
-                  asset_id: str) -> None:
-    execution_generator = run_lifecycle_for_ec2(aws_access, ec2_key_file, ec2_key_name, None, asset_id)
+                  asset_id: AssetId) -> None:
+    execution_generator = run_lifecycle_for_ec2(aws_access, ec2_key_file, ec2_key_name, None, asset_id.tag_value)
     res = next(execution_generator)
     while res[0] == "pending":
         logging.info(f"EC2 instance not ready yet.")

@@ -3,35 +3,34 @@ import traceback
 from sys import stderr
 from typing import Tuple
 
+from exasol_script_languages_developer_sandbox.lib.asset_id import AssetId
 from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess
 from exasol_script_languages_developer_sandbox.lib.cf_stack import find_ec2_instance_in_cf_stack
 from exasol_script_languages_developer_sandbox.lib.print_assets import print_assets
 from exasol_script_languages_developer_sandbox.lib.render_template import render_template
 from exasol_script_languages_developer_sandbox.lib.vm_disk_image_format import VmDiskImageFormat
-from exasol_script_languages_developer_sandbox.lib.vm_slc_bucket import find_vm_bucket, find_vm_import_role, \
-    get_bucket_prefix
-
+from exasol_script_languages_developer_sandbox.lib.vm_slc_bucket import find_vm_bucket, find_vm_import_role
 
 def export_vm(aws_access: AwsAccess,
               instance_id: str,
               vm_image_formats: Tuple[str, ...],
-              asset_id: str) -> None:
+              asset_id: AssetId) -> None:
     vm_bucket = find_vm_bucket(aws_access)
-    name = render_template("vm_image_name.jinja", asset_id=asset_id)
-    tag_value = render_template("aws_tag_value.jinja", asset_id=asset_id)
     vmimport_role = find_vm_import_role(aws_access)
+    tag_value = asset_id.tag_value
+    bucket_prefix = asset_id.bucket_prefix
+    ami_name = asset_id.ami_name
     has_errors = False
     try:
         try:
-            logging.info(f"create ami with name '{name}' and tag(s) '{tag_value}'")
-            ami_id = "ami-055e106c605a2fa41"#aws_access.create_image_from_ec2_instance(instance_id, name=name, tag_value=tag_value,
+            logging.info(f"create ami with name '{ami_name}' and tag(s) '{tag_value}'")
+            ami_id = "ami-055e106c605a2fa41"#aws_access.create_image_from_ec2_instance(instance_id, name=ami_name, tag_value=tag_value,
                      #                                          description="Image Description")
         except Exception:
             traceback.print_exc()
             logging.error("Could not create AMI. Please remove snapshot if necessary!")
             has_errors = True
             return
-        bucket_prefix = get_bucket_prefix(bucket_prefix_appendix=asset_id)
         for vm_image_format in vm_image_formats:
             try:
                 logging.info(f"export ami to vm with format '{vm_image_format}' and tag(s) '{tag_value}'")
@@ -47,17 +46,17 @@ def export_vm(aws_access: AwsAccess,
                 break
     finally:
         if has_errors:
-            print(f"VM Export finished for: {name}. There were errors. "
+            print(f"VM Export finished for: {ami_name}. There were errors. "
                   f"You might want to delete some of the assets created.", file=stderr)
         else:
-            print(f"VM Export finished for: {name} without any errors", file=stderr)
+            print(f"VM Export finished for: {ami_name} without any errors", file=stderr)
         print_assets(aws_access=aws_access, asset_id=asset_id, outfile=None)
 
 
 def run_export_vm(aws_access: AwsAccess,
                   stack_name: str,
                   vm_image_formats: Tuple[str, ...],
-                  asset_id: str):
+                  asset_id: AssetId):
     """
     Runs export only of the VM image.
     """

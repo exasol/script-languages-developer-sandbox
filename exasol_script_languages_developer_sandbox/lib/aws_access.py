@@ -116,6 +116,20 @@ class AwsAccess(object):
         cf_client = self._get_aws_client('cloudformation')
         cf_client.delete_stack(StackName=stack_name)
 
+    def describe_stacks(self) -> List[Any]:
+        """
+        This functions uses Boto3 to describe a all cloudformation stack.
+        """
+        logging.debug(f"Running describe_stacks for aws profile {self.aws_profile_for_logging}")
+        cf_client = self._get_aws_client('cloudformation')
+        current_result = cf_client.describe_stacks()
+        result = current_result["Stacks"]
+
+        while "NextToken" in current_result:
+            current_result = cf_client.describe_stacks(NextToken=current_result["NextToken"])
+            result.extend(current_result["Stacks"])
+        return result
+
     def describe_instance(self, instance_id: str):
         """
         Describes an AWS instance identified by parameter instance_id

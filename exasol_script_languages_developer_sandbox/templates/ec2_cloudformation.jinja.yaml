@@ -36,6 +36,6 @@ Resources:
               Value: "ScriptLanguages"
             - Key: "exasol:owner"
               Value: {{user_name}}
-            - Key: {trace_tag}
-              Value: {trace_tag_value}
+            - Key: {{trace_tag}}
+              Value: {{trace_tag_value}}
 

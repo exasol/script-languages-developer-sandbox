@@ -10,6 +10,7 @@ from exasol_script_languages_developer_sandbox.cli.options.id_options import id_
 from exasol_script_languages_developer_sandbox.cli.options.logging import logging_options, set_log_level
 from exasol_script_languages_developer_sandbox.cli.options.vm_options import vm_options
 from exasol_script_languages_developer_sandbox.lib.ansible.ansible_access import AnsibleAccess
+from exasol_script_languages_developer_sandbox.lib.asset_id import AssetId
 from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess
 from exasol_script_languages_developer_sandbox.lib.run_create_vm import run_create_vm
 
@@ -37,4 +38,4 @@ def create_vm(
     current_vm_image_formats = tuple() if no_vm else vm_image_format
     set_log_level(log_level)
     run_create_vm(AwsAccess(aws_profile), ec2_key_file, ec2_key_name,
-                  AnsibleAccess(), default_password, current_vm_image_formats, asset_id)
+                  AnsibleAccess(), default_password, current_vm_image_formats, AssetId(asset_id))

@@ -1,8 +1,6 @@
 import logging
 from typing import Optional
 
-from importlib_metadata import version
-
 from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess
 from exasol_script_languages_developer_sandbox.lib.random_string_generator import get_random_str_of_length_n
 from exasol_script_languages_developer_sandbox.lib.render_template import render_template
@@ -64,7 +62,7 @@ class CloudformationStack:
         self._stack_name = self._find_new_stack_name()
         self._aws_access.upload_cloudformation_stack(yml, self._stack_name,
                                                      tags=create_default_asset_tag(self._tag_value))
-        logging.info(f"Deployed cloudformation stack {self._stack_name}")
+        logging.info(f"Deployed cloudformation stack {self._stack_name} with tag value '{self._tag_value}'")
         return self
 
     def get_ec2_instance_id(self) -> str:
