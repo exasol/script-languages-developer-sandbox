@@ -219,6 +219,18 @@ class AwsAccess(object):
         if "Contents" in response:
             return response["Contents"]
 
+    def get_s3_bucket_location(self, bucket: str) -> Optional[str]:
+        """
+        Get location (region) of s3 bucket
+        Wraps: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html#S3.Client.get_bucket_location
+        """
+        logging.debug(f"Running get_s3_bucket_location for aws profile {self.aws_profile_for_logging}")
+        cloud_client = self._get_aws_client("s3")
+
+        response = cloud_client.get_bucket_location(Bucket=bucket)
+        if "LocationConstraint" in response:
+            return response["LocationConstraint"]
+
     def get_user(self) -> str:
         """
         Return the current IAM user name.
