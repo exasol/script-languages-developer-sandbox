@@ -15,8 +15,9 @@ from exasol_script_languages_developer_sandbox.lib.print_assets import print_ass
 @add_options(logging_options)
 @click.option('--slc-version', type=str, default="",
               help="Filters for a specific version. If empty, shows all versions.")
-@click.option('--name-suffix', type=str, default="",
-              help="An optional suffix appended to the search tag. Mostly for developer checks.")
+@click.option('--asset-id', type=str, default=None,
+              help="The asset-id used to create the AWS resources during the other commands. "
+                   "If not set, all resources will be printed.")
 @click.option('--asset-type', default=all_asset_types(),
               type=click.Choice(list(all_asset_types())), multiple=True,
               help="The asset types to print. Can be declared multiple times.")
@@ -25,7 +26,7 @@ from exasol_script_languages_developer_sandbox.lib.print_assets import print_ass
 def show_aws_assets(
             aws_profile: str,
             slc_version: str,
-            name_suffix: str,
+            asset_id: Optional[str],
             asset_type: Tuple[str, ...],
             out_file: Optional[str],
             log_level: str):
@@ -33,5 +34,4 @@ def show_aws_assets(
     Shows all AWS assets.
     """
     set_log_level(log_level)
-    print_assets(AwsAccess(aws_profile=aws_profile), slc_version=slc_version,
-                 name_suffix=name_suffix, outfile=out_file, asset_types=asset_type)
+    print_assets(AwsAccess(aws_profile=aws_profile), asset_id=asset_id, outfile=out_file, asset_types=asset_type)

@@ -110,11 +110,11 @@ def print_export_image_tasks(aws_access: AwsAccess, filter_value: str, printing_
     text_print.print(tuple())
 
 
-def print_s3_objects(aws_access: AwsAccess, slc_version: str, name_suffix: str, printing_factory: PrintingFactory):
+def print_s3_objects(aws_access: AwsAccess, asset_id: Optional[str], printing_factory: PrintingFactory):
     vm_bucket = find_vm_bucket(aws_access)
 
-    if len(slc_version) > 0:
-        prefix = get_bucket_prefix(slc_version=slc_version, name_suffix=name_suffix)
+    if asset_id is not None:
+        prefix = get_bucket_prefix(asset_id)
     else:
         prefix = ""
 
@@ -142,7 +142,7 @@ def print_s3_objects(aws_access: AwsAccess, slc_version: str, name_suffix: str, 
     table_printer.finish()
 
 
-def print_with_printer(aws_access: AwsAccess, slc_version: str, name_suffix: str,
+def print_with_printer(aws_access: AwsAccess, asset_id: Optional[str],
                        asset_types: Tuple[str], filter_value: str, printing_factory: PrintingFactory):
     if AssetTypes.AMI.value in asset_types:
         print_amis(aws_access, filter_value, printing_factory)
@@ -151,20 +151,20 @@ def print_with_printer(aws_access: AwsAccess, slc_version: str, name_suffix: str
     if AssetTypes.EXPORT_IMAGE_TASK.value in asset_types:
         print_export_image_tasks(aws_access, filter_value, printing_factory)
     if AssetTypes.VM_S3.value in asset_types:
-        print_s3_objects(aws_access, slc_version, name_suffix, printing_factory)
+        print_s3_objects(aws_access, asset_id, printing_factory)
 
 
-def print_assets(aws_access: AwsAccess, slc_version: str, name_suffix: str, outfile: Optional[str],
+def print_assets(aws_access: AwsAccess, asset_id: Optional[str], outfile: Optional[str],
                  asset_types: Tuple[str] = all_asset_types()):
-    if len(slc_version) == 0:
+    if asset_id is not None:
         filter_value = "*"
     else:
-        filter_value = render_template("aws_tag_value.jinja", slc_version=slc_version, suffix=name_suffix).strip("\n")
+        filter_value = render_template("aws_tag_value.jinja", asset_id=asset_id)
 
     if outfile is not None:
         with open(outfile, "w") as f:
             printing_factory = MarkdownPrintingFactory(f)
-            print_with_printer(aws_access, slc_version, name_suffix, asset_types, filter_value, printing_factory)
+            print_with_printer(aws_access, asset_id, asset_types, filter_value, printing_factory)
     else:
         printing_factory = RichConsolePrintingFactory()
-        print_with_printer(aws_access, slc_version, name_suffix, asset_types, filter_value, printing_factory)
+        print_with_printer(aws_access, asset_id, asset_types, filter_value, printing_factory)

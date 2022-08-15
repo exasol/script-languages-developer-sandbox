@@ -43,7 +43,7 @@ class AwsAccess(object):
         cloud_client = self._get_aws_client("ec2")
         cloud_client.delete_key_pair(KeyName=key_name)
 
-    def upload_cloudformation_stack(self, yml: str, stack_name: str):
+    def upload_cloudformation_stack(self, yml: str, stack_name: str, tags=tuple()):
         """
         Deploy the cloudformation stack.
         """
@@ -54,7 +54,7 @@ class AwsAccess(object):
             result = cfn_deployer.create_and_wait_for_changeset(stack_name=stack_name, cfn_template=yml,
                                                                 parameter_values=[],
                                                                 capabilities=("CAPABILITY_IAM",), role_arn=None,
-                                                                notification_arns=None, tags=tuple())
+                                                                notification_arns=None, tags=tags)
         except Exception as e:
             logging.error(f"Error creating changeset for cloud formation template: {e}")
             raise e

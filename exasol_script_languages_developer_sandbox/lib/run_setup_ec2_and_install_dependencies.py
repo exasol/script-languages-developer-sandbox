@@ -18,7 +18,7 @@ from exasol_script_languages_developer_sandbox.lib.run_setup_ec2 import run_life
 
 def run_setup_ec2_and_install_dependencies(aws_access: AwsAccess,
                                            ec2_key_file: Optional[str], ec2_key_name: Optional[str],
-                                           ansible_access: AnsibleAccess,
+                                           asset_id: str, ansible_access: AnsibleAccess,
                                            ansible_run_context: AnsibleRunContext = default_ansible_run_context,
                                            ansible_repositories: Tuple[AnsibleRepository, ...] = default_repositories
                                            ) -> None:
@@ -28,7 +28,7 @@ def run_setup_ec2_and_install_dependencies(aws_access: AwsAccess,
     gives you time to login into the machine and identify any setup issues.
     You can stop the EC-2 machine by pressing Ctrl-C.
     """
-    execution_generator = run_lifecycle_for_ec2(aws_access, ec2_key_file, ec2_key_name, None)
+    execution_generator = run_lifecycle_for_ec2(aws_access, ec2_key_file, ec2_key_name, None, asset_id)
     res = next(execution_generator)
     while res[0] == "pending":
         logging.info(f"EC2 instance not ready yet.")

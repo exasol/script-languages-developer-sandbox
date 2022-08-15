@@ -10,18 +10,15 @@ from exasol_script_languages_developer_sandbox.lib.render_template import render
 from exasol_script_languages_developer_sandbox.lib.vm_disk_image_format import VmDiskImageFormat
 from exasol_script_languages_developer_sandbox.lib.vm_slc_bucket import find_vm_bucket, find_vm_import_role, \
     get_bucket_prefix
-from importlib.metadata import version
 
 
 def export_vm(aws_access: AwsAccess,
               instance_id: str,
               vm_image_formats: Tuple[str, ...],
-              name_suffix: str) -> None:
+              asset_id: str) -> None:
     vm_bucket = find_vm_bucket(aws_access)
-    name = render_template("vm_image_name.jinja",
-                           slc_version=version("exasol_script_languages_release"), suffix=name_suffix).strip("\n")
-    tag_value = render_template("aws_tag_value.jinja",
-                           slc_version=version("exasol_script_languages_release"), suffix=name_suffix).strip("\n")
+    name = render_template("vm_image_name.jinja", asset_id=asset_id)
+    tag_value = render_template("aws_tag_value.jinja", asset_id=asset_id)
     vmimport_role = find_vm_import_role(aws_access)
     has_errors = False
     try:
@@ -34,8 +31,7 @@ def export_vm(aws_access: AwsAccess,
             logging.error("Could not create AMI. Please remove snapshot if necessary!")
             has_errors = True
             return
-        bucket_prefix = get_bucket_prefix(slc_version=version("exasol_script_languages_release"),
-                                          name_suffix=name_suffix)
+        bucket_prefix = get_bucket_prefix(bucket_prefix_appendix=asset_id)
         for vm_image_format in vm_image_formats:
             try:
                 logging.info(f"export ami to vm with format '{vm_image_format}' and tag(s) '{tag_value}'")
@@ -55,16 +51,15 @@ def export_vm(aws_access: AwsAccess,
                   f"You might want to delete some of the assets created.", file=stderr)
         else:
             print(f"VM Export finished for: {name} without any errors", file=stderr)
-        print_assets(aws_access=aws_access, slc_version=version("exasol_script_languages_release"),
-                     outfile=None, name_suffix=name_suffix)
+        print_assets(aws_access=aws_access, asset_id=asset_id, outfile=None)
 
 
 def run_export_vm(aws_access: AwsAccess,
                   stack_name: str,
                   vm_image_formats: Tuple[str, ...],
-                  name_suffix: str):
+                  asset_id: str):
     """
     Runs export only of the VM image.
     """
     ec_instance_id = find_ec2_instance_in_cf_stack(aws_access, stack_name)
-    export_vm(aws_access, ec_instance_id, vm_image_formats, name_suffix)
+    export_vm(aws_access, ec_instance_id, vm_image_formats, asset_id)

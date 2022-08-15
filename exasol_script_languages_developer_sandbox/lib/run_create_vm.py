@@ -1,4 +1,5 @@
 import logging
+from importlib.metadata import version
 from typing import Tuple, Optional, List
 
 from exasol_script_languages_developer_sandbox.lib.ansible.ansible_access import AnsibleAccess
@@ -9,6 +10,7 @@ from exasol_script_languages_developer_sandbox.lib.ansible.ansible_run_context i
 from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess
 
 from exasol_script_languages_developer_sandbox.lib.host_info import HostInfo
+from exasol_script_languages_developer_sandbox.lib.render_template import render_template
 from exasol_script_languages_developer_sandbox.lib.run_export_vm import export_vm
 from exasol_script_languages_developer_sandbox.lib.run_install_dependencies import run_install_dependencies
 from exasol_script_languages_developer_sandbox.lib.run_reset_password import run_reset_password
@@ -18,7 +20,7 @@ from exasol_script_languages_developer_sandbox.lib.run_setup_ec2 import run_life
 def run_create_vm(aws_access: AwsAccess, ec2_key_file: Optional[str], ec2_key_name: Optional[str],
                   ansible_access: AnsibleAccess, default_password: str,
                   vm_image_formats: Tuple[str, ...],
-                  name_suffix: str,
+                  asset_id: str,
                   ansible_run_context=default_ansible_run_context,
                   ansible_reset_password_context=reset_password_ansible_run_context,
                   ansible_repositories: Tuple[AnsibleRepository, ...] = default_repositories) \
@@ -29,7 +31,9 @@ def run_create_vm(aws_access: AwsAccess, ec2_key_file: Optional[str], ec2_key_na
     If anything goes wrong the cloudformation stack of the EC-2 instance will be removed.
     For debuging you can use the available debug commands.
     """
-    execution_generator = run_lifecycle_for_ec2(aws_access, ec2_key_file, ec2_key_name, None)
+    tag_value = render_template("aws_tag_value.jinja", asset_id=asset_id)
+
+    execution_generator = run_lifecycle_for_ec2(aws_access, ec2_key_file, ec2_key_name, None, tag_value)
     res = next(execution_generator)
     while res[0] == "pending":
         logging.info(f"EC2 instance not ready yet.")
@@ -46,7 +50,7 @@ def run_create_vm(aws_access: AwsAccess, ec2_key_file: Optional[str], ec2_key_na
         run_reset_password(ansible_access, default_password,
                            (HostInfo(host_name, key_file_location),), ansible_reset_password_context,
                            ansible_repositories)
-        return export_vm(aws_access, ec2_instance_id, vm_image_formats, name_suffix)
+        return export_vm(aws_access, ec2_instance_id, vm_image_formats, asset_id)
     finally:
         #shutdown stack
         next(execution_generator)
