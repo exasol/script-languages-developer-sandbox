@@ -26,13 +26,14 @@ class AwsAccess(object):
     def aws_profile(self) -> Optional[str]:
         return self._aws_profile
 
-    def create_new_ec2_key_pair(self, key_name: str) -> str:
+    def create_new_ec2_key_pair(self, key_name: str, tag_value: str) -> str:
         """
         Create an EC-2 Key-Pair, identified by parameter 'key_name'
         """
         logging.debug(f"Running create_new_ec2_key_pair for aws profile {self.aws_profile_for_logging}")
         cloud_client = self._get_aws_client("ec2")
-        key_pair = cloud_client.create_key_pair(KeyName=key_name)
+        tags = [{"ResourceType": "key-pair", "Tags": create_default_asset_tag(tag_value)}]
+        key_pair = cloud_client.create_key_pair(KeyName=key_name, TagSpecifications=tags)
         return str(key_pair['KeyMaterial'])
 
     def delete_ec2_key_pair(self, key_name: str) -> None:
@@ -135,8 +136,8 @@ class AwsAccess(object):
         Describes an AWS instance identified by parameter instance_id
         """
         logging.debug(f"Running describe_instance for aws profile {self.aws_profile_for_logging}")
-        cloud_client = self._get_aws_client("ec2")
-        return cloud_client.describe_instances(InstanceIds=[instance_id])["Reservations"][0]["Instances"][0]
+        cloud_client = self._get_aws_client("ec2")["Reservations"][0]["Instances"][0]
+        return cloud_client.describe_instances(InstanceIds=[instance_id])
 
     def create_image_from_ec2_instance(self, instance_id: str, name: str, tag_value: str, description: str) -> str:
         """
@@ -221,6 +222,17 @@ class AwsAccess(object):
         response = cloud_client.describe_export_image_tasks(Filters=filters)
         assert "NextToken" not in response
         return response["ExportImageTasks"]
+
+    def list_ec2_key_pairs(self, filters: list) -> list:
+        """
+        List ec-2 key-pairs with given tag filter
+        """
+        logging.debug(f"Running list_ec2_key_pairs for aws profile {self.aws_profile_for_logging}")
+        cloud_client = self._get_aws_client("ec2")
+
+        response = cloud_client.describe_key_pairs(Filters=filters)
+        assert "NextToken" not in response
+        return response["KeyPairs"]
 
     def list_s3_objects(self, bucket: str, prefix: str) -> list:
         """

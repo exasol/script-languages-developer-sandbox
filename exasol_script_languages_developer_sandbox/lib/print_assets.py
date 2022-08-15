@@ -21,8 +21,6 @@ class AssetTypes(Enum):
     SNAPSHOT = "snapshot"
     EXPORT_IMAGE_TASK = "export-image-task"
     CLOUDFORMATION = "cloudformation"
-    EC2_INSTANCE = "ec2-instance"
-    EC2_SECURITY_GROUP = "ec2-security-group"
     EC2_KEY_PAIR = "ec2-key-pair"
 
 
@@ -161,20 +159,25 @@ def cloudformation_stack_has_matching_tag(cloudformation_tag: dict, filter_value
 def print_cloudformation_stacks(aws_access: AwsAccess, filter_value: str, printing_factory: PrintingFactory):
     table_printer = printing_factory.create_table_printer(title=f"Cloudformation stacks (Filter={filter_value})")
 
-    table_printer.add_column("Stack-Id", style="blue", no_wrap=False)
     table_printer.add_column("Stack-Name", style="blue", no_wrap=True)
     table_printer.add_column("Description", no_wrap=False)
     table_printer.add_column("StackStatus", no_wrap=True)
-    table_printer.add_column("CreationTime", no_wrap=True)
+    table_printer.add_column("CreationTime", style="magenta", no_wrap=True)
+    table_printer.add_column("PhysicalResourceId", no_wrap=False)
+    table_printer.add_column("ResourceType", no_wrap=True)
 
     cloudformation_stack = aws_access.describe_stacks()
 
     relevant_stacks = [stack for stack in
                        cloudformation_stack if cloudformation_stack_has_matching_tag(stack, filter_value)]
     for stack in relevant_stacks:
-        table_printer.add_row(stack["StackId"], stack["StackName"],
+        table_printer.add_row(stack["StackName"],
                               get_value_safe("Description", stack), stack["StackStatus"],
                               stack["CreationTime"].strftime("%Y-%m-%d, %H:%M"))
+        stack_resources = aws_access.get_all_stack_resources(stack_name=stack["StackName"])
+        for stack_resource in stack_resources:
+            table_printer.add_row("", "", "", "",
+                                  stack_resource["PhysicalResourceId"], stack_resource["ResourceType"])
 
     table_printer.finish()
     text_print = printing_factory.create_text_printer()
@@ -182,6 +185,28 @@ def print_cloudformation_stacks(aws_access: AwsAccess, filter_value: str, printi
     text_print.print((TextObject("You can remove a cf stack using AWS CLI:\n"),
                       TextObject("'aws cloudformation delete-stack --stack-name "),
                       HighlightedTextObject("Stack-Name/Stack-Id"), TextObject("'")))
+    text_print.print(tuple())
+
+
+def print_ec2_keys(aws_access: AwsAccess, filter_value: str, printing_factory: PrintingFactory):
+    table_printer = printing_factory.create_table_printer(title=f"EC-2 Keys (Filter={filter_value})")
+
+    table_printer.add_column("KeyPairId", style="blue", no_wrap=True)
+    table_printer.add_column("KeyName", no_wrap=True)
+    table_printer.add_column("CreateTime", style="magenta", no_wrap=True)
+
+    snapshots = aws_access.list_ec2_key_pairs(filters=[{'Name': f'tag:{DEFAULT_TAG_KEY}', 'Values': [filter_value]}])
+    for snapshot in snapshots:
+        table_printer.add_row(snapshot["KeyPairId"], snapshot["KeyName"],
+                              snapshot["CreateTime"].strftime("%Y-%m-%d, %H:%M"))
+
+    table_printer.finish()
+
+    text_print = printing_factory.create_text_printer()
+
+    text_print.print((TextObject("You can remove snapshots using AWS CLI:\n"),
+                     TextObject("'aws ec2 delete-key-pair --key-pair-id "),
+                     HighlightedTextObject("KeyPairId"), TextObject("'")))
     text_print.print(tuple())
 
 
@@ -197,6 +222,8 @@ def print_with_printer(aws_access: AwsAccess, asset_id: Optional[AssetId],
         print_s3_objects(aws_access, asset_id, printing_factory)
     if AssetTypes.CLOUDFORMATION.value in asset_types:
         print_cloudformation_stacks(aws_access, filter_value, printing_factory)
+    if AssetTypes.EC2_KEY_PAIR.value in asset_types:
+        print_ec2_keys(aws_access, filter_value, printing_factory)
 
 
 def print_assets(aws_access: AwsAccess, asset_id: Optional[AssetId], outfile: Optional[str],

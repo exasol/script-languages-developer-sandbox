@@ -10,15 +10,16 @@ from importlib.metadata import version
 from exasol_script_languages_developer_sandbox.lib.tags import DEFAULT_TAG_KEY
 from exasol_script_languages_developer_sandbox.lib.vm_slc_bucket import BUCKET_NAME, ROLE_NAME
 
+from exasol_script_languages_developer_sandbox.lib.asset_id import AssetId
+
+DEFAULT_ASSET_ID = AssetId("test")
+
 
 @pytest.fixture
 def ec2_cloudformation_yml():
-    tag_value = render_template("aws_tag_value.jinja",
-                                slc_version=version("exasol_script_languages_release"),
-                                suffix="tests").strip("\n")
 
     return render_template("ec2_cloudformation.jinja.yaml", key_name="test_key", user_name="test_user",
-                           trace_tag=DEFAULT_TAG_KEY, trace_tag_value=tag_value)
+                           trace_tag=DEFAULT_TAG_KEY, trace_tag_value=DEFAULT_ASSET_ID.tag_value)
 
 
 @pytest.fixture
