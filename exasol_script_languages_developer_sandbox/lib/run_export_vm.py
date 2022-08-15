@@ -56,7 +56,7 @@ def export_vm(aws_access: AwsAccess,
         else:
             print(f"VM Export finished for: {name} without any errors", file=stderr)
         print_assets(aws_access=aws_access, slc_version=version("exasol_script_languages_release"),
-                     name_suffix=name_suffix)
+                     outfile=None, name_suffix=name_suffix)
 
 
 def run_export_vm(aws_access: AwsAccess,

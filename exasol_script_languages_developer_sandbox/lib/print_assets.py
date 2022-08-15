@@ -1,11 +1,13 @@
-from typing import Tuple
+from typing import Tuple, Optional
 
 import humanfriendly
 
+from exasol_script_languages_developer_sandbox.lib.asset_printing.mark_down_printer import MarkdownPrintingFactory
+from exasol_script_languages_developer_sandbox.lib.asset_printing.printing_factory import PrintingFactory, TextObject, \
+    HighlightedTextObject
+from exasol_script_languages_developer_sandbox.lib.asset_printing.rich_console_printer import RichConsolePrintingFactory
 from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess
 from enum import Enum
-from rich.console import Console
-from rich.table import Table
 
 from exasol_script_languages_developer_sandbox.lib.common import get_value_safe
 from exasol_script_languages_developer_sandbox.lib.render_template import render_template
@@ -24,63 +26,69 @@ def all_asset_types() -> Tuple[str, ...]:
     return tuple(asset_type.value for asset_type in AssetTypes)
 
 
-def print_amis(aws_access: AwsAccess, filter_value: str):
-    table = Table(title=f"AMI Images (Filter={filter_value})")
+def print_amis(aws_access: AwsAccess, filter_value: str, printing_factory: PrintingFactory):
+    table_printer = printing_factory.create_table_printer(title=f"AMI Images (Filter={filter_value})")
 
-    table.add_column("Image-Id", style="blue", no_wrap=True)
-    table.add_column("Name", no_wrap=True)
-    table.add_column("Description", no_wrap=False)
-    table.add_column("Public", no_wrap=True)
-    table.add_column("ImageLocation", no_wrap=True)
-    table.add_column("CreationDate", style="magenta", no_wrap=True)
-    table.add_column("State", no_wrap=True)
+    table_printer.add_column("Image-Id", style="blue", no_wrap=True)
+    table_printer.add_column("Name", no_wrap=True)
+    table_printer.add_column("Description", no_wrap=False)
+    table_printer.add_column("Public", no_wrap=True)
+    table_printer.add_column("ImageLocation", no_wrap=True)
+    table_printer.add_column("CreationDate", style="magenta", no_wrap=True)
+    table_printer.add_column("State", no_wrap=True)
 
-    console = Console()
     amis = aws_access.list_amis(filters=[{'Name': f'tag:{DEFAULT_TAG_KEY}', 'Values': [filter_value]}])
     for ami in amis:
         is_public = "yes" if ami["Public"] else "no"
-        table.add_row(ami["ImageId"], ami["Name"], ami["Description"], is_public,
+        table_printer.add_row(ami["ImageId"], ami["Name"], ami["Description"], is_public,
                       ami["ImageLocation"], ami["CreationDate"], ami["State"])
 
-    console.print(table)
-    console.print("You can de-register AMI images using AWS CLI: 'aws ec2 deregister-image --image-id [italic blue]Image-Id[/italic blue]'")
-    console.print()
+    table_printer.finish()
+    text_print = printing_factory.create_text_printer()
+
+    text_print.print((TextObject("You can de-register AMI images using AWS CLI:\n"),
+                     TextObject("'aws ec2 deregister-image --image-id "),
+                     HighlightedTextObject("Image-Id"), TextObject("'")))
+    text_print.print(tuple())
 
 
-def print_snapshots(aws_access: AwsAccess, filter_value: str):
-    table = Table(title=f"EC-2 Snapshots (Filter={filter_value})")
+def print_snapshots(aws_access: AwsAccess, filter_value: str, printing_factory: PrintingFactory):
+    table_printer = printing_factory.create_table_printer(title=f"EC-2 Snapshots (Filter={filter_value})")
 
-    table.add_column("SnapshotId", style="blue", no_wrap=True)
-    table.add_column("Description", no_wrap=False)
-    table.add_column("Progress", no_wrap=True)
-    table.add_column("VolumeId", no_wrap=True)
-    table.add_column("StartTime", style="magenta", no_wrap=True)
-    table.add_column("State", no_wrap=True)
+    table_printer.add_column("SnapshotId", style="blue", no_wrap=True)
+    table_printer.add_column("Description", no_wrap=False)
+    table_printer.add_column("Progress", no_wrap=True)
+    table_printer.add_column("VolumeId", no_wrap=True)
+    table_printer.add_column("StartTime", style="magenta", no_wrap=True)
+    table_printer.add_column("State", no_wrap=True)
 
-    console = Console()
     snapshots = aws_access.list_snapshots(filters=[{'Name': f'tag:{DEFAULT_TAG_KEY}', 'Values': [filter_value]}])
     for snapshot in snapshots:
-        table.add_row(snapshot["SnapshotId"], snapshot["Description"], snapshot["Progress"],
-                      snapshot["VolumeId"], snapshot["StartTime"].strftime("%Y-%m-%d, %H:%M"), snapshot["State"])
+        table_printer.add_row(snapshot["SnapshotId"], snapshot["Description"], snapshot["Progress"],
+                              snapshot["VolumeId"], snapshot["StartTime"].strftime("%Y-%m-%d, %H:%M"),
+                              snapshot["State"])
 
-    console.print(table)
+    table_printer.finish()
 
-    console.print("You can remove snapshots using AWS CLI: 'aws ec2 delete-snapshot --snapshot-id  [italic blue]SnapshotId[/italic blue]'")
-    console.print()
+    text_print = printing_factory.create_text_printer()
+
+    text_print.print((TextObject("You can remove snapshots using AWS CLI:\n"),
+                     TextObject("'aws ec2 delete-snapshot --snapshot-id "),
+                     HighlightedTextObject("SnapshotId"), TextObject("'")))
+    text_print.print(tuple())
 
 
-def print_export_image_tasks(aws_access: AwsAccess, filter_value: str):
-    table = Table(title=f"Export Image Tasks (Filter={filter_value})")
+def print_export_image_tasks(aws_access: AwsAccess, filter_value: str, printing_factory: PrintingFactory):
+    table_printer = printing_factory.create_table_printer(title=f"Export Image Tasks (Filter={filter_value})")
 
-    table.add_column("ExportImageTaskId", style="blue", no_wrap=True)
-    table.add_column("Description", no_wrap=False)
-    table.add_column("Progress", no_wrap=True)
-    table.add_column("S3ExportLocation - S3Bucket", no_wrap=True)
-    table.add_column("S3ExportLocation - S3Prefix", no_wrap=True)
-    table.add_column("Status", no_wrap=True)
-    table.add_column("StatusMessage", no_wrap=True)
+    table_printer.add_column("ExportImageTaskId", style="blue", no_wrap=True)
+    table_printer.add_column("Description", no_wrap=False)
+    table_printer.add_column("Progress", no_wrap=True)
+    table_printer.add_column("S3ExportLocation - S3Bucket", no_wrap=True)
+    table_printer.add_column("S3ExportLocation - S3Prefix", no_wrap=True)
+    table_printer.add_column("Status", no_wrap=True)
+    table_printer.add_column("StatusMessage", no_wrap=True)
 
-    console = Console()
     export_image_tasks = \
         aws_access.list_export_image_tasks(filters=[{'Name': f'tag:{DEFAULT_TAG_KEY}', 'Values': [filter_value]}])
 
@@ -88,51 +96,66 @@ def print_export_image_tasks(aws_access: AwsAccess, filter_value: str):
         export_location = export_image_task["S3ExportLocation"]
         s3bucket = export_location["S3Bucket"]
         s3prefix = export_location["S3Prefix"]
-        table.add_row(export_image_task["ExportImageTaskId"], export_image_task["Description"],
-                      get_value_safe("Progress", export_image_task), s3bucket, s3prefix,
-                      get_value_safe("Status", export_image_task), get_value_safe("StatusMessage", export_image_task))
+        table_printer.add_row(export_image_task["ExportImageTaskId"], export_image_task["Description"],
+                              get_value_safe("Progress", export_image_task), s3bucket, s3prefix,
+                              get_value_safe("Status", export_image_task),
+                              get_value_safe("StatusMessage", export_image_task))
 
-    console.print(table)
+    table_printer.finish()
+    text_print = printing_factory.create_text_printer()
 
-    console.print("You can cancel active tasks using AWS CLI: 'aws ec2 cancel-export-task --export-task-id  [italic blue]ExportImageTaskId[/italic blue]'")
-    console.print()
+    text_print.print((TextObject("You can cancel active tasks using AWS CLI:\n"),
+                     TextObject("'aws ec2 cancel-export-task --export-task-id "),
+                     HighlightedTextObject("ExportImageTaskId"), TextObject("'")))
+    text_print.print(tuple())
 
 
-def print_s3_objects(aws_access: AwsAccess, slc_version: str, name_suffix: str):
+def print_s3_objects(aws_access: AwsAccess, slc_version: str, name_suffix: str, printing_factory: PrintingFactory):
     vm_bucket = find_vm_bucket(aws_access)
 
     if len(slc_version) > 0:
         prefix = get_bucket_prefix(slc_version=slc_version, name_suffix=name_suffix)
     else:
         prefix = ""
-    table = Table(title=f"S3 Objects (Bucket={vm_bucket} Prefix={prefix})")
 
-    table.add_column("Key", no_wrap=False)
-    table.add_column("Size", no_wrap=True)
+    table_printer = printing_factory.create_table_printer(title=f"S3 Objects (Bucket={vm_bucket} Prefix={prefix})")
 
-    console = Console()
+    table_printer.add_column("Key", no_wrap=False)
+    table_printer.add_column("Size", no_wrap=True)
+
     s3_objects = aws_access.list_s3_objects(bucket=vm_bucket, prefix=prefix)
 
     if s3_objects is not None:
         for s3_object in s3_objects:
             obj_size = humanfriendly.format_size(s3_object["Size"])
-            table.add_row(s3_object["Key"], obj_size)
+            table_printer.add_row(s3_object["Key"], obj_size)
 
-    console.print(table)
+    table_printer.finish()
 
 
-def print_assets(aws_access: AwsAccess, slc_version: str, name_suffix: str,
+def print_with_printer(aws_access: AwsAccess, slc_version: str, name_suffix: str,
+                 asset_types: Tuple[str], filter_value: str, printing_factory: PrintingFactory):
+    if AssetTypes.AMI.value in asset_types:
+        print_amis(aws_access, filter_value, printing_factory)
+    if AssetTypes.SNAPSHOT.value in asset_types:
+        print_snapshots(aws_access, filter_value, printing_factory)
+    if AssetTypes.EXPORT_IMAGE_TASK.value in asset_types:
+        print_export_image_tasks(aws_access, filter_value, printing_factory)
+    if AssetTypes.VM_S3.value in asset_types:
+        print_s3_objects(aws_access, slc_version, name_suffix, printing_factory)
+
+
+def print_assets(aws_access: AwsAccess, slc_version: str, name_suffix: str, outfile: Optional[str],
                  asset_types: Tuple[str] = all_asset_types()):
     if len(slc_version) == 0:
         filter_value = "*"
     else:
         filter_value = render_template("aws_tag_value.jinja", slc_version=slc_version, suffix=name_suffix).strip("\n")
 
-    if AssetTypes.AMI.value in asset_types:
-        print_amis(aws_access, filter_value)
-    if AssetTypes.SNAPSHOT.value in asset_types:
-        print_snapshots(aws_access, filter_value)
-    if AssetTypes.EXPORT_IMAGE_TASK.value in asset_types:
-        print_export_image_tasks(aws_access, filter_value)
-    if AssetTypes.VM_S3.value in asset_types:
-        print_s3_objects(aws_access, slc_version, name_suffix)
+    if outfile is not None:
+        with open(outfile, "w") as f:
+            printing_factory = MarkdownPrintingFactory(f)
+            print_with_printer(aws_access, slc_version, name_suffix, asset_types, filter_value, printing_factory)
+    else:
+        printing_factory = RichConsolePrintingFactory()
+        print_with_printer(aws_access, slc_version, name_suffix, asset_types, filter_value, printing_factory)

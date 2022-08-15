@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Optional
 
 import click
 
@@ -20,15 +20,18 @@ from exasol_script_languages_developer_sandbox.lib.print_assets import print_ass
 @click.option('--asset-type', default=all_asset_types(),
               type=click.Choice(list(all_asset_types())), multiple=True,
               help="The asset types to print. Can be declared multiple times.")
+@click.option('--out-file', default=None, type=click.Path(exists=False, file_okay=True, dir_okay=False),
+              help="If given, writes the AWS assets to this file in markdown format.")
 def show_aws_assets(
             aws_profile: str,
             slc_version: str,
             name_suffix: str,
             asset_type: Tuple[str, ...],
+            out_file: Optional[str],
             log_level: str):
     """
     Shows all AWS assets.
     """
     set_log_level(log_level)
     print_assets(AwsAccess(aws_profile=aws_profile), slc_version=slc_version,
-                 name_suffix=name_suffix, asset_types=asset_type)
+                 name_suffix=name_suffix, outfile=out_file, asset_types=asset_type)
