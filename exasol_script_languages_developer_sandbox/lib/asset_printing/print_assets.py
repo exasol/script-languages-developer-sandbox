@@ -1,3 +1,4 @@
+import fnmatch
 from typing import Tuple, Optional
 
 import humanfriendly
@@ -150,7 +151,7 @@ def cloudformation_stack_has_matching_tag(cloudformation_tag: dict, filter_value
         for tag in cloudformation_tag["Tags"]:
             tag_key = tag["Key"]
             tag_value = tag["Value"]
-            if tag_key == DEFAULT_TAG_KEY and tag_value == filter_value:
+            if tag_key == DEFAULT_TAG_KEY and fnmatch.fnmatch(tag_value, filter_value):
                 return True
     return False
 
