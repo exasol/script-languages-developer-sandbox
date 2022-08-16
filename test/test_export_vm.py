@@ -5,8 +5,7 @@ import pytest
 from dateutil.tz import tzutc
 
 from exasol_script_languages_developer_sandbox.lib.export_vm.run_export_vm import export_vm
-from exasol_script_languages_developer_sandbox.lib.export_vm.vm_disk_image_format import all_vm_disk_image_formats, \
-    VmDiskImageFormat
+from exasol_script_languages_developer_sandbox.lib.export_vm.vm_disk_image_format import VmDiskImageFormat
 from exasol_script_languages_developer_sandbox.lib.vm_bucket.vm_slc_bucket import STACK_NAME
 from test.conftest import DEFAULT_ASSET_ID
 
