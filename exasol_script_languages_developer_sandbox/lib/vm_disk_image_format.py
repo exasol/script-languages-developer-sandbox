@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Tuple
+from typing import Tuple
 
 
 class VmDiskImageFormat(Enum):

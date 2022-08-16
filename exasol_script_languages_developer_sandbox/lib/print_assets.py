@@ -7,10 +7,9 @@ from exasol_script_languages_developer_sandbox.lib.asset_printing.mark_down_prin
 from exasol_script_languages_developer_sandbox.lib.asset_printing.printing_factory import PrintingFactory, TextObject, \
     HighlightedTextObject
 from exasol_script_languages_developer_sandbox.lib.asset_printing.rich_console_printer import RichConsolePrintingFactory
-from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess
+from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess, get_value_safe
 from enum import Enum
 
-from exasol_script_languages_developer_sandbox.lib.common import get_value_safe
 from exasol_script_languages_developer_sandbox.lib.tags import DEFAULT_TAG_KEY
 from exasol_script_languages_developer_sandbox.lib.vm_slc_bucket import find_vm_bucket
 

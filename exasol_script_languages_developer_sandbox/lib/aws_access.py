@@ -5,10 +5,19 @@ from typing import Optional, Any, List, Dict
 import boto3
 import botocore
 
-from exasol_script_languages_developer_sandbox.lib.common import get_value_safe
 from exasol_script_languages_developer_sandbox.lib.deployer import Deployer
-from exasol_script_languages_developer_sandbox.lib.tags import create_default_asset_tag, DEFAULT_TAG_KEY
+from exasol_script_languages_developer_sandbox.lib.tags import create_default_asset_tag
 from exasol_script_languages_developer_sandbox.lib.vm_disk_image_format import VmDiskImageFormat
+
+
+def get_value_safe(key: str, aws_object: Dict[str, Any], default: str = "n/a") -> str:
+    """
+    Returns an element from a dictionary, otherwise returns the given default value.
+    """
+    if key in aws_object:
+        return aws_object[key]
+    else:
+        return default
 
 
 class AwsAccess(object):
