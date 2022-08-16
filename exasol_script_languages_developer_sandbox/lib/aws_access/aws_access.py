@@ -200,6 +200,19 @@ class AwsAccess(object):
         if status != "completed":
             raise RuntimeError(f"Export of VM failed: status message was {status_message}")
 
+    def get_ami(self, image_id: str) -> Any:
+        """
+        Get AMI image for given image_id
+        """
+        logging.debug(f"Running get_ami for aws profile {self.aws_profile_for_logging}")
+        cloud_client = self._get_aws_client("ec2")
+
+        response = cloud_client.describe_images(ImageIds=[image_id])
+        images = response["Images"]
+        if len(images) != 1:
+            raise RuntimeError(f"AwsAccess.get_ami() for image_id='{image_id}' returned {len(images)} elements: {images}")
+        return images[0]
+
     def list_amis(self, filters: list) -> list:
         """
         List AMI images with given tag filter

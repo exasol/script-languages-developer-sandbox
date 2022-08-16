@@ -1,4 +1,5 @@
 import logging
+import time
 import traceback
 from sys import stderr
 from typing import Tuple
@@ -24,8 +25,16 @@ def export_vm(aws_access: AwsAccess,
     try:
         try:
             logging.info(f"create ami with name '{ami_name}' and tag(s) '{tag_value}'")
-            ami_id = "ami-055e106c605a2fa41"#aws_access.create_image_from_ec2_instance(instance_id, name=ami_name, tag_value=tag_value,
-                     #                                          description="Image Description")
+            ami_id = aws_access.create_image_from_ec2_instance(instance_id, name=ami_name, tag_value=tag_value,
+                                                               description="Image Description")
+
+            ami_state = aws_access.get_ami(ami_id)["State"]
+            while ami_state == "pending":
+                logging.info(f"ami  with name '{ami_name}' and tag(s) '{tag_value}'  still pending...")
+                time.sleep(10)
+                ami_state = aws_access.get_ami(ami_id)["State"]
+            if ami_state != "available":
+                raise RuntimeError(f"Failed to create ami! ami state is '{ami_state}'")
         except Exception:
             traceback.print_exc()
             logging.error("Could not create AMI. Please remove snapshot if necessary!")
