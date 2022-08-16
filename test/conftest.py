@@ -16,6 +16,11 @@ DEFAULT_ASSET_ID = AssetId("test")
 
 
 @pytest.fixture
+def default_asset_id():
+    return DEFAULT_ASSET_ID
+
+
+@pytest.fixture
 def ec2_cloudformation_yml():
 
     return render_template("ec2_cloudformation.jinja.yaml", key_name="test_key", user_name="test_user",

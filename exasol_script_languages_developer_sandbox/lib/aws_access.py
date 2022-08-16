@@ -136,8 +136,8 @@ class AwsAccess(object):
         Describes an AWS instance identified by parameter instance_id
         """
         logging.debug(f"Running describe_instance for aws profile {self.aws_profile_for_logging}")
-        cloud_client = self._get_aws_client("ec2")["Reservations"][0]["Instances"][0]
-        return cloud_client.describe_instances(InstanceIds=[instance_id])
+        cloud_client = self._get_aws_client("ec2")
+        return cloud_client.describe_instances(InstanceIds=[instance_id])["Reservations"][0]["Instances"][0]
 
     def create_image_from_ec2_instance(self, instance_id: str, name: str, tag_value: str, description: str) -> str:
         """

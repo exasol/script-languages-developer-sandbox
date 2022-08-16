@@ -8,12 +8,12 @@ from exasol_script_languages_developer_sandbox.lib.run_setup_ec2 import run_life
 from test.aws_local_stack_access import AwsLocalStackAccess
 
 
-def test_ec2_lifecycle_with_local_stack(local_stack):
+def test_ec2_lifecycle_with_local_stack(local_stack, default_asset_id):
     """
     This test uses localstack to simulate lifecycle of an EC-2 instance
     """
     print("run ec2_setup!")
-    execution_generator = run_lifecycle_for_ec2(AwsLocalStackAccess(None), None, None, None)
+    execution_generator = run_lifecycle_for_ec2(AwsLocalStackAccess(None), None, None, None, default_asset_id.tag_value)
     res = next(execution_generator)
     while res[0] == "pending":
         res = next(execution_generator)
@@ -26,12 +26,12 @@ def test_ec2_lifecycle_with_local_stack(local_stack):
     assert ec2_instance_status == "terminated"
 
 
-def test_ec2_manage_keypair_with_local_stack(local_stack):
+def test_ec2_manage_keypair_with_local_stack(local_stack, default_asset_id):
     """
     This test uses localstack to create/delete a new ec2 key pair
     """
     aws_access = AwsLocalStackAccess(None)
-    ret = aws_access.create_new_ec2_key_pair("test")
+    ret = aws_access.create_new_ec2_key_pair("test", default_asset_id.tag_value)
     assert len(ret) > 0
     aws_access.delete_ec2_key_pair("test")
 
@@ -99,9 +99,10 @@ Resources:
         aws_access.validate_cloudformation_template(wrong_cloudformation_template)
 
 
-def test_cloudformation_access_with_local_stack(local_stack):
+def test_cloudformation_access_with_local_stack(local_stack, default_asset_id):
     aws_access = AwsLocalStackAccess(None)
-    with CloudformationStackContextManager(CloudformationStack(aws_access, "test_key", aws_access.get_user(), None)) \
+    with CloudformationStackContextManager(CloudformationStack(aws_access, "test_key", aws_access.get_user(),
+                                                               None, default_asset_id.tag_value)) \
             as cf_stack:
         ec2_instance_id = cf_stack.get_ec2_instance_id()
         ec2_instance_description = aws_access.describe_instance(ec2_instance_id)
