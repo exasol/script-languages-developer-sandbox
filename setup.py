@@ -12,6 +12,7 @@ packages = \
  'exasol_script_languages_developer_sandbox.lib.aws_access',
  'exasol_script_languages_developer_sandbox.lib.export_vm',
  'exasol_script_languages_developer_sandbox.lib.setup_ec2',
+ 'exasol_script_languages_developer_sandbox.lib.vm_bucket',
  'exasol_script_languages_developer_sandbox.runtime']
 
 package_data = \

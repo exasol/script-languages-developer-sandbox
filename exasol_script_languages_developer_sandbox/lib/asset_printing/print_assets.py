@@ -3,7 +3,7 @@ from typing import Tuple, Optional
 
 import humanfriendly
 
-from exasol_script_languages_developer_sandbox.lib.asset_id import AssetId
+from exasol_script_languages_developer_sandbox.lib.asset_id import AssetId, BUCKET_PREFIX
 from exasol_script_languages_developer_sandbox.lib.asset_printing.mark_down_printer import MarkdownPrintingFactory
 from exasol_script_languages_developer_sandbox.lib.asset_printing.printing_factory import PrintingFactory, TextObject, \
     HighlightedTextObject
@@ -12,7 +12,7 @@ from exasol_script_languages_developer_sandbox.lib.aws_access.aws_access import 
 from enum import Enum
 
 from exasol_script_languages_developer_sandbox.lib.tags import DEFAULT_TAG_KEY
-from exasol_script_languages_developer_sandbox.lib.export_vm.vm_slc_bucket import find_vm_bucket, BUCKET_PREFIX
+from exasol_script_languages_developer_sandbox.lib.vm_bucket.vm_slc_bucket import find_vm_bucket
 
 
 class AssetTypes(Enum):

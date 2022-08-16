@@ -1,4 +1,4 @@
-from exasol_script_languages_developer_sandbox.lib.export_vm.vm_slc_bucket import BUCKET_PREFIX
+BUCKET_PREFIX = "slc_developer_sandbox"
 
 
 class AssetId:

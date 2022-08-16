@@ -12,7 +12,7 @@ from exasol_script_languages_developer_sandbox.cli.options.vm_options import vm_
 from exasol_script_languages_developer_sandbox.lib.ansible.ansible_access import AnsibleAccess
 from exasol_script_languages_developer_sandbox.lib.asset_id import AssetId
 from exasol_script_languages_developer_sandbox.lib.aws_access.aws_access import AwsAccess
-from exasol_script_languages_developer_sandbox.lib.export_vm.run_create_vm import run_create_vm
+from exasol_script_languages_developer_sandbox.lib.run_create_vm import run_create_vm
 
 
 @cli.command()

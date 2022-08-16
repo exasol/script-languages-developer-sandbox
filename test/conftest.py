@@ -8,7 +8,7 @@ from exasol_script_languages_developer_sandbox.lib.render_template import render
 from importlib.metadata import version
 
 from exasol_script_languages_developer_sandbox.lib.tags import DEFAULT_TAG_KEY
-from exasol_script_languages_developer_sandbox.lib.export_vm.vm_slc_bucket import BUCKET_NAME, ROLE_NAME
+from exasol_script_languages_developer_sandbox.lib.vm_bucket.vm_slc_bucket import BUCKET_NAME, ROLE_NAME
 
 from exasol_script_languages_developer_sandbox.lib.asset_id import AssetId
 
