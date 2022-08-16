@@ -143,6 +143,8 @@ def print_s3_objects(aws_access: AwsAccess, asset_id: Optional[AssetId], printin
 
     s3_objects = aws_access.list_s3_objects(bucket=vm_bucket, prefix=BUCKET_PREFIX)
     if len(prefix) > 0:
+        if prefix[-1] != "*":
+            prefix = f"{prefix}*"
         s3_objects = [s3_object for s3_object in s3_objects if fnmatch.fnmatch(s3_object["Key"], prefix)]
     s3_bucket_location = aws_access.get_s3_bucket_location(bucket=vm_bucket)
     s3_bucket_uri = "s3://{bucket}/{{object}}".format(bucket=vm_bucket)
