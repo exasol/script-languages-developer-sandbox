@@ -17,7 +17,7 @@ def export_vm(aws_access: AwsAccess,
     vm_bucket = find_vm_bucket(aws_access)
     vmimport_role = find_vm_import_role(aws_access)
     tag_value = asset_id.tag_value
-    bucket_prefix = asset_id.bucket_prefix
+    bucket_prefix = f"{asset_id.bucket_prefix}/"
     ami_name = asset_id.ami_name
     has_errors = False
     try:

@@ -12,7 +12,7 @@ from exasol_script_languages_developer_sandbox.lib.aws_access.aws_access import 
 from enum import Enum
 
 from exasol_script_languages_developer_sandbox.lib.tags import DEFAULT_TAG_KEY
-from exasol_script_languages_developer_sandbox.lib.export_vm.vm_slc_bucket import find_vm_bucket
+from exasol_script_languages_developer_sandbox.lib.export_vm.vm_slc_bucket import find_vm_bucket, BUCKET_PREFIX
 
 
 class AssetTypes(Enum):
@@ -127,7 +127,9 @@ def print_s3_objects(aws_access: AwsAccess, asset_id: Optional[AssetId], printin
     table_printer.add_column("S3 URI", no_wrap=False)
     table_printer.add_column("URL", no_wrap=False)
 
-    s3_objects = aws_access.list_s3_objects(bucket=vm_bucket, prefix=prefix)
+    s3_objects = aws_access.list_s3_objects(bucket=vm_bucket, prefix=BUCKET_PREFIX)
+    if len(prefix) > 0:
+        s3_objects = [s3_object for s3_object in s3_objects if fnmatch.fnmatch(s3_object["Key"], prefix)]
     s3_bucket_location = aws_access.get_s3_bucket_location(bucket=vm_bucket)
     s3_bucket_uri = "s3://{bucket}/{{object}}".format(bucket=vm_bucket)
     https_bucket_url = "https://{bucket}.s3.{region}.amazonaws.com/{{object}}"\
