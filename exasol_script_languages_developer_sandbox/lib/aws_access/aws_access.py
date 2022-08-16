@@ -5,9 +5,9 @@ from typing import Optional, Any, List, Dict
 import boto3
 import botocore
 
-from exasol_script_languages_developer_sandbox.lib.deployer import Deployer
+from exasol_script_languages_developer_sandbox.lib.aws_access.deployer import Deployer
 from exasol_script_languages_developer_sandbox.lib.tags import create_default_asset_tag
-from exasol_script_languages_developer_sandbox.lib.vm_disk_image_format import VmDiskImageFormat
+from exasol_script_languages_developer_sandbox.lib.export_vm.vm_disk_image_format import VmDiskImageFormat
 
 
 def get_value_safe(key: str, aws_object: Dict[str, Any], default: str = "n/a") -> str:

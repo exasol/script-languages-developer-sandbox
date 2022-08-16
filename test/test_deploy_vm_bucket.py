@@ -2,8 +2,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess
-from exasol_script_languages_developer_sandbox.lib.vm_slc_bucket import run_setup_vm_bucket, find_vm_bucket
+from exasol_script_languages_developer_sandbox.lib.aws_access.aws_access import AwsAccess
+from exasol_script_languages_developer_sandbox.lib.export_vm.vm_slc_bucket import run_setup_vm_bucket, find_vm_bucket
 from test.cloudformation_validation import validate_using_cfn_lint
 from test.aws_local_stack_access import AwsLocalStackAccess
 

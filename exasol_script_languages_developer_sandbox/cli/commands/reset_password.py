@@ -5,8 +5,8 @@ from exasol_script_languages_developer_sandbox.cli.common import add_options
 from exasol_script_languages_developer_sandbox.cli.options.ec2_options import ec2_host_options
 from exasol_script_languages_developer_sandbox.cli.options.logging import logging_options, set_log_level
 from exasol_script_languages_developer_sandbox.lib.ansible.ansible_access import AnsibleAccess
-from exasol_script_languages_developer_sandbox.lib.host_info import HostInfo
-from exasol_script_languages_developer_sandbox.lib.run_reset_password import run_reset_password
+from exasol_script_languages_developer_sandbox.lib.setup_ec2.host_info import HostInfo
+from exasol_script_languages_developer_sandbox.lib.setup_ec2.run_reset_password import run_reset_password
 
 
 @cli.command()

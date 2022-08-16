@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock
 
-from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess
-from exasol_script_languages_developer_sandbox.lib.cf_stack import CloudformationStack, \
+from exasol_script_languages_developer_sandbox.lib.aws_access.aws_access import AwsAccess
+from exasol_script_languages_developer_sandbox.lib.setup_ec2.cf_stack import CloudformationStack, \
     CloudformationStackContextManager
 from exasol_script_languages_developer_sandbox.lib.tags import create_default_asset_tag
 from test.cloudformation_validation import validate_using_cfn_lint

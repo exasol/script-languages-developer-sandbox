@@ -1,5 +1,5 @@
 from exasol_script_languages_developer_sandbox.lib.render_template import render_template
-from exasol_script_languages_developer_sandbox.lib.vm_slc_bucket import BUCKET_PREFIX
+from exasol_script_languages_developer_sandbox.lib.export_vm.vm_slc_bucket import BUCKET_PREFIX
 
 
 class AssetId:
@@ -8,7 +8,7 @@ class AssetId:
 
     @property
     def tag_value(self):
-        return render_template("aws_tag_value.jinja", asset_id=self._asset_id)
+        return f"exa-slc-{self._asset_id}"
 
     @property
     def bucket_prefix(self):
@@ -16,4 +16,4 @@ class AssetId:
 
     @property
     def ami_name(self):
-        return render_template("vm_image_name.jinja", asset_id=self._asset_id)
+        return f"Exasol-SLC-Developer-Sandbox-{self._asset_id}"

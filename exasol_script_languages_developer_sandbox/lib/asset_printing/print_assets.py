@@ -7,11 +7,11 @@ from exasol_script_languages_developer_sandbox.lib.asset_printing.mark_down_prin
 from exasol_script_languages_developer_sandbox.lib.asset_printing.printing_factory import PrintingFactory, TextObject, \
     HighlightedTextObject
 from exasol_script_languages_developer_sandbox.lib.asset_printing.rich_console_printer import RichConsolePrintingFactory
-from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess, get_value_safe
+from exasol_script_languages_developer_sandbox.lib.aws_access.aws_access import AwsAccess, get_value_safe
 from enum import Enum
 
 from exasol_script_languages_developer_sandbox.lib.tags import DEFAULT_TAG_KEY
-from exasol_script_languages_developer_sandbox.lib.vm_slc_bucket import find_vm_bucket
+from exasol_script_languages_developer_sandbox.lib.export_vm.vm_slc_bucket import find_vm_bucket
 
 
 class AssetTypes(Enum):
@@ -203,7 +203,7 @@ def print_ec2_keys(aws_access: AwsAccess, filter_value: str, printing_factory: P
 
     text_print = printing_factory.create_text_printer()
 
-    text_print.print((TextObject("You can remove snapshots using AWS CLI:\n"),
+    text_print.print((TextObject("You can remove key-pairs using AWS CLI:\n"),
                      TextObject("'aws ec2 delete-key-pair --key-pair-id "),
                      HighlightedTextObject("KeyPairId"), TextObject("'")))
     text_print.print(tuple())

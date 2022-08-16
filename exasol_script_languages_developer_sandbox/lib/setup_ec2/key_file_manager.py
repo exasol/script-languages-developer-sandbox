@@ -3,8 +3,8 @@ import os
 from tempfile import mkstemp
 from typing import Optional
 
-from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess
-from exasol_script_languages_developer_sandbox.lib.random_string_generator import get_random_str
+from exasol_script_languages_developer_sandbox.lib.aws_access.aws_access import AwsAccess
+from exasol_script_languages_developer_sandbox.lib.setup_ec2.random_string_generator import get_random_str
 
 
 class KeyFileManager:

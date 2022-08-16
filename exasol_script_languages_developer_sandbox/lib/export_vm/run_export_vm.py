@@ -4,11 +4,11 @@ from sys import stderr
 from typing import Tuple
 
 from exasol_script_languages_developer_sandbox.lib.asset_id import AssetId
-from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess
-from exasol_script_languages_developer_sandbox.lib.cf_stack import find_ec2_instance_in_cf_stack
-from exasol_script_languages_developer_sandbox.lib.print_assets import print_assets
-from exasol_script_languages_developer_sandbox.lib.vm_disk_image_format import VmDiskImageFormat
-from exasol_script_languages_developer_sandbox.lib.vm_slc_bucket import find_vm_bucket, find_vm_import_role
+from exasol_script_languages_developer_sandbox.lib.aws_access.aws_access import AwsAccess
+from exasol_script_languages_developer_sandbox.lib.setup_ec2.cf_stack import find_ec2_instance_in_cf_stack
+from exasol_script_languages_developer_sandbox.lib.asset_printing import print_assets
+from exasol_script_languages_developer_sandbox.lib.export_vm.vm_disk_image_format import VmDiskImageFormat
+from exasol_script_languages_developer_sandbox.lib.export_vm.vm_slc_bucket import find_vm_bucket, find_vm_import_role
 
 def export_vm(aws_access: AwsAccess,
               instance_id: str,

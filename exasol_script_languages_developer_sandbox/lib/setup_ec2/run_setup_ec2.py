@@ -3,10 +3,10 @@ import signal
 from typing import Optional, Tuple, Any
 
 from exasol_script_languages_developer_sandbox.lib.asset_id import AssetId
-from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess
-from exasol_script_languages_developer_sandbox.lib.cf_stack import CloudformationStack, \
+from exasol_script_languages_developer_sandbox.lib.aws_access.aws_access import AwsAccess
+from exasol_script_languages_developer_sandbox.lib.setup_ec2.cf_stack import CloudformationStack, \
     CloudformationStackContextManager
-from exasol_script_languages_developer_sandbox.lib.key_file_manager import KeyFileManager, KeyFileManagerContextManager
+from exasol_script_languages_developer_sandbox.lib.setup_ec2.key_file_manager import KeyFileManager, KeyFileManagerContextManager
 
 
 def unpack_ec2_instance_description(ec2_instance_description: Any) -> Tuple[str, str]:

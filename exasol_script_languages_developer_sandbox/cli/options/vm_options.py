@@ -1,7 +1,7 @@
 import click
 
-from exasol_script_languages_developer_sandbox.lib.vm_disk_image_format import default_vm_disk_image_formats, \
-    all_vm_disk_image_formats
+from exasol_script_languages_developer_sandbox.lib.export_vm.vm_disk_image_format \
+    import default_vm_disk_image_formats, all_vm_disk_image_formats
 
 vm_options = [
               click.option('--vm-image-format', default=default_vm_disk_image_formats(),

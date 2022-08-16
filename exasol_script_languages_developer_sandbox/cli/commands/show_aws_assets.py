@@ -7,8 +7,8 @@ from exasol_script_languages_developer_sandbox.cli.common import add_options
 from exasol_script_languages_developer_sandbox.cli.options.aws_options import aws_options
 from exasol_script_languages_developer_sandbox.cli.options.logging import logging_options, set_log_level
 from exasol_script_languages_developer_sandbox.lib.asset_id import AssetId
-from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess
-from exasol_script_languages_developer_sandbox.lib.print_assets import print_assets, all_asset_types
+from exasol_script_languages_developer_sandbox.lib.aws_access.aws_access import AwsAccess
+from exasol_script_languages_developer_sandbox.lib.asset_printing.print_assets import all_asset_types, print_assets
 
 
 @cli.command()

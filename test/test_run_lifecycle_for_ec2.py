@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from exasol_script_languages_developer_sandbox.lib.run_setup_ec2 import run_lifecycle_for_ec2
+from exasol_script_languages_developer_sandbox.lib.setup_ec2.run_setup_ec2 import run_lifecycle_for_ec2
 
 
 def test_run_lifecycle_for_ec2(default_asset_id):

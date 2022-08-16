@@ -9,8 +9,8 @@ from exasol_script_languages_developer_sandbox.cli.options.id_options import id_
 from exasol_script_languages_developer_sandbox.cli.options.logging import logging_options, set_log_level
 from exasol_script_languages_developer_sandbox.cli.options.vm_options import vm_options
 from exasol_script_languages_developer_sandbox.lib.asset_id import AssetId
-from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess
-from exasol_script_languages_developer_sandbox.lib.run_export_vm import run_export_vm
+from exasol_script_languages_developer_sandbox.lib.aws_access.aws_access import AwsAccess
+from exasol_script_languages_developer_sandbox.lib.export_vm.run_export_vm import run_export_vm
 
 
 @cli.command()

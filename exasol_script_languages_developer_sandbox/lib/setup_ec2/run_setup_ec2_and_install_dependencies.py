@@ -10,12 +10,12 @@ from exasol_script_languages_developer_sandbox.lib.ansible.ansible_repository im
 from exasol_script_languages_developer_sandbox.lib.ansible.ansible_run_context import AnsibleRunContext, \
     default_ansible_run_context
 from exasol_script_languages_developer_sandbox.lib.asset_id import AssetId
-from exasol_script_languages_developer_sandbox.lib.aws_access import AwsAccess
+from exasol_script_languages_developer_sandbox.lib.aws_access.aws_access import AwsAccess
 
-from exasol_script_languages_developer_sandbox.lib.host_info import HostInfo
+from exasol_script_languages_developer_sandbox.lib.setup_ec2.host_info import HostInfo
 
-from exasol_script_languages_developer_sandbox.lib.run_install_dependencies import run_install_dependencies
-from exasol_script_languages_developer_sandbox.lib.run_setup_ec2 import run_lifecycle_for_ec2
+from exasol_script_languages_developer_sandbox.lib.setup_ec2.run_install_dependencies import run_install_dependencies
+from exasol_script_languages_developer_sandbox.lib.setup_ec2.run_setup_ec2 import run_lifecycle_for_ec2
 
 
 def run_setup_ec2_and_install_dependencies(aws_access: AwsAccess,

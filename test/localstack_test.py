@@ -1,9 +1,9 @@
 import botocore
 import pytest
 
-from exasol_script_languages_developer_sandbox.lib.cf_stack import CloudformationStack, \
+from exasol_script_languages_developer_sandbox.lib.setup_ec2.cf_stack import CloudformationStack, \
     CloudformationStackContextManager
-from exasol_script_languages_developer_sandbox.lib.run_setup_ec2 import run_lifecycle_for_ec2, \
+from exasol_script_languages_developer_sandbox.lib.setup_ec2.run_setup_ec2 import run_lifecycle_for_ec2, \
     unpack_ec2_instance_description
 from test.aws_local_stack_access import AwsLocalStackAccess
 
