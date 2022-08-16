@@ -1,5 +1,5 @@
 import fnmatch
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Any
 
 import humanfriendly
 
@@ -28,6 +28,16 @@ def all_asset_types() -> Tuple[str, ...]:
     return tuple(asset_type.value for asset_type in AssetTypes)
 
 
+def find_default_tag_value(aws_object: Any):
+    return_value = "n/a"
+
+    if "Tags" in aws_object:
+        filtered_tags = [tag["Value"] for tag in aws_object["Tags"] if tag["Key"] == DEFAULT_TAG_KEY]
+        if len(filtered_tags) == 1:
+            return_value = filtered_tags[0]
+    return return_value
+
+
 def print_amis(aws_access: AwsAccess, filter_value: str, printing_factory: PrintingFactory):
     table_printer = printing_factory.create_table_printer(title=f"AMI Images (Filter={filter_value})")
 
@@ -38,12 +48,13 @@ def print_amis(aws_access: AwsAccess, filter_value: str, printing_factory: Print
     table_printer.add_column("ImageLocation", no_wrap=True)
     table_printer.add_column("CreationDate", style="magenta", no_wrap=True)
     table_printer.add_column("State", no_wrap=True)
+    table_printer.add_column("Asset-Tag-Value", no_wrap=True)
 
     amis = aws_access.list_amis(filters=[{'Name': f'tag:{DEFAULT_TAG_KEY}', 'Values': [filter_value]}])
     for ami in amis:
         is_public = "yes" if ami["Public"] else "no"
         table_printer.add_row(ami["ImageId"], ami["Name"], ami["Description"], is_public,
-                      ami["ImageLocation"], ami["CreationDate"], ami["State"])
+                      ami["ImageLocation"], ami["CreationDate"], ami["State"], find_default_tag_value(ami))
 
     table_printer.finish()
     text_print = printing_factory.create_text_printer()
@@ -63,12 +74,13 @@ def print_snapshots(aws_access: AwsAccess, filter_value: str, printing_factory: 
     table_printer.add_column("VolumeId", no_wrap=True)
     table_printer.add_column("StartTime", style="magenta", no_wrap=True)
     table_printer.add_column("State", no_wrap=True)
+    table_printer.add_column("Asset-Tag-Value", no_wrap=True)
 
     snapshots = aws_access.list_snapshots(filters=[{'Name': f'tag:{DEFAULT_TAG_KEY}', 'Values': [filter_value]}])
     for snapshot in snapshots:
         table_printer.add_row(snapshot["SnapshotId"], snapshot["Description"], snapshot["Progress"],
                               snapshot["VolumeId"], snapshot["StartTime"].strftime("%Y-%m-%d, %H:%M"),
-                              snapshot["State"])
+                              snapshot["State"], find_default_tag_value(snapshot))
 
     table_printer.finish()
 
@@ -90,6 +102,7 @@ def print_export_image_tasks(aws_access: AwsAccess, filter_value: str, printing_
     table_printer.add_column("S3ExportLocation - S3Prefix", no_wrap=True)
     table_printer.add_column("Status", no_wrap=True)
     table_printer.add_column("StatusMessage", no_wrap=True)
+    table_printer.add_column("Asset-Tag-Value", no_wrap=True)
 
     export_image_tasks = \
         aws_access.list_export_image_tasks(filters=[{'Name': f'tag:{DEFAULT_TAG_KEY}', 'Values': [filter_value]}])
@@ -101,7 +114,8 @@ def print_export_image_tasks(aws_access: AwsAccess, filter_value: str, printing_
         table_printer.add_row(export_image_task["ExportImageTaskId"], export_image_task["Description"],
                               get_value_safe("Progress", export_image_task), s3bucket, s3prefix,
                               get_value_safe("Status", export_image_task),
-                              get_value_safe("StatusMessage", export_image_task))
+                              get_value_safe("StatusMessage", export_image_task),
+                              find_default_tag_value(export_image_task))
 
     table_printer.finish()
     text_print = printing_factory.create_text_printer()
@@ -167,6 +181,7 @@ def print_cloudformation_stacks(aws_access: AwsAccess, filter_value: str, printi
     table_printer.add_column("CreationTime", style="magenta", no_wrap=True)
     table_printer.add_column("PhysicalResourceId", no_wrap=False)
     table_printer.add_column("ResourceType", no_wrap=True)
+    table_printer.add_column("Asset-Tag-Value", no_wrap=True)
 
     cloudformation_stack = aws_access.describe_stacks()
 
@@ -175,11 +190,13 @@ def print_cloudformation_stacks(aws_access: AwsAccess, filter_value: str, printi
     for stack in relevant_stacks:
         table_printer.add_row(stack["StackName"],
                               get_value_safe("Description", stack), stack["StackStatus"],
-                              stack["CreationTime"].strftime("%Y-%m-%d, %H:%M"))
+                              stack["CreationTime"].strftime("%Y-%m-%d, %H:%M"), "", "",
+                              find_default_tag_value(stack))
         stack_resources = aws_access.get_all_stack_resources(stack_name=stack["StackName"])
         for stack_resource in stack_resources:
             table_printer.add_row("", "", "", "",
-                                  stack_resource["PhysicalResourceId"], stack_resource["ResourceType"])
+                                  stack_resource["PhysicalResourceId"], stack_resource["ResourceType"],
+                                  find_default_tag_value(stack))
 
     table_printer.finish()
     text_print = printing_factory.create_text_printer()
@@ -196,11 +213,13 @@ def print_ec2_keys(aws_access: AwsAccess, filter_value: str, printing_factory: P
     table_printer.add_column("KeyPairId", style="blue", no_wrap=True)
     table_printer.add_column("KeyName", no_wrap=True)
     table_printer.add_column("CreateTime", style="magenta", no_wrap=True)
+    table_printer.add_column("Asset-Tag-Value", no_wrap=True)
 
-    snapshots = aws_access.list_ec2_key_pairs(filters=[{'Name': f'tag:{DEFAULT_TAG_KEY}', 'Values': [filter_value]}])
-    for snapshot in snapshots:
-        table_printer.add_row(snapshot["KeyPairId"], snapshot["KeyName"],
-                              snapshot["CreateTime"].strftime("%Y-%m-%d, %H:%M"))
+    key_pairs = aws_access.list_ec2_key_pairs(filters=[{'Name': f'tag:{DEFAULT_TAG_KEY}', 'Values': [filter_value]}])
+    for key_pair in key_pairs:
+        table_printer.add_row(key_pair["KeyPairId"], key_pair["KeyName"],
+                              key_pair["CreateTime"].strftime("%Y-%m-%d, %H:%M"),
+                              find_default_tag_value(key_pair))
 
     table_printer.finish()
 
