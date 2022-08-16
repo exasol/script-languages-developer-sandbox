@@ -16,7 +16,8 @@ from exasol_script_languages_developer_sandbox.lib.asset_printing.print_assets i
 @add_options(logging_options)
 @click.option('--asset-id', type=str, default=None,
               help="The asset-id used to create the AWS resources during the other commands. "
-                   "If not set, all resources will be printed.")
+                   "If not set, all resources will be printed. "
+                   "The value might contain wildcards.")
 @click.option('--asset-type', default=all_asset_types(),
               type=click.Choice(list(all_asset_types())), multiple=True,
               help="The asset types to print. Can be declared multiple times.")

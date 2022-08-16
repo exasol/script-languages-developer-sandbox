@@ -7,7 +7,7 @@ class AssetId:
 
     @property
     def tag_value(self):
-        return f"exa-slc-{self._asset_id}"
+        return self._asset_id
 
     @property
     def bucket_prefix(self):
