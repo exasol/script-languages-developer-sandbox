@@ -5,6 +5,7 @@ import boto3
 import botocore
 
 from exasol_script_languages_developer_sandbox.lib.aws_access.ami import Ami
+from exasol_script_languages_developer_sandbox.lib.aws_access.cloudformation_stack import CloudformationStack
 from exasol_script_languages_developer_sandbox.lib.aws_access.deployer import Deployer
 from exasol_script_languages_developer_sandbox.lib.aws_access.export_image_task import ExportImageTask
 from exasol_script_languages_developer_sandbox.lib.tags import create_default_asset_tag
@@ -117,7 +118,7 @@ class AwsAccess(object):
         cf_client = self._get_aws_client('cloudformation')
         cf_client.delete_stack(StackName=stack_name)
 
-    def describe_stacks(self) -> List[Any]:
+    def describe_stacks(self) -> List[CloudformationStack]:
         """
         This functions uses Boto3 to describe all cloudformation stacks.
         """
@@ -129,7 +130,7 @@ class AwsAccess(object):
         while "NextToken" in current_result:
             current_result = cf_client.describe_stacks(NextToken=current_result["NextToken"])
             result.extend(current_result["Stacks"])
-        return result
+        return [CloudformationStack(stack) for stack in result]
 
     def describe_instance(self, instance_id: str):
         """

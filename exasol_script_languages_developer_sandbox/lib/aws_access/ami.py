@@ -1,3 +1,4 @@
+from typing import Optional, List, Dict
 
 
 class Ami:
@@ -44,3 +45,8 @@ class Ami:
     @property
     def creation_date(self) -> str:
         return self._aws_object["CreationDate"]
+
+    @property
+    def tags(self) -> Optional[List[Dict[str, str]]]:
+        if "Tags" in self._aws_object:
+            return self._aws_object["Tags"]

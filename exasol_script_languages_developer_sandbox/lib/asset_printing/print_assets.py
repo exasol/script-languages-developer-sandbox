@@ -1,5 +1,5 @@
 import fnmatch
-from typing import Tuple, Optional, Any
+from typing import Tuple, Optional, Any, List, Dict
 
 import humanfriendly
 
@@ -8,9 +8,10 @@ from exasol_script_languages_developer_sandbox.lib.asset_printing.mark_down_prin
 from exasol_script_languages_developer_sandbox.lib.asset_printing.printing_factory import PrintingFactory, TextObject, \
     HighlightedTextObject
 from exasol_script_languages_developer_sandbox.lib.asset_printing.rich_console_printer import RichConsolePrintingFactory
-from exasol_script_languages_developer_sandbox.lib.aws_access.aws_access import AwsAccess, get_value_safe
+from exasol_script_languages_developer_sandbox.lib.aws_access.aws_access import AwsAccess
 from enum import Enum
 
+from exasol_script_languages_developer_sandbox.lib.aws_access.cloudformation_stack import CloudformationStack
 from exasol_script_languages_developer_sandbox.lib.tags import DEFAULT_TAG_KEY
 from exasol_script_languages_developer_sandbox.lib.vm_bucket.vm_slc_bucket import find_vm_bucket
 
@@ -38,6 +39,15 @@ def find_default_tag_value(aws_object: Any):
     return return_value
 
 
+def find_default_tag_value_in_tags(tags: Optional[List[Dict[str,str]]]):
+    return_value = "n/a"
+
+    filtered_tags = [tag["Value"] for tag in tags if tag["Key"] == DEFAULT_TAG_KEY]
+    if len(filtered_tags) == 1:
+        return_value = filtered_tags[0]
+    return return_value
+
+
 def print_amis(aws_access: AwsAccess, filter_value: str, printing_factory: PrintingFactory):
     table_printer = printing_factory.create_table_printer(title=f"AMI Images (Filter={filter_value})")
 
@@ -54,7 +64,8 @@ def print_amis(aws_access: AwsAccess, filter_value: str, printing_factory: Print
     for ami in amis:
         is_public = "yes" if ami.is_public else "no"
         table_printer.add_row(ami.id, ami.name, ami.description, is_public,
-                              ami.image_location, ami.creation_date, ami.state, find_default_tag_value(ami))
+                              ami.image_location, ami.creation_date, ami.state,
+                              find_default_tag_value_in_tags(ami.tags))
 
     table_printer.finish()
     text_print = printing_factory.create_text_printer()
@@ -113,7 +124,7 @@ def print_export_image_tasks(aws_access: AwsAccess, filter_value: str, printing_
         table_printer.add_row(export_image_task.id, export_image_task.description,
                               export_image_task.progress, s3bucket, s3prefix,
                               export_image_task.status, export_image_task.status_message,
-                              find_default_tag_value(export_image_task))
+                              find_default_tag_value_in_tags(export_image_task.tags))
 
     table_printer.finish()
     text_print = printing_factory.create_text_printer()
@@ -161,15 +172,16 @@ def print_s3_objects(aws_access: AwsAccess, asset_id: Optional[AssetId], printin
     table_printer.finish()
 
 
-def cloudformation_stack_has_matching_tag(cloudformation_tag: dict, filter_value: str):
+def cloudformation_stack_has_matching_tag(cloudformation_stack: CloudformationStack, filter_value: str):
     if filter_value == "*":
         return True
     else:
-        for tag in cloudformation_tag["Tags"]:
-            tag_key = tag["Key"]
-            tag_value = tag["Value"]
-            if tag_key == DEFAULT_TAG_KEY and fnmatch.fnmatch(tag_value, filter_value):
-                return True
+        if cloudformation_stack.tags is not None:
+            for tag in cloudformation_stack.tags:
+                tag_key = tag["Key"]
+                tag_value = tag["Value"]
+                if tag_key == DEFAULT_TAG_KEY and fnmatch.fnmatch(tag_value, filter_value):
+                    return True
     return False
 
 
@@ -189,15 +201,14 @@ def print_cloudformation_stacks(aws_access: AwsAccess, filter_value: str, printi
     relevant_stacks = [stack for stack in
                        cloudformation_stack if cloudformation_stack_has_matching_tag(stack, filter_value)]
     for stack in relevant_stacks:
-        table_printer.add_row(stack["StackName"],
-                              get_value_safe("Description", stack), stack["StackStatus"],
-                              stack["CreationTime"].strftime("%Y-%m-%d, %H:%M"), "", "",
-                              find_default_tag_value(stack))
-        stack_resources = aws_access.get_all_stack_resources(stack_name=stack["StackName"])
+        table_printer.add_row(stack.name,
+                              stack.description, stack.status,
+                              stack.creation_time.strftime("%Y-%m-%d, %H:%M"), "", "",
+                              find_default_tag_value_in_tags(stack.tags))
+        stack_resources = aws_access.get_all_stack_resources(stack_name=stack.name)
         for stack_resource in stack_resources:
-            table_printer.add_row("", "", "", "",
-                                  stack_resource["PhysicalResourceId"], stack_resource["ResourceType"],
-                                  find_default_tag_value(stack))
+            table_printer.add_row("", "", "", "", stack_resource["PhysicalResourceId"],
+                                  stack_resource["ResourceType"], "n/a")
 
     table_printer.finish()
     text_print = printing_factory.create_text_printer()

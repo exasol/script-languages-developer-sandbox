@@ -2,6 +2,7 @@ import datetime
 from dateutil.tz import tzutc
 
 from exasol_script_languages_developer_sandbox.lib.aws_access.ami import Ami
+from exasol_script_languages_developer_sandbox.lib.aws_access.cloudformation_stack import CloudformationStack
 from exasol_script_languages_developer_sandbox.lib.aws_access.export_image_task import ExportImageTask
 from exasol_script_languages_developer_sandbox.lib.vm_bucket.vm_slc_bucket import STACK_NAME
 from test.conftest import DEFAULT_ASSET_ID
@@ -113,7 +114,7 @@ def get_s3_object_mock_data():
 
 
 def get_ec2_cloudformation_mock_data():
-    return {
+    return CloudformationStack({
         'StackId': 'test-stack-id',
         'StackName': 'test-stack-name',
         'ChangeSetId': 'test-stack-changeset-id-1',
@@ -124,7 +125,7 @@ def get_ec2_cloudformation_mock_data():
         'DisableRollback': False, 'NotificationARNs': [], 'Capabilities': ['CAPABILITY_IAM'],
         'Tags': [{'Key': 'exa_slc_id', 'Value': DEFAULT_ASSET_ID.tag_value}],
         'DriftInformation': {'StackDriftStatus': 'NOT_CHECKED'}
-    }
+    })
 
 
 def get_ec2_cloudformation_stack_resources_mock_data():

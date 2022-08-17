@@ -1,3 +1,5 @@
+from typing import Optional, List, Dict
+
 from exasol_script_languages_developer_sandbox.lib.aws_access.common import get_value_safe
 
 
@@ -45,3 +47,8 @@ class ExportImageTask:
     @property
     def is_completed(self) -> bool:
         return self.status == "completed"
+
+    @property
+    def tags(self) -> Optional[List[Dict[str, str]]]:
+        if "Tags" in self._aws_object:
+            return self._aws_object["Tags"]

@@ -138,8 +138,8 @@ def test_print_cloudformation_stack(default_asset_id, printing_mocks, filter_val
     if expected_found_cloudformation:
         expected_calls = [
             call('test-stack-name', "n/a", "CREATE_COMPLETE", "2022-08-16, 14:30", "", "", default_asset_id.tag_value),
-            call('', "", "", "", 'ec2-instance-123', 'AWS::EC2::Instance', default_asset_id.tag_value),
-            call('', "", "", "", 'ec2-security-group-123', 'AWS::EC2::SecurityGroup', default_asset_id.tag_value),
+            call('', "", "", "", 'ec2-instance-123', 'AWS::EC2::Instance', "n/a"),
+            call('', "", "", "", 'ec2-security-group-123', 'AWS::EC2::SecurityGroup', "n/a"),
         ]
         assert table_printer_mock.add_row.call_args_list == expected_calls
     else:
