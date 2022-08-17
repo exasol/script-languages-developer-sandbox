@@ -2,6 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from exasol_script_languages_developer_sandbox.lib.aws_access.ec2_instance import EC2Instance
 from exasol_script_languages_developer_sandbox.lib.aws_access.stack_resource import StackResource
 from exasol_script_languages_developer_sandbox.lib.setup_ec2.run_setup_ec2 import run_lifecycle_for_ec2
 
@@ -25,9 +26,9 @@ def test_run_lifecycle_for_ec2(default_asset_id):
     aws_access_mock.stack_exists.return_value = False
     instances_states =\
         [
-            {"State": {"Name": "pending"}, "PublicDnsName": "public_host"},
-            {"State": {"Name": "pending"}, "PublicDnsName": "public_host"},
-            {"State": {"Name": "running"}, "PublicDnsName": "public_host"}
+            EC2Instance({"State": {"Name": "pending"}, "PublicDnsName": "public_host"}),
+            EC2Instance({"State": {"Name": "pending"}, "PublicDnsName": "public_host"}),
+            EC2Instance({"State": {"Name": "running"}, "PublicDnsName": "public_host"})
         ]
     aws_access_mock.describe_instance.side_effect = instances_states
     res_gen = run_lifecycle_for_ec2(aws_access_mock, "test_key_file_loc", "test_key", None, default_asset_id.tag_value)

@@ -3,8 +3,7 @@ import pytest
 
 from exasol_script_languages_developer_sandbox.lib.setup_ec2.cf_stack import CloudformationStack, \
     CloudformationStackContextManager
-from exasol_script_languages_developer_sandbox.lib.setup_ec2.run_setup_ec2 import run_lifecycle_for_ec2, \
-    unpack_ec2_instance_description
+from exasol_script_languages_developer_sandbox.lib.setup_ec2.run_setup_ec2 import run_lifecycle_for_ec2
 from exasol_script_languages_developer_sandbox.lib.tags import create_default_asset_tag
 from test.aws_local_stack_access import AwsLocalStackAccess
 
@@ -108,7 +107,8 @@ def test_cloudformation_access_with_local_stack(local_stack, default_asset_id):
             as cf_stack:
         ec2_instance_id = cf_stack.get_ec2_instance_id()
         ec2_instance_description = aws_access.describe_instance(ec2_instance_id)
-        status, host_name = unpack_ec2_instance_description(ec2_instance_description)
+        status = ec2_instance_description.state_name
+        host_name = ec2_instance_description.public_dns_name
         assert status == "running"
         assert host_name.endswith(".eu-central-1.compute.amazonaws.com")
 

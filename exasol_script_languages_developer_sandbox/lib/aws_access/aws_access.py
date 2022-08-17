@@ -7,6 +7,7 @@ import botocore
 from exasol_script_languages_developer_sandbox.lib.aws_access.ami import Ami
 from exasol_script_languages_developer_sandbox.lib.aws_access.cloudformation_stack import CloudformationStack
 from exasol_script_languages_developer_sandbox.lib.aws_access.deployer import Deployer
+from exasol_script_languages_developer_sandbox.lib.aws_access.ec2_instance import EC2Instance
 from exasol_script_languages_developer_sandbox.lib.aws_access.export_image_task import ExportImageTask
 from exasol_script_languages_developer_sandbox.lib.aws_access.stack_resource import StackResource
 from exasol_script_languages_developer_sandbox.lib.tags import create_default_asset_tag
@@ -46,7 +47,7 @@ class AwsAccess(object):
         cloud_client = self._get_aws_client("ec2")
         cloud_client.delete_key_pair(KeyName=key_name)
 
-    def upload_cloudformation_stack(self, yml: str, stack_name: str, tags=tuple()):
+    def upload_cloudformation_stack(self, yml: str, stack_name: str, tags=tuple()) -> None:
         """
         Deploy the cloudformation stack.
         """
@@ -133,13 +134,20 @@ class AwsAccess(object):
             result.extend(current_result["Stacks"])
         return [CloudformationStack(stack) for stack in result]
 
-    def describe_instance(self, instance_id: str):
+    def describe_instance(self, instance_id: str) -> EC2Instance:
         """
         Describes an AWS instance identified by parameter instance_id
         """
         logging.debug(f"Running describe_instance for aws profile {self.aws_profile_for_logging}")
         cloud_client = self._get_aws_client("ec2")
-        return cloud_client.describe_instances(InstanceIds=[instance_id])["Reservations"][0]["Instances"][0]
+        instances_result = cloud_client.describe_instances(InstanceIds=[instance_id])
+        reservations = instances_result["Reservations"]
+        if len(reservations) != 1:
+            raise RuntimeError(f"Unexpected number of reservations in describe_instance(): {len(reservations)}")
+        instances = reservations[0]["Instances"]
+        if len(instances) != 1:
+            raise RuntimeError(f"Unexpected number of instances in describe_instance(): {len(instances)}")
+        return EC2Instance(instances[0])
 
     def create_image_from_ec2_instance(self, instance_id: str, name: str, tag_value: str, description: str) -> str:
         """

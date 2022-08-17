@@ -1,16 +1,13 @@
 import logging
 import signal
-from typing import Optional, Tuple, Any
+from typing import Optional, Tuple
 
 from exasol_script_languages_developer_sandbox.lib.asset_id import AssetId
 from exasol_script_languages_developer_sandbox.lib.aws_access.aws_access import AwsAccess
 from exasol_script_languages_developer_sandbox.lib.setup_ec2.cf_stack import CloudformationStack, \
     CloudformationStackContextManager
-from exasol_script_languages_developer_sandbox.lib.setup_ec2.key_file_manager import KeyFileManager, KeyFileManagerContextManager
-
-
-def unpack_ec2_instance_description(ec2_instance_description: Any) -> Tuple[str, str]:
-    return ec2_instance_description["State"]["Name"], ec2_instance_description["PublicDnsName"]
+from exasol_script_languages_developer_sandbox.lib.setup_ec2.key_file_manager import KeyFileManager, \
+    KeyFileManagerContextManager
 
 
 def run_lifecycle_for_ec2(aws_access: AwsAccess,
@@ -25,7 +22,8 @@ def run_lifecycle_for_ec2(aws_access: AwsAccess,
             logging.info(f"Waiting for EC2 instance ({ec2_instance_id}) to start...")
             while True:
                 ec2_instance_description = aws_access.describe_instance(ec2_instance_id)
-                ec2_instance_status, host_name = unpack_ec2_instance_description(ec2_instance_description)
+                ec2_instance_status = ec2_instance_description.state_name
+                host_name = ec2_instance_description.public_dns_name
                 yield ec2_instance_status, host_name, ec2_instance_id, km.key_file_location
                 if ec2_instance_status != "pending":
                     break
