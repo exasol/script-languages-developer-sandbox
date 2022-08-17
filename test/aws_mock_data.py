@@ -1,6 +1,7 @@
 import datetime
 from dateutil.tz import tzutc
 
+from exasol_script_languages_developer_sandbox.lib.aws_access.ami import Ami
 from exasol_script_languages_developer_sandbox.lib.aws_access.export_image_task import ExportImageTask
 from exasol_script_languages_developer_sandbox.lib.vm_bucket.vm_slc_bucket import STACK_NAME
 from test.conftest import DEFAULT_ASSET_ID
@@ -35,30 +36,30 @@ def get_only_vm_stack_side_effect(stack_name: str):
         raise ValueError(f"Unexpected parameter:{stack_name}")
 
 
-def get_ami_image_mock_data(state: str):
-    return {'Architecture': 'x86_64',
-            'CreationDate': '2022-08-16T15:02:10.000Z',
-            'ImageId': TEST_AMI_ID,
-            'ImageLocation': '123/some_dummy_location',
-            'ImageType': 'machine', 'Public': False, 'OwnerId': '123',
-            'PlatformDetails': 'Linux/UNIX',
-            'UsageOperation': 'RunInstances',
-            'State': state,
-            'BlockDeviceMappings':
-                [{'DeviceName': '/dev/sda1',
-                  'Ebs':
-                      {'DeleteOnTermination': True, 'SnapshotId': 'snap-0e4b4dcef3f806d84',
-                       'VolumeSize': 100, 'VolumeType': 'gp2', 'Encrypted': False}
-                  },
-                 {'DeviceName': '/dev/sdb', 'VirtualName': 'ephemeral0'},
-                 {'DeviceName': '/dev/sdc', 'VirtualName': 'ephemeral1'}],
-            'Description': 'Image Description', 'EnaSupport': True,
-            'Hypervisor': 'xen',
-            'Name': DEFAULT_ASSET_ID.ami_name,
-            'RootDeviceName': '/dev/sda1',
-            'RootDeviceType': 'ebs', 'SriovNetSupport': 'simple',
-            'Tags': [{'Key': 'exa_slc_id', 'Value': DEFAULT_ASSET_ID.tag_value}],
-            'VirtualizationType': 'hvm'}
+def get_ami_image_mock_data(state: str) -> Ami:
+    return Ami({'Architecture': 'x86_64',
+                'CreationDate': '2022-08-16T15:02:10.000Z',
+                'ImageId': TEST_AMI_ID,
+                'ImageLocation': '123/some_dummy_location',
+                'ImageType': 'machine', 'Public': False, 'OwnerId': '123',
+                'PlatformDetails': 'Linux/UNIX',
+                'UsageOperation': 'RunInstances',
+                'State': state,
+                'BlockDeviceMappings':
+                    [{'DeviceName': '/dev/sda1',
+                      'Ebs':
+                          {'DeleteOnTermination': True, 'SnapshotId': 'snap-0e4b4dcef3f806d84',
+                           'VolumeSize': 100, 'VolumeType': 'gp2', 'Encrypted': False}
+                      },
+                     {'DeviceName': '/dev/sdb', 'VirtualName': 'ephemeral0'},
+                     {'DeviceName': '/dev/sdc', 'VirtualName': 'ephemeral1'}],
+                'Description': 'Image Description', 'EnaSupport': True,
+                'Hypervisor': 'xen',
+                'Name': DEFAULT_ASSET_ID.ami_name,
+                'RootDeviceName': '/dev/sda1',
+                'RootDeviceType': 'ebs', 'SriovNetSupport': 'simple',
+                'Tags': [{'Key': 'exa_slc_id', 'Value': DEFAULT_ASSET_ID.tag_value}],
+                'VirtualizationType': 'hvm'})
 
 
 def get_snapshot_mock_data():

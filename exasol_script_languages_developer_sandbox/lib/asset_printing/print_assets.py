@@ -52,9 +52,9 @@ def print_amis(aws_access: AwsAccess, filter_value: str, printing_factory: Print
 
     amis = aws_access.list_amis(filters=[{'Name': f'tag:{DEFAULT_TAG_KEY}', 'Values': [filter_value]}])
     for ami in amis:
-        is_public = "yes" if ami["Public"] else "no"
-        table_printer.add_row(ami["ImageId"], ami["Name"], ami["Description"], is_public,
-                              ami["ImageLocation"], ami["CreationDate"], ami["State"], find_default_tag_value(ami))
+        is_public = "yes" if ami.is_public else "no"
+        table_printer.add_row(ami.id, ami.name, ami.description, is_public,
+                              ami.image_location, ami.creation_date, ami.state, find_default_tag_value(ami))
 
     table_printer.finish()
     text_print = printing_factory.create_text_printer()

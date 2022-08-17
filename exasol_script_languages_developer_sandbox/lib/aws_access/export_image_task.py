@@ -11,41 +11,37 @@ class ExportImageTask:
         self._aws_object = aws_object
 
     @property
-    def id(self):
+    def id(self) -> str:
         return self._aws_object["ExportImageTaskId"]
 
     @property
-    def description(self):
+    def description(self) -> str:
         return self._aws_object["Description"]
 
     @property
-    def status(self):
+    def status(self) -> str:
         return self._aws_object["Status"]
 
     @property
-    def status_message(self):
+    def status_message(self) -> str:
         return get_value_safe("StatusMessage", self._aws_object)
 
     @property
-    def progress(self):
+    def progress(self) -> str:
         return get_value_safe("Progress", self._aws_object)
-
-    @property
-    def s3_export_location(self):
-        return self._aws_object["S3ExportLocation"]
 
     @property
     def s3_bucket(self):
         return self._aws_object["S3ExportLocation"]["S3Bucket"]
 
     @property
-    def s3_prefix(self):
+    def s3_prefix(self) -> str:
         return self._aws_object["S3ExportLocation"]["S3Prefix"]
 
     @property
-    def is_active(self):
+    def is_active(self) -> bool:
         return self.status == "active"
 
     @property
-    def is_completed(self):
+    def is_completed(self) -> bool:
         return self.status == "completed"

@@ -31,10 +31,11 @@ def export_vm_image(aws_access: AwsAccess, vm_image_format: VmDiskImageFormat, t
     logging.info(
         f"Started export of vm image to {vm_bucket}/{bucket_prefix}. "
         f"Status message is {export_image_task.status_message}.")
-    last_progress = None
+    last_progress = export_image_task.progress
     last_status = export_image_task.status
     while export_image_task.is_active:
         time.sleep(10)
+        export_image_task = aws_access.get_export_image_task(export_image_task_id)
         if export_image_task.progress != last_progress or export_image_task.status != last_status:
             logging.info(f"still running export of vm image to {vm_bucket}/{bucket_prefix}. "
                          f"Status message is {export_image_task.status_message}. "
@@ -56,13 +57,13 @@ def create_ami(aws_access: AwsAccess, ami_name: str, tag_value: str, instance_id
     ami_id = aws_access.create_image_from_ec2_instance(instance_id, name=ami_name, tag_value=tag_value,
                                                        description="Image Description")
 
-    ami_state = aws_access.get_ami(ami_id)["State"]
-    while ami_state == "pending":
-        logging.info(f"ami  with name '{ami_name}' and tag(s) '{tag_value}'  still pending...")
+    ami = aws_access.get_ami(ami_id)
+    while ami.is_pending:
+        logging.info(f"ami  with name '{ami.name}' and tag(s) '{tag_value}'  still pending...")
         time.sleep(10)
-        ami_state = aws_access.get_ami(ami_id)["State"]
-    if ami_state != "available":
-        raise RuntimeError(f"Failed to create ami! ami state is '{ami_state}'")
+        ami = aws_access.get_ami(ami_id)
+    if ami.is_available:
+        raise RuntimeError(f"Failed to create ami! ami state is '{ami.state}'")
     return ami_id
 
 

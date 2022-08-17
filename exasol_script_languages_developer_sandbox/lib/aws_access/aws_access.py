@@ -4,6 +4,7 @@ from typing import Optional, Any, List, Dict
 import boto3
 import botocore
 
+from exasol_script_languages_developer_sandbox.lib.aws_access.ami import Ami
 from exasol_script_languages_developer_sandbox.lib.aws_access.deployer import Deployer
 from exasol_script_languages_developer_sandbox.lib.aws_access.export_image_task import ExportImageTask
 from exasol_script_languages_developer_sandbox.lib.tags import create_default_asset_tag
@@ -182,7 +183,7 @@ class AwsAccess(object):
         export_image_task = export_image_tasks[0]
         return ExportImageTask(export_image_task)
 
-    def get_ami(self, image_id: str) -> Any:
+    def get_ami(self, image_id: str) -> Ami:
         """
         Get AMI image for given image_id
         """
@@ -193,17 +194,16 @@ class AwsAccess(object):
         images = response["Images"]
         if len(images) != 1:
             raise RuntimeError(f"AwsAccess.get_ami() for image_id='{image_id}' returned {len(images)} elements: {images}")
-        return images[0]
+        return Ami(images[0])
 
-    def list_amis(self, filters: list) -> list:
+    def list_amis(self, filters: list) -> List[Ami]:
         """
         List AMI images with given tag filter
         """
         logging.debug(f"Running list_amis for aws profile {self.aws_profile_for_logging}")
         cloud_client = self._get_aws_client("ec2")
-
         response = cloud_client.describe_images(Filters=filters)
-        return response["Images"]
+        return [Ami(ami) for ami in response["Images"]]
 
     def list_snapshots(self, filters: list) -> list:
         """
