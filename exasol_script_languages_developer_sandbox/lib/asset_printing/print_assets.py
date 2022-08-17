@@ -89,9 +89,9 @@ def print_snapshots(aws_access: AwsAccess, filter_value: str, printing_factory: 
 
     snapshots = aws_access.list_snapshots(filters=[{'Name': f'tag:{DEFAULT_TAG_KEY}', 'Values': [filter_value]}])
     for snapshot in snapshots:
-        table_printer.add_row(snapshot["SnapshotId"], snapshot["Description"], snapshot["Progress"],
-                              snapshot["VolumeId"], snapshot["StartTime"].strftime("%Y-%m-%d, %H:%M"),
-                              snapshot["State"], find_default_tag_value(snapshot))
+        table_printer.add_row(snapshot.id, snapshot.description, snapshot.progress,
+                              snapshot.volume_id, snapshot.start_time.strftime("%Y-%m-%d, %H:%M"),
+                              snapshot.state, find_default_tag_value_in_tags(snapshot.tags))
 
     table_printer.finish()
 

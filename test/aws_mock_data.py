@@ -4,6 +4,7 @@ from dateutil.tz import tzutc
 from exasol_script_languages_developer_sandbox.lib.aws_access.ami import Ami
 from exasol_script_languages_developer_sandbox.lib.aws_access.cloudformation_stack import CloudformationStack
 from exasol_script_languages_developer_sandbox.lib.aws_access.export_image_task import ExportImageTask
+from exasol_script_languages_developer_sandbox.lib.aws_access.snapshot import Snapshot
 from exasol_script_languages_developer_sandbox.lib.aws_access.stack_resource import StackResource
 from exasol_script_languages_developer_sandbox.lib.vm_bucket.vm_slc_bucket import STACK_NAME
 from test.conftest import DEFAULT_ASSET_ID
@@ -20,15 +21,17 @@ def get_vm_bucket_cloudformation_mock_data():
     # The following is a snapshot from calling AwsAccess(a).get_all_stack_resources("VM-SLC-Bucket") on a running
     # cloudformation stack
     return [StackResource({'LogicalResourceId': 'VMImportRole',
-             'PhysicalResourceId': TEST_ROLE_ID,
-             'ResourceType': 'AWS::IAM::Role',
-             'LastUpdatedTimestamp': datetime.datetime(2022, 8, 11, 17, 15, 20, 380000, tzinfo=tzutc()),
-             'ResourceStatus': 'CREATE_COMPLETE', 'DriftInformation': {'StackResourceDriftStatus': 'NOT_CHECKED'}}),
+                           'PhysicalResourceId': TEST_ROLE_ID,
+                           'ResourceType': 'AWS::IAM::Role',
+                           'LastUpdatedTimestamp': datetime.datetime(2022, 8, 11, 17, 15, 20, 380000, tzinfo=tzutc()),
+                           'ResourceStatus': 'CREATE_COMPLETE',
+                           'DriftInformation': {'StackResourceDriftStatus': 'NOT_CHECKED'}}),
             StackResource({'LogicalResourceId': 'VMSLCBucket',
-             'PhysicalResourceId': TEST_BUCKET_ID,
-             'ResourceType': 'AWS::S3::Bucket',
-             'LastUpdatedTimestamp': datetime.datetime(2022, 8, 11, 17, 14, 55, 63000, tzinfo=tzutc()),
-             'ResourceStatus': 'CREATE_COMPLETE', 'DriftInformation': {'StackResourceDriftStatus': 'NOT_CHECKED'}})]
+                           'PhysicalResourceId': TEST_BUCKET_ID,
+                           'ResourceType': 'AWS::S3::Bucket',
+                           'LastUpdatedTimestamp': datetime.datetime(2022, 8, 11, 17, 14, 55, 63000, tzinfo=tzutc()),
+                           'ResourceStatus': 'CREATE_COMPLETE',
+                           'DriftInformation': {'StackResourceDriftStatus': 'NOT_CHECKED'}})]
 
 
 def get_only_vm_stack_side_effect(stack_name: str):
@@ -65,14 +68,14 @@ def get_ami_image_mock_data(state: str) -> Ami:
 
 
 def get_snapshot_mock_data():
-    return {
+    return Snapshot({
         'Description': 'Created by foo', 'Encrypted': False,
         'OwnerId': '123', 'Progress': '100%', 'SnapshotId': 'snap-123',
         'StartTime': datetime.datetime(2022, 8, 16, 15, 3, 40, 662000, tzinfo=tzutc()), 'State': 'completed',
         'VolumeId': 'vol-123', 'VolumeSize': 100,
         'Tags': [{'Key': 'exa_slc_id', 'Value': DEFAULT_ASSET_ID.tag_value}],
         'StorageTier': 'standard'
-    }
+    })
 
 
 def get_export_image_task_mock_data(in_progress: bool):
@@ -131,20 +134,20 @@ def get_ec2_cloudformation_mock_data():
 
 def get_ec2_cloudformation_stack_resources_mock_data():
     return [
-        {'LogicalResourceId': 'EC2Instance',
-         'PhysicalResourceId': 'ec2-instance-123',
-         'ResourceType': 'AWS::EC2::Instance',
-         'LastUpdatedTimestamp': datetime.datetime(2022, 8, 16, 14, 31, 35, 929000, tzinfo=tzutc()),
-         'ResourceStatus': 'CREATE_COMPLETE',
-         'DriftInformation': {'StackResourceDriftStatus': 'NOT_CHECKED'}
-         },
-        {'LogicalResourceId': 'Ec2SecurityGroup',
-         'PhysicalResourceId': 'ec2-security-group-123',
-         'ResourceType': 'AWS::EC2::SecurityGroup',
-         'LastUpdatedTimestamp': datetime.datetime(2022, 8, 16, 14, 31, 0, 224000, tzinfo=tzutc()),
-         'ResourceStatus': 'CREATE_COMPLETE',
-         'DriftInformation': {'StackResourceDriftStatus': 'NOT_CHECKED'}
-         }
+        StackResource({'LogicalResourceId': 'EC2Instance',
+                       'PhysicalResourceId': 'ec2-instance-123',
+                       'ResourceType': 'AWS::EC2::Instance',
+                       'LastUpdatedTimestamp': datetime.datetime(2022, 8, 16, 14, 31, 35, 929000, tzinfo=tzutc()),
+                       'ResourceStatus': 'CREATE_COMPLETE',
+                       'DriftInformation': {'StackResourceDriftStatus': 'NOT_CHECKED'}
+                       }),
+        StackResource({'LogicalResourceId': 'Ec2SecurityGroup',
+                       'PhysicalResourceId': 'ec2-security-group-123',
+                       'ResourceType': 'AWS::EC2::SecurityGroup',
+                       'LastUpdatedTimestamp': datetime.datetime(2022, 8, 16, 14, 31, 0, 224000, tzinfo=tzutc()),
+                       'ResourceStatus': 'CREATE_COMPLETE',
+                       'DriftInformation': {'StackResourceDriftStatus': 'NOT_CHECKED'}
+                       })
     ]
 
 

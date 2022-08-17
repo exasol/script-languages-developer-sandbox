@@ -9,6 +9,7 @@ from exasol_script_languages_developer_sandbox.lib.aws_access.cloudformation_sta
 from exasol_script_languages_developer_sandbox.lib.aws_access.deployer import Deployer
 from exasol_script_languages_developer_sandbox.lib.aws_access.ec2_instance import EC2Instance
 from exasol_script_languages_developer_sandbox.lib.aws_access.export_image_task import ExportImageTask
+from exasol_script_languages_developer_sandbox.lib.aws_access.snapshot import Snapshot
 from exasol_script_languages_developer_sandbox.lib.aws_access.stack_resource import StackResource
 from exasol_script_languages_developer_sandbox.lib.tags import create_default_asset_tag
 from exasol_script_languages_developer_sandbox.lib.export_vm.vm_disk_image_format import VmDiskImageFormat
@@ -151,7 +152,8 @@ class AwsAccess(object):
 
     def create_image_from_ec2_instance(self, instance_id: str, name: str, tag_value: str, description: str) -> str:
         """
-        Creates an AMI image from an EC-2 instance
+        Creates an AMI image from an EC-2 instance.
+        Returns the image-id of the new AMI.
         """
         logging.debug(f"Running create_image_from_ec2_instance for aws profile {self.aws_profile_for_logging}")
         cloud_client = self._get_aws_client("ec2")
@@ -215,7 +217,7 @@ class AwsAccess(object):
         response = cloud_client.describe_images(Filters=filters)
         return [Ami(ami) for ami in response["Images"]]
 
-    def list_snapshots(self, filters: list) -> list:
+    def list_snapshots(self, filters: list) -> List[Snapshot]:
         """
         List EC2 volume snapthos with given tag filter
         """
@@ -224,7 +226,7 @@ class AwsAccess(object):
 
         response = cloud_client.describe_snapshots(Filters=filters)
         assert "NextToken" not in response
-        return response["Snapshots"]
+        return [Snapshot[snapshot] for snapshot in response["Snapshots"]]
 
     def list_export_image_tasks(self, filters: list) -> List[ExportImageTask]:
         """
