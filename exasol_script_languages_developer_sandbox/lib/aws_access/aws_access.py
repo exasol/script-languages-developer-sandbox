@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Any, List, Dict
+from typing import Optional, Any, List
 
 import boto3
 import botocore
@@ -228,7 +228,7 @@ class AwsAccess(object):
 
         response = cloud_client.describe_snapshots(Filters=filters)
         assert "NextToken" not in response
-        return [Snapshot[snapshot] for snapshot in response["Snapshots"]]
+        return [Snapshot(snapshot) for snapshot in response["Snapshots"]]
 
     def list_export_image_tasks(self, filters: list) -> List[ExportImageTask]:
         """

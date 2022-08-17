@@ -17,7 +17,7 @@ def test_deploy_ec2_upload_invoked(ec2_cloudformation_yml, default_asset_id):
                                                                None, default_asset_id.tag_value)) \
             as cf_access:
         pass
-    default_tag = create_default_asset_tag(default_asset_id.tag_value)
+    default_tag = tuple(create_default_asset_tag(default_asset_id.tag_value))
     aws_access_mock.upload_cloudformation_stack.assert_called_once_with(ec2_cloudformation_yml,
                                                                         cf_access.stack_name,
                                                                         tags=default_tag)
