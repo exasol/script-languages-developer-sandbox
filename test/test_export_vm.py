@@ -5,7 +5,7 @@ import pytest
 from exasol_script_languages_developer_sandbox.lib.export_vm.run_export_vm import export_vm
 from exasol_script_languages_developer_sandbox.lib.export_vm.vm_disk_image_format import VmDiskImageFormat
 from test.aws_mock_data import get_ami_image_mock_data, TEST_AMI_ID, TEST_ROLE_ID, TEST_BUCKET_ID, INSTANCE_ID, \
-    get_only_vm_stack_side_effect
+    get_only_vm_stack_side_effect, get_export_image_task_mock_data
 
 
 def call_counter(func):
@@ -34,6 +34,7 @@ def aws_vm_export_mock():
     aws_access_mock = MagicMock()
     aws_access_mock.get_all_stack_resources.side_effect = get_only_vm_stack_side_effect
     aws_access_mock.create_image_from_ec2_instance.return_value = TEST_AMI_ID
+    aws_access_mock.get_export_image_task.return_value = get_export_image_task_mock_data(False)
     aws_access_mock.get_ami.side_effect = get_ami_side_effect
     return aws_access_mock
 
