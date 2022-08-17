@@ -4,6 +4,7 @@ from dateutil.tz import tzutc
 from exasol_script_languages_developer_sandbox.lib.aws_access.ami import Ami
 from exasol_script_languages_developer_sandbox.lib.aws_access.cloudformation_stack import CloudformationStack
 from exasol_script_languages_developer_sandbox.lib.aws_access.export_image_task import ExportImageTask
+from exasol_script_languages_developer_sandbox.lib.aws_access.key_pair import KeyPair
 from exasol_script_languages_developer_sandbox.lib.aws_access.s3_object import S3Object
 from exasol_script_languages_developer_sandbox.lib.aws_access.snapshot import Snapshot
 from exasol_script_languages_developer_sandbox.lib.aws_access.stack_resource import StackResource
@@ -153,7 +154,7 @@ def get_ec2_cloudformation_stack_resources_mock_data():
 
 
 def get_ec2_key_pair_mock_data():
-    return {
+    return KeyPair({
         'KeyPairId': 'key-123',
         'KeyFingerprint': '12:34:56:78:90:12:34:56:78:90:12:34:56:78:90:12:34:56:78:90',
         'KeyName': 'ec2-key-test-key',
@@ -161,4 +162,4 @@ def get_ec2_key_pair_mock_data():
         'Tags': [{'Key': 'exa_slc_id', 'Value': DEFAULT_ASSET_ID.tag_value}],
         'CreateTime': datetime.datetime(2022, 8, 16, 15, 30, 41,
                                         tzinfo=tzutc())
-    }
+    })

@@ -1,5 +1,5 @@
 import fnmatch
-from typing import Tuple, Optional, Any, List, Dict
+from typing import Tuple, Optional, List, Dict
 
 import humanfriendly
 
@@ -27,16 +27,6 @@ class AssetTypes(Enum):
 
 def all_asset_types() -> Tuple[str, ...]:
     return tuple(asset_type.value for asset_type in AssetTypes)
-
-
-def find_default_tag_value(aws_object: Any):
-    return_value = "n/a"
-
-    if "Tags" in aws_object:
-        filtered_tags = [tag["Value"] for tag in aws_object["Tags"] if tag["Key"] == DEFAULT_TAG_KEY]
-        if len(filtered_tags) == 1:
-            return_value = filtered_tags[0]
-    return return_value
 
 
 def find_default_tag_value_in_tags(tags: Optional[List[Dict[str,str]]]):
@@ -229,9 +219,9 @@ def print_ec2_keys(aws_access: AwsAccess, filter_value: str, printing_factory: P
 
     key_pairs = aws_access.list_ec2_key_pairs(filters=[{'Name': f'tag:{DEFAULT_TAG_KEY}', 'Values': [filter_value]}])
     for key_pair in key_pairs:
-        table_printer.add_row(key_pair["KeyPairId"], key_pair["KeyName"],
-                              key_pair["CreateTime"].strftime("%Y-%m-%d, %H:%M"),
-                              find_default_tag_value(key_pair))
+        table_printer.add_row(key_pair.id, key_pair.key_name,
+                              key_pair.created_time.strftime("%Y-%m-%d, %H:%M"),
+                              find_default_tag_value_in_tags(key_pair.tags))
 
     table_printer.finish()
 

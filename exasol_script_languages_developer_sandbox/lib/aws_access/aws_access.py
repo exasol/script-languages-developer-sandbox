@@ -9,6 +9,7 @@ from exasol_script_languages_developer_sandbox.lib.aws_access.cloudformation_sta
 from exasol_script_languages_developer_sandbox.lib.aws_access.deployer import Deployer
 from exasol_script_languages_developer_sandbox.lib.aws_access.ec2_instance import EC2Instance
 from exasol_script_languages_developer_sandbox.lib.aws_access.export_image_task import ExportImageTask
+from exasol_script_languages_developer_sandbox.lib.aws_access.key_pair import KeyPair
 from exasol_script_languages_developer_sandbox.lib.aws_access.s3_object import S3Object
 from exasol_script_languages_developer_sandbox.lib.aws_access.snapshot import Snapshot
 from exasol_script_languages_developer_sandbox.lib.aws_access.stack_resource import StackResource
@@ -240,7 +241,7 @@ class AwsAccess(object):
         assert "NextToken" not in response
         return [ExportImageTask(export_image_task) for export_image_task in response["ExportImageTasks"]]
 
-    def list_ec2_key_pairs(self, filters: list) -> list:
+    def list_ec2_key_pairs(self, filters: list) -> List[KeyPair]:
         """
         List ec-2 key-pairs with given tag filter
         """
@@ -249,7 +250,7 @@ class AwsAccess(object):
 
         response = cloud_client.describe_key_pairs(Filters=filters)
         assert "NextToken" not in response
-        return response["KeyPairs"]
+        return [KeyPair(keypair) for keypair in response["KeyPairs"]]
 
     def list_s3_objects(self, bucket: str, prefix: str) -> Optional[List[S3Object]]:
         """
