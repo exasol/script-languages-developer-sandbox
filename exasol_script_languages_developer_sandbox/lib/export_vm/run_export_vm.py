@@ -62,7 +62,7 @@ def create_ami(aws_access: AwsAccess, ami_name: str, tag_value: str, instance_id
         logging.info(f"ami  with name '{ami.name}' and tag(s) '{tag_value}'  still pending...")
         time.sleep(10)
         ami = aws_access.get_ami(ami_id)
-    if ami.is_available:
+    if not ami.is_available:
         raise RuntimeError(f"Failed to create ami! ami state is '{ami.state}'")
     return ami_id
 
