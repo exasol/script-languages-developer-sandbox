@@ -4,6 +4,8 @@ import subprocess
 
 import pytest
 
+from exasol_script_languages_developer_sandbox.lib import config
+from exasol_script_languages_developer_sandbox.lib.config import ConfigObject
 from exasol_script_languages_developer_sandbox.lib.render_template import render_template
 from importlib.metadata import version
 
@@ -55,3 +57,11 @@ def local_stack():
 
     command = "localstack stop"
     subprocess.run(shlex.split(command), env=env_variables)
+
+
+@pytest.fixture(autouse=True)
+def override_config():
+    test_config = {
+        "time_to_wait_for_polling": 0.01,
+    }
+    config.global_config = ConfigObject(**test_config)

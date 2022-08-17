@@ -2,6 +2,7 @@ import logging
 import time
 from typing import Tuple, Optional, List
 
+from exasol_script_languages_developer_sandbox.lib import config
 from exasol_script_languages_developer_sandbox.lib.ansible.ansible_access import AnsibleAccess
 from exasol_script_languages_developer_sandbox.lib.ansible.ansible_repository import AnsibleRepository, \
     default_repositories
@@ -44,7 +45,7 @@ def run_create_vm(aws_access: AwsAccess, ec2_key_file: Optional[str], ec2_key_na
                                f"Status is {ec2_instance_status}")
 
         # Wait for the EC-2 instance to become ready.
-        time.sleep(10.0)
+        time.sleep(config.global_config.time_to_wait_for_polling)
 
         run_install_dependencies(ansible_access, (HostInfo(host_name, key_file_location),),
                                  ansible_run_context, ansible_repositories)

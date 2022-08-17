@@ -3,6 +3,7 @@ import time
 from sys import stderr
 from typing import Tuple
 
+from exasol_script_languages_developer_sandbox.lib import config
 from exasol_script_languages_developer_sandbox.lib.asset_id import AssetId
 from exasol_script_languages_developer_sandbox.lib.aws_access.aws_access import AwsAccess
 from exasol_script_languages_developer_sandbox.lib.setup_ec2.cf_stack import find_ec2_instance_in_cf_stack
@@ -34,7 +35,7 @@ def export_vm_image(aws_access: AwsAccess, vm_image_format: VmDiskImageFormat, t
     last_progress = export_image_task.progress
     last_status = export_image_task.status
     while export_image_task.is_active:
-        time.sleep(10)
+        time.sleep(config.global_config.time_to_wait_for_polling)
         export_image_task = aws_access.get_export_image_task(export_image_task_id)
         if export_image_task.progress != last_progress or export_image_task.status != last_status:
             logging.info(f"still running export of vm image to {vm_bucket}/{bucket_prefix}. "
@@ -60,7 +61,7 @@ def create_ami(aws_access: AwsAccess, ami_name: str, tag_value: str, instance_id
     ami = aws_access.get_ami(ami_id)
     while ami.is_pending:
         logging.info(f"ami  with name '{ami.name}' and tag(s) '{tag_value}'  still pending...")
-        time.sleep(10)
+        time.sleep(config.global_config.time_to_wait_for_polling)
         ami = aws_access.get_ami(ami_id)
     if not ami.is_available:
         raise RuntimeError(f"Failed to create ami! ami state is '{ami.state}'")
