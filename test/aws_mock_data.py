@@ -90,7 +90,7 @@ def get_export_image_task_mock_data(in_progress: bool):
                     'S3Bucket': '123/some_dummy_location',
                     'S3Prefix': DEFAULT_ASSET_ID.bucket_prefix
                 },
-            'Status': 'completed',
+            'Status': 'active',
             'Tags': [{'Key': 'exa_slc_id', 'Value': DEFAULT_ASSET_ID.tag_value}]
         })
     else:
@@ -104,7 +104,7 @@ def get_export_image_task_mock_data(in_progress: bool):
                 },
             'Progress': "50%",
             "StatusMessage": "creating the image",
-            'Status': 'active',
+            'Status': 'completed',
             'Tags': [{'Key': 'exa_slc_id', 'Value': DEFAULT_ASSET_ID.tag_value}]
         })
 
