@@ -54,7 +54,7 @@ def print_amis(aws_access: AwsAccess, filter_value: str, printing_factory: Print
     for ami in amis:
         is_public = "yes" if ami["Public"] else "no"
         table_printer.add_row(ami["ImageId"], ami["Name"], ami["Description"], is_public,
-                      ami["ImageLocation"], ami["CreationDate"], ami["State"], find_default_tag_value(ami))
+                              ami["ImageLocation"], ami["CreationDate"], ami["State"], find_default_tag_value(ami))
 
     table_printer.finish()
     text_print = printing_factory.create_text_printer()
@@ -142,7 +142,8 @@ def print_s3_objects(aws_access: AwsAccess, asset_id: Optional[AssetId], printin
     table_printer.add_column("URL", no_wrap=False)
 
     s3_objects = aws_access.list_s3_objects(bucket=vm_bucket, prefix=BUCKET_PREFIX)
-    if len(prefix) > 0:
+
+    if s3_objects is not None and len(prefix) > 0:
         if prefix[-1] != "*":
             prefix = f"{prefix}*"
         s3_objects = [s3_object for s3_object in s3_objects if fnmatch.fnmatch(s3_object["Key"], prefix)]

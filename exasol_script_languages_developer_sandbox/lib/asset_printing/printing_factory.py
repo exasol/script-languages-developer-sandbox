@@ -36,10 +36,10 @@ class TextPrinter(abc.ABC):
 class PrintingFactory(abc.ABC):
 
     @abc.abstractmethod
-    def create_table_printer(self, title: str):
+    def create_table_printer(self, title: str) -> TablePrinter:
         pass
 
     @abc.abstractmethod
-    def create_text_printer(self):
+    def create_text_printer(self) -> TextPrinter:
         pass
 
