@@ -36,8 +36,7 @@ def export_vm(aws_access: AwsAccess,
             if ami_state != "available":
                 raise RuntimeError(f"Failed to create ami! ami state is '{ami_state}'")
         except Exception:
-            traceback.print_exc()
-            logging.error("Could not create AMI. Please remove snapshot if necessary!")
+            logging.exception("Could not create AMI. Please remove snapshot if necessary!")
             has_errors = True
             return
         for vm_image_format in vm_image_formats:
@@ -49,8 +48,7 @@ def export_vm(aws_access: AwsAccess,
                                                   s3_bucket=vm_bucket, s3_prefix=bucket_prefix)
 
             except Exception:
-                traceback.print_exc()
-                logging.error(f"Failed to export VM to bucket {vm_bucket} at {bucket_prefix}\n")
+                logging.exception(f"Failed to export VM to bucket {vm_bucket} at {bucket_prefix}\n")
                 has_errors = True
                 break
     finally:

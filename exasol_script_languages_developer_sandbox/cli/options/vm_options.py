@@ -8,5 +8,5 @@ vm_options = [
                              type=click.Choice(all_vm_disk_image_formats()), multiple=True,
                              help="The VM image format. Can be declared multiple times."),
               click.option('--no-vm', is_flag=True, help="If set, no vm image will be exported. "
-                                                         "Overrides 'vm-image-format.")
+                                                         "This option takes prrecedence over 'vm-image-format'.")
 ]

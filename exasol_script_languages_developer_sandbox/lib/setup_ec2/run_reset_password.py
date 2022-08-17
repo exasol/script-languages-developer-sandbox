@@ -21,6 +21,9 @@ def run_reset_password(ansible_access: AnsibleAccess, default_password: str,
     All ansible repositories, given by variable ansible_repositories,
     are copied as flat copy to the dynamic working copy, too.
     The playbook is indicated by variable ansible_run_context, which also might contain additional ansible variables.
+    The default password will be used to set a default password for the default user in the VM; however it will be
+    set a 'expired', thus the user is required to set a new password during the first login.
+    The parameter ansible_access is used to interact with Ansible (dependency injection).
     """
     new_extra_vars = {"default_vm_password": default_password}
     if ansible_run_context.extra_vars is not None:

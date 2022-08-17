@@ -5,6 +5,7 @@ from exasol_script_languages_developer_sandbox.lib.setup_ec2.cf_stack import Clo
     CloudformationStackContextManager
 from exasol_script_languages_developer_sandbox.lib.setup_ec2.run_setup_ec2 import run_lifecycle_for_ec2, \
     unpack_ec2_instance_description
+from exasol_script_languages_developer_sandbox.lib.tags import create_default_asset_tag
 from test.aws_local_stack_access import AwsLocalStackAccess
 
 
@@ -36,9 +37,10 @@ def test_ec2_manage_keypair_with_local_stack(local_stack, default_asset_id):
     aws_access.delete_ec2_key_pair("test")
 
 
-def test_cloudformation_with_localstack(local_stack, ec2_cloudformation_yml):
+def test_cloudformation_with_localstack(default_asset_id, local_stack, ec2_cloudformation_yml):
     aws_access = AwsLocalStackAccess(None)
-    aws_access.upload_cloudformation_stack(ec2_cloudformation_yml, stack_name="test_stack")
+    aws_access.upload_cloudformation_stack(ec2_cloudformation_yml, stack_name="test_stack",
+                                           tags=create_default_asset_tag(default_asset_id.tag_value))
     stack_resources = aws_access.get_all_stack_resources(stack_name="test_stack")
     assert len(stack_resources) == 2
     ec2_instance = [i for i in stack_resources if i["ResourceType"] == "AWS::EC2::Instance"]

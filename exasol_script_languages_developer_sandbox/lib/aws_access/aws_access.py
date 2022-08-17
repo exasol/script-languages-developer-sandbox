@@ -128,7 +128,7 @@ class AwsAccess(object):
 
     def describe_stacks(self) -> List[Any]:
         """
-        This functions uses Boto3 to describe a all cloudformation stack.
+        This functions uses Boto3 to describe all cloudformation stacks.
         """
         logging.debug(f"Running describe_stacks for aws profile {self.aws_profile_for_logging}")
         cf_client = self._get_aws_client('cloudformation')

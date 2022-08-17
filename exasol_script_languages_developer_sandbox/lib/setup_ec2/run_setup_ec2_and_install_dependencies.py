@@ -47,7 +47,7 @@ def run_setup_ec2_and_install_dependencies(aws_access: AwsAccess,
         run_install_dependencies(ansible_access, (HostInfo(host_name, key_file_location),),
                                  ansible_run_context, ansible_repositories)
     except Exception as e:
-        traceback.print_exc()
+        logging.exception("Install dependencies failed.")
 
     print("-----------------------------------------------------")
     print(f"You can now login to the ec2 machine with 'ssh -i {key_file_location}  ubuntu@{host_name}'")

@@ -21,7 +21,7 @@ Resources:
                     - vmie.amazonaws.com
               Action:
                 - sts:AssumeRole
-      Description: !Sub "IAM Role to deploy VM's on ${AWS::StackName}"
+      Description: !Sub "IAM Role to run VM image exports on the S3-Bucket"
       Path: '/'
       Policies:
         - PolicyName: root

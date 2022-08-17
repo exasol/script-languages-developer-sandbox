@@ -61,7 +61,7 @@ class CloudformationStack:
                               trace_tag=DEFAULT_TAG_KEY, trace_tag_value=self._tag_value)
         self._stack_name = self._find_new_stack_name()
         self._aws_access.upload_cloudformation_stack(yml, self._stack_name,
-                                                     tags=create_default_asset_tag(self._tag_value))
+                                                     tags=tuple(create_default_asset_tag(self._tag_value)))
         logging.info(f"Deployed cloudformation stack {self._stack_name} with tag value '{self._tag_value}'")
         return self
 
