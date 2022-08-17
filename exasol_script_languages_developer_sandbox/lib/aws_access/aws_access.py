@@ -9,6 +9,7 @@ from exasol_script_languages_developer_sandbox.lib.aws_access.cloudformation_sta
 from exasol_script_languages_developer_sandbox.lib.aws_access.deployer import Deployer
 from exasol_script_languages_developer_sandbox.lib.aws_access.ec2_instance import EC2Instance
 from exasol_script_languages_developer_sandbox.lib.aws_access.export_image_task import ExportImageTask
+from exasol_script_languages_developer_sandbox.lib.aws_access.s3_object import S3Object
 from exasol_script_languages_developer_sandbox.lib.aws_access.snapshot import Snapshot
 from exasol_script_languages_developer_sandbox.lib.aws_access.stack_resource import StackResource
 from exasol_script_languages_developer_sandbox.lib.tags import create_default_asset_tag
@@ -250,7 +251,7 @@ class AwsAccess(object):
         assert "NextToken" not in response
         return response["KeyPairs"]
 
-    def list_s3_objects(self, bucket: str, prefix: str) -> list:
+    def list_s3_objects(self, bucket: str, prefix: str) -> Optional[List[S3Object]]:
         """
         List s3 objects images with given tag filter
         """
@@ -259,7 +260,7 @@ class AwsAccess(object):
 
         response = cloud_client.list_objects_v2(Bucket=bucket, Prefix=prefix)
         if "Contents" in response:
-            return response["Contents"]
+            return [S3Object(s3object) for s3object in response["Contents"]]
 
     def get_s3_bucket_location(self, bucket: str) -> Optional[str]:
         """

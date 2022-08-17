@@ -4,6 +4,7 @@ from dateutil.tz import tzutc
 from exasol_script_languages_developer_sandbox.lib.aws_access.ami import Ami
 from exasol_script_languages_developer_sandbox.lib.aws_access.cloudformation_stack import CloudformationStack
 from exasol_script_languages_developer_sandbox.lib.aws_access.export_image_task import ExportImageTask
+from exasol_script_languages_developer_sandbox.lib.aws_access.s3_object import S3Object
 from exasol_script_languages_developer_sandbox.lib.aws_access.snapshot import Snapshot
 from exasol_script_languages_developer_sandbox.lib.aws_access.stack_resource import StackResource
 from exasol_script_languages_developer_sandbox.lib.vm_bucket.vm_slc_bucket import STACK_NAME
@@ -108,13 +109,13 @@ def get_export_image_task_mock_data(in_progress: bool):
 
 
 def get_s3_object_mock_data():
-    return {
+    return S3Object({
         'Key': f'{DEFAULT_ASSET_ID.bucket_prefix}/export-ami-123.vmdk',
         'LastModified': datetime.datetime(2022, 8, 15, 11, 14, 4, tzinfo=tzutc()),
         'ETag': '"32555a13671cd66c04959366c579b09b-209"',
         'Size': 2185813504,
         'StorageClass': 'STANDARD'
-    }
+    })
 
 
 def get_ec2_cloudformation_mock_data():
