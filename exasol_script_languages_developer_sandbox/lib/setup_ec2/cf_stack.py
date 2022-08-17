@@ -11,12 +11,12 @@ _MAX_ATTEMPTS_TO_FIND_STACK_NAME = 3
 
 def find_ec2_instance_in_cf_stack(aws_access: AwsAccess, stack_name: str) -> str:
     stack_resources = aws_access.get_all_stack_resources(stack_name)
-    ec2_instance = [i for i in stack_resources if i["ResourceType"] == "AWS::EC2::Instance"]
+    ec2_instance = [i for i in stack_resources if i.is_ec2_instance]
     if len(ec2_instance) == 0:
         raise RuntimeError("Error starting or retrieving ec2 instance of stack %s" % stack_name)
     elif len(ec2_instance) > 1:
         raise RuntimeError("Multiple ec2 instances of stack %s" % stack_name)
-    ec2_instance_id = ec2_instance[0]["PhysicalResourceId"]
+    ec2_instance_id = ec2_instance[0].physical_id
     logging.info(f"Started EC2 with physical id {ec2_instance_id}")
     return ec2_instance_id
 

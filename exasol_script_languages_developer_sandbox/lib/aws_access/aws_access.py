@@ -8,6 +8,7 @@ from exasol_script_languages_developer_sandbox.lib.aws_access.ami import Ami
 from exasol_script_languages_developer_sandbox.lib.aws_access.cloudformation_stack import CloudformationStack
 from exasol_script_languages_developer_sandbox.lib.aws_access.deployer import Deployer
 from exasol_script_languages_developer_sandbox.lib.aws_access.export_image_task import ExportImageTask
+from exasol_script_languages_developer_sandbox.lib.aws_access.stack_resource import StackResource
 from exasol_script_languages_developer_sandbox.lib.tags import create_default_asset_tag
 from exasol_script_languages_developer_sandbox.lib.export_vm.vm_disk_image_format import VmDiskImageFormat
 
@@ -79,7 +80,7 @@ class AwsAccess(object):
         cloud_client = self._get_aws_client("cloudformation")
         cloud_client.validate_template(TemplateBody=cloudformation_yml)
 
-    def _get_stack_resources(self, stack_name: str) -> List[Dict[str, str]]:
+    def _get_stack_resources(self, stack_name: str) -> List[StackResource]:
         cf_client = self._get_aws_client('cloudformation')
         current_result = cf_client.list_stack_resources(StackName=stack_name)
         result = current_result["StackResourceSummaries"]
@@ -87,9 +88,9 @@ class AwsAccess(object):
         while "nextToken" in current_result:
             current_result = cf_client.list_stack_resources(StackName=stack_name, nextToken=current_result["nextToken"])
             result.extend(current_result["StackResourceSummaries"])
-        return result
+        return [StackResource(stack_resource) for stack_resource in result]
 
-    def get_all_stack_resources(self, stack_name: str) -> List[Dict[str, str]]:
+    def get_all_stack_resources(self, stack_name: str) -> List[StackResource]:
         """
         This functions uses Boto3 to get all AWS Cloudformation resources for a specific Cloudformation stack,
         identified by parameter `stack_name`.
@@ -106,7 +107,7 @@ class AwsAccess(object):
         logging.debug(f"Running stack_exists for aws profile {self.aws_profile_for_logging}")
         try:
             result = self._get_stack_resources(stack_name=stack_name)
-            return any([res["ResourceStatus"] != "DELETE_COMPLETE" for res in result])
+            return any([res.status != "DELETE_COMPLETE" for res in result])
         except botocore.exceptions.ClientError:
             return False
 

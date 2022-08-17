@@ -4,6 +4,7 @@ from dateutil.tz import tzutc
 from exasol_script_languages_developer_sandbox.lib.aws_access.ami import Ami
 from exasol_script_languages_developer_sandbox.lib.aws_access.cloudformation_stack import CloudformationStack
 from exasol_script_languages_developer_sandbox.lib.aws_access.export_image_task import ExportImageTask
+from exasol_script_languages_developer_sandbox.lib.aws_access.stack_resource import StackResource
 from exasol_script_languages_developer_sandbox.lib.vm_bucket.vm_slc_bucket import STACK_NAME
 from test.conftest import DEFAULT_ASSET_ID
 
@@ -18,16 +19,16 @@ INSTANCE_ID = "test-instance"
 def get_vm_bucket_cloudformation_mock_data():
     # The following is a snapshot from calling AwsAccess(a).get_all_stack_resources("VM-SLC-Bucket") on a running
     # cloudformation stack
-    return [{'LogicalResourceId': 'VMImportRole',
+    return [StackResource({'LogicalResourceId': 'VMImportRole',
              'PhysicalResourceId': TEST_ROLE_ID,
              'ResourceType': 'AWS::IAM::Role',
              'LastUpdatedTimestamp': datetime.datetime(2022, 8, 11, 17, 15, 20, 380000, tzinfo=tzutc()),
-             'ResourceStatus': 'CREATE_COMPLETE', 'DriftInformation': {'StackResourceDriftStatus': 'NOT_CHECKED'}},
-            {'LogicalResourceId': 'VMSLCBucket',
+             'ResourceStatus': 'CREATE_COMPLETE', 'DriftInformation': {'StackResourceDriftStatus': 'NOT_CHECKED'}}),
+            StackResource({'LogicalResourceId': 'VMSLCBucket',
              'PhysicalResourceId': TEST_BUCKET_ID,
              'ResourceType': 'AWS::S3::Bucket',
              'LastUpdatedTimestamp': datetime.datetime(2022, 8, 11, 17, 14, 55, 63000, tzinfo=tzutc()),
-             'ResourceStatus': 'CREATE_COMPLETE', 'DriftInformation': {'StackResourceDriftStatus': 'NOT_CHECKED'}}]
+             'ResourceStatus': 'CREATE_COMPLETE', 'DriftInformation': {'StackResourceDriftStatus': 'NOT_CHECKED'}})]
 
 
 def get_only_vm_stack_side_effect(stack_name: str):

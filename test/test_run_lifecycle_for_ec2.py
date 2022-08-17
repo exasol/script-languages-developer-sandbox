@@ -2,6 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from exasol_script_languages_developer_sandbox.lib.aws_access.stack_resource import StackResource
 from exasol_script_languages_developer_sandbox.lib.setup_ec2.run_setup_ec2 import run_lifecycle_for_ec2
 
 
@@ -15,9 +16,9 @@ def test_run_lifecycle_for_ec2(default_asset_id):
 
     stack_resources_mock = \
         [
-            {"ResourceType": "AWS::EC2::Instance",
+            StackResource({"ResourceType": "AWS::EC2::Instance",
              "ResourceStatus": "CREATE_COMPLETE",
-             "PhysicalResourceId": "abc"}
+             "PhysicalResourceId": "abc"})
         ]
 
     aws_access_mock.get_all_stack_resources.return_value = stack_resources_mock

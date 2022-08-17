@@ -207,8 +207,8 @@ def print_cloudformation_stacks(aws_access: AwsAccess, filter_value: str, printi
                               find_default_tag_value_in_tags(stack.tags))
         stack_resources = aws_access.get_all_stack_resources(stack_name=stack.name)
         for stack_resource in stack_resources:
-            table_printer.add_row("", "", "", "", stack_resource["PhysicalResourceId"],
-                                  stack_resource["ResourceType"], "n/a")
+            table_printer.add_row("", "", "", "", stack_resource.physical_id,
+                                  stack_resource.resource_type, "n/a")
 
     table_printer.finish()
     text_print = printing_factory.create_text_printer()

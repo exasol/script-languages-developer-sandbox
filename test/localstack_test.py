@@ -43,10 +43,10 @@ def test_cloudformation_with_localstack(default_asset_id, local_stack, ec2_cloud
                                            tags=create_default_asset_tag(default_asset_id.tag_value))
     stack_resources = aws_access.get_all_stack_resources(stack_name="test_stack")
     assert len(stack_resources) == 2
-    ec2_instance = [i for i in stack_resources if i["ResourceType"] == "AWS::EC2::Instance"]
+    ec2_instance = [i for i in stack_resources if i.is_ec2_instance]
     assert len(ec2_instance) == 1
 
-    sec_group = [i for i in stack_resources if i["ResourceType"] == "AWS::EC2::SecurityGroup"]
+    sec_group = [i for i in stack_resources if i.is_security_group]
     assert len(sec_group) == 1
     aws_access.delete_stack(stack_name="test_stack")
 
