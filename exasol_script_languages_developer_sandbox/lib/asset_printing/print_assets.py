@@ -108,13 +108,11 @@ def print_export_image_tasks(aws_access: AwsAccess, filter_value: str, printing_
         aws_access.list_export_image_tasks(filters=[{'Name': f'tag:{DEFAULT_TAG_KEY}', 'Values': [filter_value]}])
 
     for export_image_task in export_image_tasks:
-        export_location = export_image_task["S3ExportLocation"]
-        s3bucket = export_location["S3Bucket"]
-        s3prefix = export_location["S3Prefix"]
-        table_printer.add_row(export_image_task["ExportImageTaskId"], export_image_task["Description"],
-                              get_value_safe("Progress", export_image_task), s3bucket, s3prefix,
-                              get_value_safe("Status", export_image_task),
-                              get_value_safe("StatusMessage", export_image_task),
+        s3bucket = export_image_task.s3_bucket
+        s3prefix = export_image_task.s3_prefix
+        table_printer.add_row(export_image_task.id, export_image_task.description,
+                              export_image_task.progress, s3bucket, s3prefix,
+                              export_image_task.status, export_image_task.status_message,
                               find_default_tag_value(export_image_task))
 
     table_printer.finish()

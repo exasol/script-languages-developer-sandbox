@@ -1,23 +1,13 @@
 import logging
-import time
 from typing import Optional, Any, List, Dict
 
 import boto3
 import botocore
 
 from exasol_script_languages_developer_sandbox.lib.aws_access.deployer import Deployer
+from exasol_script_languages_developer_sandbox.lib.aws_access.export_image_task import ExportImageTask
 from exasol_script_languages_developer_sandbox.lib.tags import create_default_asset_tag
 from exasol_script_languages_developer_sandbox.lib.export_vm.vm_disk_image_format import VmDiskImageFormat
-
-
-def get_value_safe(key: str, aws_object: Dict[str, Any], default: str = "n/a") -> str:
-    """
-    Returns an element from a dictionary, otherwise returns the given default value.
-    """
-    if key in aws_object:
-        return aws_object[key]
-    else:
-        return default
 
 
 class AwsAccess(object):
@@ -163,9 +153,10 @@ class AwsAccess(object):
 
     def export_ami_image_to_vm(self, image_id: str, tag_value: str,
                                description: str, role_name: str, disk_format: VmDiskImageFormat,
-                               s3_bucket: str, s3_prefix: str) -> None:
+                               s3_bucket: str, s3_prefix: str) -> str:
         """
-        Creates an AMI image from an EC-2 instance
+        Creates an AMI image from an EC-2 instance.
+        Returns the export_image_task_id.
         """
         logging.debug(f"Running create_image_from_ec2_instance for aws profile {self.aws_profile_for_logging}")
         cloud_client = self._get_aws_client("ec2")
@@ -175,30 +166,21 @@ class AwsAccess(object):
                                            S3ExportLocation={"S3Bucket": s3_bucket, "S3Prefix": s3_prefix},
                                            TagSpecifications=tags)
 
-        export_image_task_id, status, status_message = \
-            result["ExportImageTaskId"], result["Status"], result["StatusMessage"]
-        logging.info(f"Started export of vm image to {s3_bucket}/{s3_prefix}. Status message is {status_message}.")
-        last_progress = None
-        last_status = status
-        while status == "active":
-            time.sleep(10)
-            result = cloud_client.describe_export_image_tasks(ExportImageTaskIds=[export_image_task_id])
-            assert "NextToken" not in result #We expect only one result
-            export_image_tasks = result["ExportImageTasks"]
-            if len(export_image_tasks) != 1:
-                raise RuntimeError(f"Unexpected number of export image tasks: {export_image_tasks}")
-            export_image_task = export_image_tasks[0]
-            status = export_image_task["Status"]
-            status_message = get_value_safe("StatusMessage", export_image_task)
-            progress = get_value_safe("Progress", export_image_task)
+        return result["ExportImageTaskId"]
 
-            if progress != last_progress or status != last_status:
-                logging.info(f"still running export of vm image to {s3_bucket}/{s3_prefix}. "
-                             f"Status message is {status_message}. Progess is '{progress}'")
-            last_progress = progress
-            last_status = status
-        if status != "completed":
-            raise RuntimeError(f"Export of VM failed: status message was {status_message}")
+    def get_export_image_task(self, export_image_task_id: str) -> ExportImageTask:
+        """
+        Get Export-Image-Task for given export_image_task_id.
+        """
+        logging.debug(f"Running create_image_from_ec2_instance for aws profile {self.aws_profile_for_logging}")
+        cloud_client = self._get_aws_client("ec2")
+        result = cloud_client.describe_export_image_tasks(ExportImageTaskIds=[export_image_task_id])
+        assert "NextToken" not in result  # We expect only one result
+        export_image_tasks = result["ExportImageTasks"]
+        if len(export_image_tasks) != 1:
+            raise RuntimeError(f"Unexpected number of export image tasks: {export_image_tasks}")
+        export_image_task = export_image_tasks[0]
+        return ExportImageTask(export_image_task)
 
     def get_ami(self, image_id: str) -> Any:
         """
@@ -234,7 +216,7 @@ class AwsAccess(object):
         assert "NextToken" not in response
         return response["Snapshots"]
 
-    def list_export_image_tasks(self, filters: list) -> list:
+    def list_export_image_tasks(self, filters: list) -> List[ExportImageTask]:
         """
         List export image tasks with given tag filter
         """
@@ -243,7 +225,7 @@ class AwsAccess(object):
 
         response = cloud_client.describe_export_image_tasks(Filters=filters)
         assert "NextToken" not in response
-        return response["ExportImageTasks"]
+        return [ExportImageTask(export_image_task) for export_image_task in response["ExportImageTasks"]]
 
     def list_ec2_key_pairs(self, filters: list) -> list:
         """

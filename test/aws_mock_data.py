@@ -1,6 +1,7 @@
 import datetime
 from dateutil.tz import tzutc
 
+from exasol_script_languages_developer_sandbox.lib.aws_access.export_image_task import ExportImageTask
 from exasol_script_languages_developer_sandbox.lib.vm_bucket.vm_slc_bucket import STACK_NAME
 from test.conftest import DEFAULT_ASSET_ID
 
@@ -73,7 +74,7 @@ def get_snapshot_mock_data():
 
 def get_export_image_task_mock_data(in_progress: bool):
     if in_progress:
-        return {
+        return ExportImageTask({
             'Description': 'VM Description',
             'ExportImageTaskId': 'export-ami-123',
             'S3ExportLocation':
@@ -83,9 +84,9 @@ def get_export_image_task_mock_data(in_progress: bool):
                 },
             'Status': 'completed',
             'Tags': [{'Key': 'exa_slc_id', 'Value': DEFAULT_ASSET_ID.tag_value}]
-        }
+        })
     else:
-        return {
+        return ExportImageTask({
             'Description': 'VM Description',
             'ExportImageTaskId': 'export-ami-123',
             'S3ExportLocation':
@@ -97,7 +98,7 @@ def get_export_image_task_mock_data(in_progress: bool):
             "StatusMessage": "creating the image",
             'Status': 'active',
             'Tags': [{'Key': 'exa_slc_id', 'Value': DEFAULT_ASSET_ID.tag_value}]
-        }
+        })
 
 
 def get_s3_object_mock_data():
