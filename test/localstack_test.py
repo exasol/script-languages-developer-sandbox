@@ -14,16 +14,16 @@ def test_ec2_lifecycle_with_local_stack(local_stack, default_asset_id):
     """
     print("run ec2_setup!")
     execution_generator = run_lifecycle_for_ec2(AwsLocalStackAccess(None), None, None, None, default_asset_id.tag_value)
-    res = next(execution_generator)
-    while res[0] == "pending":
-        res = next(execution_generator)
+    ec2_data = next(execution_generator)
+    ec2_instance_description, key_file_location = ec2_data
+    while ec2_instance_description.is_pending:
+        ec2_data = next(execution_generator)
+        ec2_instance_description, key_file_location = ec2_data
 
-    ec2_instance_status, host_name, ec2_instance_id, key_file_location = res
-    assert ec2_instance_status == "running"
-    print("running!")
-    res = next(execution_generator)
-    ec2_instance_status, host_name, ec2_instance_id, key_file_location = res
-    assert ec2_instance_status == "terminated"
+    assert ec2_instance_description.is_running
+    ec2_data = next(execution_generator)
+    ec2_instance_description, key_file_location = ec2_data
+    assert ec2_instance_description is None and key_file_location is None
 
 
 def test_ec2_manage_keypair_with_local_stack(local_stack, default_asset_id):
@@ -107,9 +107,8 @@ def test_cloudformation_access_with_local_stack(local_stack, default_asset_id):
             as cf_stack:
         ec2_instance_id = cf_stack.get_ec2_instance_id()
         ec2_instance_description = aws_access.describe_instance(ec2_instance_id)
-        status = ec2_instance_description.state_name
         host_name = ec2_instance_description.public_dns_name
-        assert status == "running"
+        assert ec2_instance_description.is_running
         assert host_name.endswith(".eu-central-1.compute.amazonaws.com")
 
 
@@ -117,4 +116,3 @@ def test_user_with_local_stack(local_stack):
     aws_access = AwsLocalStackAccess(None)
     user_name = aws_access.get_user()
     assert user_name == "default_user"
-

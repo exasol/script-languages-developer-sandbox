@@ -1,9 +1,9 @@
 import logging
 import signal
 import time
-import traceback
 from typing import Tuple, Optional
 
+from exasol_script_languages_developer_sandbox.lib import config
 from exasol_script_languages_developer_sandbox.lib.ansible.ansible_access import AnsibleAccess
 from exasol_script_languages_developer_sandbox.lib.ansible.ansible_repository import AnsibleRepository, \
     default_repositories
@@ -15,7 +15,8 @@ from exasol_script_languages_developer_sandbox.lib.aws_access.aws_access import 
 from exasol_script_languages_developer_sandbox.lib.setup_ec2.host_info import HostInfo
 
 from exasol_script_languages_developer_sandbox.lib.setup_ec2.run_install_dependencies import run_install_dependencies
-from exasol_script_languages_developer_sandbox.lib.setup_ec2.run_setup_ec2 import run_lifecycle_for_ec2
+from exasol_script_languages_developer_sandbox.lib.setup_ec2.run_setup_ec2 import run_lifecycle_for_ec2, \
+    EC2StackLifecycleContextManager
 
 
 def run_setup_ec2_and_install_dependencies(aws_access: AwsAccess,
@@ -31,33 +32,32 @@ def run_setup_ec2_and_install_dependencies(aws_access: AwsAccess,
     You can stop the EC-2 machine by pressing Ctrl-C.
     """
     execution_generator = run_lifecycle_for_ec2(aws_access, ec2_key_file, ec2_key_name, None, asset_id.tag_value)
-    res = next(execution_generator)
-    while res[0] == "pending":
-        logging.info(f"EC2 instance not ready yet.")
-        res = next(execution_generator)
+    with EC2StackLifecycleContextManager(execution_generator) as res:
+        ec2_instance_description, key_file_location = res
 
-    ec2_instance_status, host_name, ec2_instance_id, key_file_location = res
-    if ec2_instance_status != "running":
-        logging.error(f"Error during startup of EC2 instance '{ec2_instance_id}'. Status is {ec2_instance_status}")
-        return
+        if not ec2_instance_description.is_running:
+            logging.error(f"Error during startup of EC2 instance '{ec2_instance_description.id}'. "
+                          f"Status is {ec2_instance_description.state_name}")
+            return
 
-    #Wait for the EC-2 instance to become ready.
-    time.sleep(10.0)
-    try:
-        run_install_dependencies(ansible_access, (HostInfo(host_name, key_file_location),),
-                                 ansible_run_context, ansible_repositories)
-    except Exception as e:
-        logging.exception("Install dependencies failed.")
+        #Wait for the EC-2 instance to become ready.
+        time.sleep(config.global_config.time_to_wait_for_polling)
+        host_name = ec2_instance_description.public_dns_name
+        try:
+            run_install_dependencies(ansible_access, (HostInfo(host_name, key_file_location),),
+                                     ansible_run_context, ansible_repositories)
+        except Exception as e:
+            logging.exception("Install dependencies failed.")
 
-    print("-----------------------------------------------------")
-    print(f"You can now login to the ec2 machine with 'ssh -i {key_file_location}  ubuntu@{host_name}'")
-    print(f"Also you can access Jupyterlab via http://{host_name}:8888/lab")
-    print('Press Ctrl+C to stop and cleanup.')
+        print("-----------------------------------------------------")
+        print(f"You can now login to the ec2 machine with 'ssh -i {key_file_location}  ubuntu@{host_name}'")
+        print(f"Also you can access Jupyterlab via http://{host_name}:8888/lab")
+        print('Press Ctrl+C to stop and cleanup.')
 
-    def signal_handler(sig, frame):
-        print('Start cleanup.')
-        next(execution_generator)
-        print('Cleanup done.')
+        def signal_handler(sig, frame):
+            print('Start cleanup.')
 
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.pause()
+        signal.signal(signal.SIGINT, signal_handler)
+        signal.pause()
+
+    print('Cleanup done.')

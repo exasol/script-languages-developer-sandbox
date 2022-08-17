@@ -22,3 +22,11 @@ class EC2Instance:
     @property
     def public_dns_name(self) -> str:
         return self._aws_object["PublicDnsName"]
+
+    @property
+    def is_pending(self) -> bool:
+        return self.state_name == "pending"
+
+    @property
+    def is_running(self) -> bool:
+        return self.state_name == "running"
