@@ -7,6 +7,5 @@ def get_value_safe(key: str, aws_object: Dict[str, Any], default: str = "n/a") -
     """
     if key in aws_object:
         return aws_object[key]
-    else:
-        return default
+    return default
 

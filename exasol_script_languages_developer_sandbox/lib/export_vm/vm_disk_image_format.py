@@ -12,9 +12,11 @@ class VmDiskImageFormat(Enum):
     VHD = "VHD"
 
 
-def all_vm_disk_image_formats() -> Tuple[str, ...]:
-    return tuple(vm_format.value for vm_format in VmDiskImageFormat)
+    @staticmethod
+    def all_formats() -> Tuple[str, ...]:
+        return tuple(vm_format.value for vm_format in VmDiskImageFormat)
 
+    @staticmethod
+    def default_formats() -> Tuple[str, ...]:
+        return VmDiskImageFormat.VHD.value, VmDiskImageFormat.VMDK.value
 
-def default_vm_disk_image_formats() -> Tuple[str, ...]:
-    return VmDiskImageFormat.VHD.value, VmDiskImageFormat.VMDK.value

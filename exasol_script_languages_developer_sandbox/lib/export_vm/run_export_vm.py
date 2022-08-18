@@ -1,15 +1,31 @@
 import logging
 import time
+from dataclasses import dataclass
 from sys import stderr
 from typing import Tuple
 
 from exasol_script_languages_developer_sandbox.lib import config
 from exasol_script_languages_developer_sandbox.lib.asset_id import AssetId
 from exasol_script_languages_developer_sandbox.lib.aws_access.aws_access import AwsAccess
+from exasol_script_languages_developer_sandbox.lib.aws_access.export_image_task import ExportImageTask
 from exasol_script_languages_developer_sandbox.lib.setup_ec2.cf_stack import find_ec2_instance_in_cf_stack
 from exasol_script_languages_developer_sandbox.lib.asset_printing.print_assets import print_assets
 from exasol_script_languages_developer_sandbox.lib.export_vm.vm_disk_image_format import VmDiskImageFormat
 from exasol_script_languages_developer_sandbox.lib.vm_bucket.vm_slc_bucket import find_vm_bucket, find_vm_import_role
+
+
+@dataclass(init=True, repr=True, eq=True)
+class ExportImageTaskProgress:
+    """
+    Simple helper class which stores export image task progress and status.
+    It supports comparison and hence can be used to check if there were any updates of `progress` or `status`.
+    """
+    progress: str
+    status: str
+
+    @staticmethod
+    def from_export_image_task(export_image_task: ExportImageTask):
+        return ExportImageTaskProgress(progress=export_image_task.progress, status=export_image_task.status)
 
 
 def export_vm_image(aws_access: AwsAccess, vm_image_format: VmDiskImageFormat, tag_value: str,
@@ -32,17 +48,14 @@ def export_vm_image(aws_access: AwsAccess, vm_image_format: VmDiskImageFormat, t
     logging.info(
         f"Started export of vm image to {vm_bucket}/{bucket_prefix}. "
         f"Status message is {export_image_task.status_message}.")
-    last_progress = export_image_task.progress
-    last_status = export_image_task.status
+    last_progress = ExportImageTaskProgress.from_export_image_task(export_image_task)
     while export_image_task.is_active:
         time.sleep(config.global_config.time_to_wait_for_polling)
         export_image_task = aws_access.get_export_image_task(export_image_task_id)
-        if export_image_task.progress != last_progress or export_image_task.status != last_status:
-            logging.info(f"still running export of vm image to {vm_bucket}/{bucket_prefix}. "
-                         f"Status message is {export_image_task.status_message}. "
-                         f"Progess is '{export_image_task.progress}'")
-        last_progress = export_image_task.progress
-        last_status = export_image_task.status
+        progress = ExportImageTaskProgress.from_export_image_task(export_image_task)
+        if last_progress != progress:
+            logging.info(f"still running export of vm image to {vm_bucket}/{bucket_prefix}: {progress} ")
+            last_progress = progress
     if not export_image_task.is_completed:
         raise RuntimeError(f"Export of VM failed: status message was {export_image_task.status_message}")
 

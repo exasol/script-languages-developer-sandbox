@@ -51,8 +51,8 @@ def test_printing_snapshot(default_asset_id, printing_mocks):
 
 
 export_image_task_mock_data = [
-    ("50%", "active", "creating the image", get_export_image_task_mock_data(True)),
-    ("n/a", "completed", "n/a", get_export_image_task_mock_data(False))
+    ("50%", "active", "creating the image", get_export_image_task_mock_data(in_progress=True)),
+    ("n/a", "completed", "n/a", get_export_image_task_mock_data(in_progress=False))
 ]
 
 

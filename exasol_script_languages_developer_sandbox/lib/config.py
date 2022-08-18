@@ -5,8 +5,8 @@ default_config = {
 
 
 class ConfigObject:
-    def __init__(self, **argv):
-        self.__dict__.update(argv)
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
 
 
 global_config = ConfigObject(**default_config)
