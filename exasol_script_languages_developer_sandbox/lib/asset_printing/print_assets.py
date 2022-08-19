@@ -147,9 +147,9 @@ def print_s3_objects(aws_access: AwsAccess, asset_id: Optional[AssetId], printin
     #    we need to implement our own wildcard implementation here.
     #    We call list_s3_object with the standard prefix (e.g. "slc_developer_sandbox"),
     #    which returns ALL stored vm objects.
-    # 3. If no filter is given as command line variable, "prefix" will be empty, and we return all s3 objects
-    # 4. If variable "prefix" is not empty, we need to ensure that it end's with a wildcard, so that the matching
-    #    works correcty.
+    # 3. If no filter is given (asset_id == None), "prefix" will be empty, and we return all s3 objects
+    # 4. If the variable "prefix" is not empty, we need to ensure that it ends with a wildcard, so that the matching
+    #    works correctly.
     # => Assume that a filter is given  "5.0.0". Variable prefix would be "slc_developer_sandbox/5.0.0".
 
     s3_objects = aws_access.list_s3_objects(bucket=vm_bucket, prefix=AssetId.BUCKET_PREFIX)
