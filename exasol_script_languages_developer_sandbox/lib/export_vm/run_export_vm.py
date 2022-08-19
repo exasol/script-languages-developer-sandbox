@@ -28,6 +28,26 @@ class ExportImageTaskProgress:
         return ExportImageTaskProgress(progress=export_image_task.progress, status=export_image_task.status)
 
 
+def poll_export_image_task(aws_access: AwsAccess, export_image_task: ExportImageTask) -> ExportImageTask:
+    """
+    Checks a started exported-image-task in a loop until it completes or fails.
+
+    :param aws_access: Aws Access proxy
+    :param export_image_task:  the newly started export image task object.
+    :return: The export-image-task object after the task has completed or failed.
+    """
+    last_progress = ExportImageTaskProgress.from_export_image_task(export_image_task)
+    while export_image_task.is_active:
+        time.sleep(config.global_config.time_to_wait_for_polling)
+        export_image_task = aws_access.get_export_image_task(export_image_task.id)
+        progress = ExportImageTaskProgress.from_export_image_task(export_image_task)
+        if last_progress != progress:
+            logging.info(f"still running export of vm image to "
+                         f"{export_image_task.s3_bucket}/{export_image_task.s3_prefix}: {progress} ")
+            last_progress = progress
+    return export_image_task
+
+
 def export_vm_image(aws_access: AwsAccess, vm_image_format: VmDiskImageFormat, tag_value: str,
                     ami_id: str, vmimport_role: str, vm_bucket: str, bucket_prefix: str):
     """
@@ -44,18 +64,9 @@ def export_vm_image(aws_access: AwsAccess, vm_image_format: VmDiskImageFormat, t
                                           s3_bucket=vm_bucket, s3_prefix=bucket_prefix)
 
     export_image_task = aws_access.get_export_image_task(export_image_task_id)
-
-    logging.info(
-        f"Started export of vm image to {vm_bucket}/{bucket_prefix}. "
-        f"Status message is {export_image_task.status_message}.")
-    last_progress = ExportImageTaskProgress.from_export_image_task(export_image_task)
-    while export_image_task.is_active:
-        time.sleep(config.global_config.time_to_wait_for_polling)
-        export_image_task = aws_access.get_export_image_task(export_image_task_id)
-        progress = ExportImageTaskProgress.from_export_image_task(export_image_task)
-        if last_progress != progress:
-            logging.info(f"still running export of vm image to {vm_bucket}/{bucket_prefix}: {progress} ")
-            last_progress = progress
+    logging.info(f"Started export of vm image to {vm_bucket}/{bucket_prefix}. "
+                 f"Status message is {export_image_task.status_message}.")
+    export_image_task = poll_export_image_task(aws_access, export_image_task)
     if not export_image_task.is_completed:
         raise RuntimeError(f"Export of VM failed: status message was {export_image_task.status_message}")
 
