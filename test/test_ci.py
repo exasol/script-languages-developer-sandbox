@@ -14,7 +14,6 @@ from invoke import Responder
 from exasol_script_languages_developer_sandbox.cli.options.id_options import DEFAULT_ID
 from exasol_script_languages_developer_sandbox.lib.ansible.ansible_access import AnsibleAccess
 from exasol_script_languages_developer_sandbox.lib.asset_id import AssetId
-from exasol_script_languages_developer_sandbox.lib.aws_access.ami import Ami
 from exasol_script_languages_developer_sandbox.lib.aws_access.aws_access import AwsAccess
 from exasol_script_languages_developer_sandbox.lib.run_create_vm import run_create_vm
 from exasol_script_languages_developer_sandbox.lib.setup_ec2.run_setup_ec2 import run_lifecycle_for_ec2, \
@@ -50,8 +49,12 @@ def new_ec2_from_ami():
     then starts another EC-2 instance, based on the new AMI, then changes the password (which is expired),
     and finally  returns that EC-2 name together with the new temporary password.
     """
+    # Create default_password (the one burned into the AMI) and the new password (which will be set during first login)
+    # We use different sizes of both in order to avoid equality of both!
     default_password = generate_random_password(length=12)
     new_password = generate_random_password(length=14)
+    # both passwords differ in length, so it can't happen that both are equal.
+    # However, just as a safeguard check for inequality.
     assert default_password != new_password
     aws_access = AwsAccess(aws_profile=None)
     asset_id = AssetId("ci-test-{suffix}-{now}".format(now=datetime.now().strftime("%Y-%m-%d-%H-%M-%S"),
