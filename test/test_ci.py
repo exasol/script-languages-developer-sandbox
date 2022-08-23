@@ -14,6 +14,7 @@ from invoke import Responder
 from exasol_script_languages_developer_sandbox.cli.options.id_options import DEFAULT_ID
 from exasol_script_languages_developer_sandbox.lib.ansible.ansible_access import AnsibleAccess
 from exasol_script_languages_developer_sandbox.lib.asset_id import AssetId
+from exasol_script_languages_developer_sandbox.lib.aws_access.ami import Ami
 from exasol_script_languages_developer_sandbox.lib.aws_access.aws_access import AwsAccess
 from exasol_script_languages_developer_sandbox.lib.run_create_vm import run_create_vm
 from exasol_script_languages_developer_sandbox.lib.setup_ec2.run_setup_ec2 import run_lifecycle_for_ec2, \
@@ -21,6 +22,8 @@ from exasol_script_languages_developer_sandbox.lib.setup_ec2.run_setup_ec2 impor
 
 import string
 import random
+
+from exasol_script_languages_developer_sandbox.lib.tags import DEFAULT_TAG_KEY
 
 
 def generate_random_password(length) -> str:
@@ -59,25 +62,35 @@ def new_ec2_from_ami():
     # Use the ami_name to find the AMI id (alternatively we could use the tag here)
     amis = aws_access.list_amis(filters=[{'Name': 'name', 'Values': [asset_id.ami_name]}])
     assert len(amis) == 1
-    ami_id = amis[0].id
+    ami = amis[0]
 
     stack_prefix = str(asset_id).replace(".", "-")
     lifecycle_generator = run_lifecycle_for_ec2(aws_access, None, None, stack_prefix=stack_prefix,
-                                                tag_value=asset_id.tag_value, ami_id=ami_id)
+                                                tag_value=asset_id.tag_value, ami_id=ami.id)
 
-    with EC2StackLifecycleContextManager(lifecycle_generator) as ec2_data:
-        ec2_instance_description, key_file_location = ec2_data
-        assert ec2_instance_description.is_running
+    try:
+        with EC2StackLifecycleContextManager(lifecycle_generator) as ec2_data:
+            ec2_instance_description, key_file_location = ec2_data
+            assert ec2_instance_description.is_running
 
-        status = aws_access.get_instance_status(ec2_instance_description.id)
-        while status.initializing:
-            time.sleep(10)
             status = aws_access.get_instance_status(ec2_instance_description.id)
-        assert status.ok
-        time.sleep(10)
-        change_password(host=ec2_instance_description.public_dns_name, user='ubuntu',
-                        curr_pass=default_password, new_password=new_password)
-        yield ec2_instance_description.public_dns_name, new_password, default_password
+            while status.initializing:
+                time.sleep(10)
+                status = aws_access.get_instance_status(ec2_instance_description.id)
+            assert status.ok
+            time.sleep(10)
+            change_password(host=ec2_instance_description.public_dns_name, user='ubuntu',
+                            curr_pass=default_password, new_password=new_password)
+            yield ec2_instance_description.public_dns_name, new_password, default_password
+    finally:
+        # Cleanup: We need to unregister the AMI and the snapshot
+        # (the rest was removed automatically by deleting the cloudformation stack)
+        aws_access.deregister_ami(ami.id)
+        # Find snapshot by the tag
+        snapshots = aws_access.list_snapshots(filters=[{'Name': f'tag:{DEFAULT_TAG_KEY}',
+                                                        'Values': [asset_id.tag_value]}])
+        assert len(snapshots) == 1
+        aws_access.remove_snapshot(snapshots[0].id)
 
 
 @pytest.mark.skipif(os.environ.get('RUN_DEVELOPER_SANDBOX_CI_TEST') != 'true',

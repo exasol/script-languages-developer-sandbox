@@ -290,6 +290,22 @@ class AwsAccess(object):
         if "LocationConstraint" in response:
             return response["LocationConstraint"]
 
+    def deregister_ami(self, ami_d: str) -> None:
+        """
+        De-registers an AMI
+        """
+        logging.debug(f"Running deregister_ami for aws profile {self.aws_profile_for_logging}")
+        cloud_client = self._get_aws_client("ec2")
+        cloud_client.deregister_image(ImageId=ami_d)
+
+    def remove_snapshot(self, snapshot_id: str) -> None:
+        """
+        Removes a snapshot
+        """
+        logging.debug(f"Running remove_snapshot for aws profile {self.aws_profile_for_logging}")
+        cloud_client = self._get_aws_client("ec2")
+        cloud_client.delete_snapshot(SnapshotId=snapshot_id)
+
     def get_user(self) -> str:
         """
         Return the current IAM user name.
