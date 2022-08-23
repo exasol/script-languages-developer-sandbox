@@ -3,6 +3,7 @@ import time
 
 from datetime import datetime
 
+import botocore
 import paramiko
 import pytest
 
@@ -24,6 +25,20 @@ import string
 import random
 
 from exasol_script_languages_developer_sandbox.lib.tags import DEFAULT_TAG_KEY
+
+
+class AwsCiAccess(AwsAccess):
+    """
+    We can't use Aws.getUser() without parameters when executing from within a IAM Role, and not a User account.
+    (Boto3 throws an exception).
+    Hence, we overwrite the default implementation and return a standard value.
+    """
+    def get_user(self) -> str:
+        try:
+            user = super().get_user()
+        except botocore.exceptions.ClientError:
+            user = "ci_user"
+        return user
 
 
 def generate_random_password(length) -> str:
@@ -57,7 +72,7 @@ def new_ec2_from_ami():
     # both passwords differ in length, so it can't happen that both are equal.
     # However, just as a safeguard check for inequality.
     assert default_password != new_password
-    aws_access = AwsAccess(aws_profile=None)
+    aws_access = AwsCiAccess(aws_profile=None)
     asset_id = AssetId("ci-test-{suffix}-{now}".format(now=datetime.now().strftime("%Y-%m-%d-%H-%M-%S"),
                                                        suffix=DEFAULT_ID))
     run_create_vm(aws_access, None, None,

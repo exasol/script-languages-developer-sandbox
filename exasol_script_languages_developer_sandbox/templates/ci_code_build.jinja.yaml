@@ -54,11 +54,6 @@ Resources:
                   - ec2:*
                   - cloudformation:*
                 Resource: '*'
-              - Effect: Allow
-                Action:
-                  - iam:GetUser
-                Resource:
-                  - '*'
   DeveloperSandboxCICodeBuild:
     Type: AWS::CodeBuild::Project
     Properties:
