@@ -54,6 +54,11 @@ Resources:
                   - ec2:*
                   - cloudformation:*
                 Resource: '*'
+              - Effect: Allow
+                Action:
+                  - iam:GetUser
+                Resource:
+                  - !Sub "arn:aws:iam::${AWS::AccountId}:role/${AWS::StackName}-CodeBuildRole-*"
   DeveloperSandboxCICodeBuild:
     Type: AWS::CodeBuild::Project
     Properties:
