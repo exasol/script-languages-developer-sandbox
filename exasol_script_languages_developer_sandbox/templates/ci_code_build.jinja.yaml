@@ -1,24 +1,4 @@
 Resources:
-  ArtifactsBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: 'aws:kms'
-              KMSMasterKeyID: !Sub "arn:aws:kms:${AWS::Region}:${AWS::AccountId}:alias/aws/s3"
-            BucketKeyEnabled: true
-      LifecycleConfiguration:
-        Rules:
-          - Id: ExpirationRule
-            Status: Enabled
-            ExpirationInDays: 30
-
   CodeBuildRole:
     Type: AWS::IAM::Role
     Properties:
@@ -45,15 +25,13 @@ Resources:
                 Resource: '*'
               - Effect: Allow
                 Action:
-                  - s3:PutObject
-                  - s3:GetObject
-                Resource:
-                  - !Sub "arn:aws:s3:::${ArtifactsBucket}/*"
-              - Effect: Allow
-                Action:
                   - ec2:*
                   - cloudformation:*
                 Resource: '*'
+              - Effect: Allow
+                Action:
+                  - s3:*
+                Resource: arn:aws:s3:::{{vm_bucket}}/*
   DeveloperSandboxCICodeBuild:
     Type: AWS::CodeBuild::Project
     Properties:
@@ -70,9 +48,7 @@ Resources:
                Pattern: \[CodeBuild\]
       ServiceRole: !GetAtt CodeBuildRole.Arn
       Artifacts:
-        Location: !Ref ArtifactsBucket
-        OverrideArtifactName: true
-        Type: S3
+        Type: NO_ARTIFACTS
       Environment:
         Type: LINUX_CONTAINER
         ComputeType: BUILD_GENERAL1_SMALL

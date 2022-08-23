@@ -29,7 +29,7 @@ from exasol_script_languages_developer_sandbox.lib.tags import DEFAULT_TAG_KEY
 
 class AwsCiAccess(AwsAccess):
     """
-    We can't use Aws.getUser() without parameters when executing from within a IAM Role, and not a User account.
+    We can't use AwsAccess.getUser() without parameters when executing from within an IAM Role, and not a User account.
     (Boto3 throws an exception).
     Hence, we overwrite the default implementation and return a standard value.
     """
@@ -74,7 +74,9 @@ def new_ec2_from_ami():
     assert default_password != new_password
     aws_access = AwsCiAccess(aws_profile=None)
     asset_id = AssetId("ci-test-{suffix}-{now}".format(now=datetime.now().strftime("%Y-%m-%d-%H-%M-%S"),
-                                                       suffix=DEFAULT_ID))
+                                                       suffix=DEFAULT_ID),
+                       stack_prefix="stack",
+                       ami_prefix="ami")
     run_create_vm(aws_access, None, None,
                   AnsibleAccess(), default_password, tuple(), asset_id, default_config_object)
 
@@ -83,9 +85,7 @@ def new_ec2_from_ami():
     assert len(amis) == 1
     ami = amis[0]
 
-    stack_prefix = str(asset_id).replace(".", "-")
-    lifecycle_generator = run_lifecycle_for_ec2(aws_access, None, None, stack_prefix=stack_prefix,
-                                                tag_value=asset_id.tag_value, ami_id=ami.id)
+    lifecycle_generator = run_lifecycle_for_ec2(aws_access, None, None, asset_id=asset_id, ami_id=ami.id)
 
     try:
         with EC2StackLifecycleContextManager(lifecycle_generator, default_config_object) as ec2_data:
