@@ -1,0 +1,96 @@
+Resources:
+  ArtifactsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: 'aws:kms'
+              KMSMasterKeyID: !Sub "arn:aws:kms:${AWS::Region}:${AWS::AccountId}:alias/aws/s3"
+            BucketKeyEnabled: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpirationRule
+            Status: Enabled
+            ExpirationInDays: 30
+
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+            - Effect: Allow
+              Principal:
+                  Service:
+                    - codebuild.amazonaws.com
+              Action:
+                - sts:AssumeRole
+      Description: !Sub "IAM Role for ${AWS::StackName}"
+      Path: '/'
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - codebuild:*
+                  - logs:*
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                Resource:
+                  - !Sub "arn:aws:s3:::${ArtifactsBucket}/*"
+              - Effect: Allow
+                Action:
+                  - ec2:*
+                  - cloudformation:*
+                Resource: '*'
+  DeveloperSandboxCICodeBuild:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Description: CI Build which runs CI test if script-languages-developer-sandbox
+      Triggers:
+        Webhook: True
+        FilterGroups:
+          -  - Type: EVENT
+               Pattern: PUSH
+             - Type: HEAD_REF
+               Pattern: ^refs/heads/main$
+               ExcludeMatchedPattern: true
+             - Type: COMMIT_MESSAGE
+               Pattern: \[CodeBuild\]
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Artifacts:
+        Location: !Ref ArtifactsBucket
+        OverrideArtifactName: true
+        Type: S3
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:5.0
+      Source:
+        Type: GITHUB
+        Location: "https://github.com/exasol/script-languages-developer-sandbox"
+        BuildSpec: "aws-code-build/ci/buildspec.yaml"
+      TimeoutInMinutes: 240
+
+#Trick to have log retention, see https://medium.com/allermedia-techblog/cloudformation-example-log-retention-for-lambda-and-codebuild-a11e74516bb6
+  CodeBuildLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/codebuild/${ DeveloperSandboxCICodeBuild }"
+      RetentionInDays: 14
+
+Outputs:
+  ProjectName:
+    Value: !Ref DeveloperSandboxCICodeBuild
+    Description: Developer Sandbox CI Build project name
