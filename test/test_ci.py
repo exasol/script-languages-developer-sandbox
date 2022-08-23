@@ -3,6 +3,7 @@ import time
 
 from datetime import datetime
 
+import paramiko
 import pytest
 
 import fabric
@@ -29,20 +30,12 @@ def generate_random_password(length) -> str:
 def change_password(host: str, user: str, curr_pass: str, new_password: str) -> None:
     with fabric.Connection(host, user=user,
                            connect_kwargs={"password": curr_pass}) as con:
-        responder_current_password = Responder(
-            pattern=r"Current password: ",
-            response=f"{curr_pass}\n",
-        )
-        responder_mew_password = Responder(
-            pattern=r"New password: ",
-            response=f"{new_password}\n",
-        )
-        responder_retype_password = Responder(
-            pattern=r"Retype new password: ",
-            response=f"{new_password}\n",
-        )
+        prompts = ((r"Current password: ", f"{curr_pass}\n"),
+                   (r"New password: ", f"{new_password}\n"),
+                   (r"Retype new password: ", f"{new_password}\n"))
+        responders = [Responder(pattern=prompt, response=response) for prompt, response in prompts]
         res = con.run("uname",
-                      watchers=[responder_current_password, responder_mew_password, responder_retype_password],
+                      watchers=responders,
                       pty=True)
         assert res.ok
 
@@ -54,8 +47,9 @@ def new_ec2_from_ami():
     then starts another EC-2 instance, based on the new AMI, then changes the password (which is expired),
     and finally  returns that EC-2 name together with the new temporary password.
     """
-    default_password = generate_random_password(12)
-    new_password = generate_random_password(12)
+    default_password = generate_random_password(length=12)
+    new_password = generate_random_password(length=14)
+    assert default_password != new_password
     aws_access = AwsAccess(aws_profile=None)
     asset_id = AssetId("ci-test-{suffix}-{now}".format(now=datetime.now().strftime("%Y-%m-%d-%H-%M-%S"),
                                                        suffix=DEFAULT_ID))
@@ -83,7 +77,7 @@ def new_ec2_from_ami():
         time.sleep(10)
         change_password(host=ec2_instance_description.public_dns_name, user='ubuntu',
                         curr_pass=default_password, new_password=new_password)
-        yield ec2_instance_description.public_dns_name, new_password
+        yield ec2_instance_description.public_dns_name, new_password, default_password
 
 
 @pytest.mark.skipif(os.environ.get('RUN_DEVELOPER_SANDBOX_CI_TEST') != 'true',
@@ -93,7 +87,7 @@ def test_exaslct_with_ec2_based_on_new_ami(new_ec2_from_ami):
     This test validates that exaslct is correctly working on the EC-2 instance, which was launched from the
     newly created AMI.
     """
-    ec2_instance, password = new_ec2_from_ami
+    ec2_instance, password, _ = new_ec2_from_ami
     with fabric.Connection(ec2_instance, user='ubuntu',
                            connect_kwargs={"password": password}) as con:
         with con.cd("script-languages-release"):
@@ -110,6 +104,24 @@ def test_jupyter_with_ec2_based_on_new_ami(new_ec2_from_ami):
     This test validates that Jupyterlab is correctly working on the EC-2 instance, which was launched from the
     newly created AMI.
     """
-    ec2_instance, password = new_ec2_from_ami
+    ec2_instance, password, _ = new_ec2_from_ami
     http_conn = requests.get(f"http://{ec2_instance}:8888/lab")
     assert http_conn.status_code == 200
+
+
+@pytest.mark.skipif(os.environ.get('RUN_DEVELOPER_SANDBOX_CI_TEST') != 'true',
+                    reason="CI test need to be activated by env variable RUN_DEVELOPER_SANDBOX_CI_TEST")
+def test_password_changed_on_new_ami(new_ec2_from_ami):
+    """
+    This test validates that the password has been changed by trying to login via ssh using the old password
+    (which must fail) and by using the new password (which must succeed).
+    """
+    ec2_instance, password, old_password = new_ec2_from_ami
+    with pytest.raises(paramiko.ssh_exception.AuthenticationException):
+        with fabric.Connection(ec2_instance, user='ubuntu',
+                               connect_kwargs={"password": old_password}) as con:
+            con.run("uname")
+
+    with fabric.Connection(ec2_instance, user='ubuntu',
+                           connect_kwargs={"password": password}) as con:
+        con.run("uname")
