@@ -1,3 +1,4 @@
+import logging
 import time
 from typing import Tuple, Optional, List
 
@@ -16,6 +17,7 @@ from exasol_script_languages_developer_sandbox.lib.setup_ec2.run_install_depende
 from exasol_script_languages_developer_sandbox.lib.setup_ec2.run_reset_password import run_reset_password
 from exasol_script_languages_developer_sandbox.lib.setup_ec2.run_setup_ec2 import run_lifecycle_for_ec2, \
     EC2StackLifecycleContextManager
+from exasol_script_languages_developer_sandbox.lib.setup_ec2.source_ami import find_source_ami
 
 
 def run_create_vm(aws_access: AwsAccess, ec2_key_file: Optional[str], ec2_key_name: Optional[str],
@@ -32,8 +34,11 @@ def run_create_vm(aws_access: AwsAccess, ec2_key_file: Optional[str], ec2_key_na
     If anything goes wrong the cloudformation stack of the EC-2 instance will be removed.
     For debuging you can use the available debug commands.
     """
+    source_ami = find_source_ami(aws_access, config.global_config.source_ami_filters)
+    logging.info(f"Using source ami: '{source_ami.name}' from {source_ami.creation_date}")
+
     execution_generator = run_lifecycle_for_ec2(aws_access, ec2_key_file, ec2_key_name, None,
-                                                asset_id.tag_value, config.global_config.source_ami_id)
+                                                asset_id.tag_value, source_ami.id)
 
     with EC2StackLifecycleContextManager(execution_generator) as ec2_data:
         ec2_instance_description, key_file_location = ec2_data

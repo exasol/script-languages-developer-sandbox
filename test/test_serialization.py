@@ -4,7 +4,7 @@ import pickle
 import traceback
 from pathlib import Path
 
-from exasol_script_languages_developer_sandbox.lib import config
+from conftest import TEST_DUMMY_AMI_ID
 from exasol_script_languages_developer_sandbox.lib.asset_id import AssetId
 from exasol_script_languages_developer_sandbox.lib.setup_ec2.cf_stack import CloudformationStack
 from exasol_script_languages_developer_sandbox.lib.setup_ec2.key_file_manager import KeyFileManager
@@ -59,7 +59,7 @@ def create_cloudformation_stack_and_serialize(tmp_location_key_manager: Path, tm
             pickle.dump(key_file_manager, f)
         cloudformation = CloudformationStack(aws_access, key_file_manager.key_name,
                                              aws_access.get_user(), None, default_asset_id.tag_value,
-                                             config.global_config.source_ami_id)
+                                             TEST_DUMMY_AMI_ID)
         cloudformation.upload_cloudformation_stack()
         with open(tmp_location_cloudformation, "wb") as f:
             pickle.dump(cloudformation, f)

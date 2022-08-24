@@ -16,6 +16,8 @@ from exasol_script_languages_developer_sandbox.lib.asset_id import AssetId
 
 DEFAULT_ASSET_ID = AssetId("test")
 
+TEST_DUMMY_AMI_ID = "ami-123"
+
 
 @pytest.fixture
 def default_asset_id():
@@ -27,7 +29,7 @@ def ec2_cloudformation_yml():
 
     return render_template("ec2_cloudformation.jinja.yaml", key_name="test_key", user_name="test_user",
                            trace_tag=DEFAULT_TAG_KEY, trace_tag_value=DEFAULT_ASSET_ID.tag_value,
-                           ami_id=config.global_config.source_ami_id)
+                           ami_id=TEST_DUMMY_AMI_ID)
 
 
 @pytest.fixture
@@ -64,6 +66,6 @@ def local_stack():
 def override_config():
     test_config = {
         "time_to_wait_for_polling": 0.01,
-        "source_ami_id": config.global_config.source_ami_id
+        "source_ami_filters": config.global_config.source_ami_filters
     }
     config.global_config = ConfigObject(**test_config)

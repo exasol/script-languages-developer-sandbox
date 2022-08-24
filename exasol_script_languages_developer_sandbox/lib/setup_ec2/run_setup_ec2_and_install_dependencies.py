@@ -17,6 +17,7 @@ from exasol_script_languages_developer_sandbox.lib.setup_ec2.host_info import Ho
 from exasol_script_languages_developer_sandbox.lib.setup_ec2.run_install_dependencies import run_install_dependencies
 from exasol_script_languages_developer_sandbox.lib.setup_ec2.run_setup_ec2 import run_lifecycle_for_ec2, \
     EC2StackLifecycleContextManager
+from exasol_script_languages_developer_sandbox.lib.setup_ec2.source_ami import find_source_ami
 
 
 LOG = get_status_logger(LogType.SETUP)
@@ -34,8 +35,10 @@ def run_setup_ec2_and_install_dependencies(aws_access: AwsAccess,
     gives you time to login into the machine and identify any setup issues.
     You can stop the EC-2 machine by pressing Ctrl-C.
     """
+    source_ami = find_source_ami(aws_access, config.global_config.source_ami_filters)
+    logging.info(f"Using source ami: '{source_ami.name}' from {source_ami.creation_date}")
     execution_generator = run_lifecycle_for_ec2(aws_access, ec2_key_file, ec2_key_name, None,
-                                                asset_id.tag_value, config.global_config.source_ami_id)
+                                                asset_id.tag_value, source_ami.id)
     with EC2StackLifecycleContextManager(execution_generator) as res:
         ec2_instance_description, key_file_location = res
 
