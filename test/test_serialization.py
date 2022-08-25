@@ -70,7 +70,7 @@ def create_cloudformation_stack_and_serialize(tmp_location_key_manager: Path, tm
         raise e
 
 
-def test_cloudformation_stack_with_local_stack(tmp_path, local_stack, default_asset_id):
+def test_cloudformation_stack_with_local_stack(tmp_path, local_stack, default_asset_id, test_dummy_ami_id):
     """
     Test that serialization and deserialization of CloudformationStack work!
     """
@@ -78,7 +78,7 @@ def test_cloudformation_stack_with_local_stack(tmp_path, local_stack, default_as
     tmp_file_cloud_formation = Path(tmp_path) / "cloudformation.data"
     q = mp.Queue()
     p = mp.Process(target=create_cloudformation_stack_and_serialize,
-                   args=(tmp_file_key_file, tmp_file_cloud_formation, q, default_asset_id))
+                   args=(tmp_file_key_file, tmp_file_cloud_formation, q, default_asset_id, test_dummy_ami_id))
     p.start()
     p.join()
     assert p.exitcode == 0
