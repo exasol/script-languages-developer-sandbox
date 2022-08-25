@@ -26,3 +26,4 @@
     - 'etc/update-motd.d/999-jupyter'
   vars:
     jupyter_server_config_file: "{{user_home}}/.jupyter/jupyter_server_config.json"
+    heading_jupyter_update_password: "{{lookup('ansible.builtin.file', 'heading_jupyter_update_password.txt') }}"

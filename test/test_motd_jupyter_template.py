@@ -7,6 +7,8 @@ import pytest
 from jinja2 import Template
 
 
+jupyter_update_msg_heading = """__TEST_JUPYTER_PASSWORD_HEADING___"""
+
 @pytest.fixture()
 def motd_file(tmp_path):
     jupyter_server_config_file = tmp_path / "jupyter_server_config.json"
@@ -24,24 +26,11 @@ def motd_file(tmp_path):
 
     python_code = python_template.render(user_name="test_user", jupyterlab=jupyterlab(),
                                          jupyter_server_config_file=str(jupyter_server_config_file),
-                                         server_hashed_password="dummy_password_hash")
+                                         server_hashed_password="dummy_password_hash",
+                                         heading_jupyter_update_password=jupyter_update_msg_heading)
     with open(python_file, "w") as f:
         f.write(python_code)
     yield python_file, jupyter_server_config_file
-
-
-
-
-jupyter_update_msg_header = """
-  _    _           _       _                                       _                   _              _____                                    _ _
- | |  | |         | |     | |                                     | |                 | |            |  __ \                                  | | |
- | |  | |_ __   __| | __ _| |_ ___   _   _  ___  _   _ _ __       | |_   _ _ __  _   _| |_ ___ _ __  | |__) |_ _ ___ _____      _____  _ __ __| | |
- | |  | | '_ \ / _` |/ _` | __/ _ \ | | | |/ _ \| | | | '__|  _   | | | | | '_ \| | | | __/ _ \ '__| |  ___/ _` / __/ __\ \ /\ / / _ \| '__/ _` | |
- | |__| | |_) | (_| | (_| | ||  __/ | |_| | (_) | |_| | |    | |__| | |_| | |_) | |_| | ||  __/ |    | |  | (_| \__ \__ \\ V  V / (_) | | | (_| |_|
-  \____/| .__/ \__,_|\__,_|\__\___|  \__, |\___/ \__,_|_|     \____/ \__,_| .__/ \__, |\__\___|_|    |_|   \__,_|___/___/ \_/\_/ \___/|_|  \__,_(_)
-        | |                           __/ |                               | |     __/ |
-        |_|                          |___/                                |_|    |___/
-"""
 
 
 def test_motd_jupyter_template_prints_password_message(motd_file):
@@ -59,7 +48,7 @@ def test_motd_jupyter_template_prints_password_message(motd_file):
         json.dump(mock_data, f)
 
     result = subprocess.run(["python3", python_file], capture_output=True)
-    assert jupyter_update_msg_header in result.stdout.decode("utf-8")
+    assert jupyter_update_msg_heading in result.stdout.decode("utf-8")
 
 
 def test_motd_jupyter_template_prints_password_message_not_if_passward_was_changed(motd_file):
