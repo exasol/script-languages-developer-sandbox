@@ -157,3 +157,47 @@ def test_password_changed_on_new_ami(new_ec2_from_ami):
     with fabric.Connection(ec2_instance, user='ubuntu',
                            connect_kwargs={"password": password}) as con:
         con.run("uname")
+
+
+jupyter_update_msg_header = """
+  _    _           _       _                                       _                   _              _____                                    _ _
+ | |  | |         | |     | |                                     | |                 | |            |  __ \                                  | | |
+ | |  | |_ __   __| | __ _| |_ ___   _   _  ___  _   _ _ __       | |_   _ _ __  _   _| |_ ___ _ __  | |__) |_ _ ___ _____      _____  _ __ __| | |
+ | |  | | '_ \ / _` |/ _` | __/ _ \ | | | |/ _ \| | | | '__|  _   | | | | | '_ \| | | | __/ _ \ '__| |  ___/ _` / __/ __\ \ /\ / / _ \| '__/ _` | |
+ | |__| | |_) | (_| | (_| | ||  __/ | |_| | (_) | |_| | |    | |__| | |_| | |_) | |_| | ||  __/ |    | |  | (_| \__ \__ \\ V  V / (_) | | | (_| |_|
+  \____/| .__/ \__,_|\__,_|\__\___|  \__, |\___/ \__,_|_|     \____/ \__,_| .__/ \__, |\__\___|_|    |_|   \__,_|___/___/ \_/\_/ \___/|_|  \__,_(_)
+        | |                           __/ |                               | |     __/ |
+        |_|                          |___/                                |_|    |___/
+"""
+
+
+@pytest.mark.skipif(os.environ.get('RUN_DEVELOPER_SANDBOX_CI_TEST') != 'true',
+                    reason="CI test need to be activated by env variable RUN_DEVELOPER_SANDBOX_CI_TEST")
+def test_jupyter_password_message_shown(new_ec2_from_ami):
+    """
+    This test validates that the motd password message for Jupyterlab is working as expected.
+    """
+    ec2_instance, password, old_password = new_ec2_from_ami
+
+    with fabric.Connection(ec2_instance, user='ubuntu',
+                           connect_kwargs={"password": password}) as con:
+        result = con.run("cat /var/run/motd.dynamic")
+        assert result.ok
+        assert jupyter_update_msg_header in result.stdout
+
+    random_jupyter_password = generate_random_password(12)
+    with fabric.Connection(ec2_instance, user='ubuntu',
+                           connect_kwargs={"password": password}) as con:
+        prompts = ((r"Enter password: ", f"{random_jupyter_password}\n"),
+                   (r"Verify password: ", f"{random_jupyter_password}\n"))
+        responders = [Responder(pattern=prompt, response=response) for prompt, response in prompts]
+        res = con.run("./jupyterenv/bin/jupyter server password",
+                      watchers=responders,
+                      pty=True)
+        assert res.ok
+
+    with fabric.Connection(ec2_instance, user='ubuntu',
+                           connect_kwargs={"password": password}) as con:
+        result = con.run("cat /var/run/motd.dynamic")
+        assert result.ok
+        assert jupyter_update_msg_header not in result.stdout
