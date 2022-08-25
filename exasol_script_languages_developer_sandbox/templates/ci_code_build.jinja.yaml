@@ -19,7 +19,6 @@ Resources:
             Version: '2012-10-17'
             Statement:
               - Action:
-                - codebuild:*
                 - logs:*
                 Resource: "*"
                 Effect: Allow
