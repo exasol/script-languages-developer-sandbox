@@ -18,46 +18,55 @@ Resources:
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
-              - Effect: Allow
-                Action:
-                  - codebuild:*
-                  - logs:*
-                Resource: '*'
-              - Effect: Allow
-                Action:
-                  - ec2:CreateSecurityGroup
-                  - ec2:DeleteSecurityGroup
-                  - ec2:AuthorizeSecurityGroupIngress
-                  - ec2:CreateTags
-
-                Resource: "arn:aws:ec2:eu-central-1:620087982706:security-group/*",
-            - Effect: Allow
-              Action:
-                  - ec2:RunInstances
-                  - ec2:TerminateInstances
-                  - ec2:DescribeInstances
-                  - ec2:CreateTags
-                  - ec2:DescribeImages
-                  - ec2:DescribeSnapshots
-                  - ec2:DescribeSecurityGroups
-                  - ec2:DescribeExportImageTasks
-                  - ec2:DescribeKeyPairs
-                  - ec2:DescribeInstanceStatus
-                  - ec2:CreateImage
-                  - ec2:DeregisterImage
-                  - ec2:DeleteSnapshot
-              Resource: "*"
-            - Effect: Allow
-              Action:
-                  - ec2:CreateKeyPair
-                  - ec2:DeleteKeyPair
-              Resource: arn:aws:ec2:eu-central-1:620087982706:key-pair/ec2-key-*
-            - Effect: Allow
-              Action:
-                  - s3:GetBucketLocation
-                  - s3:ListBucket
-              Resource: arn:aws:s3:::vm-slc-bucket-vmslcbucket-jf66gs2p8rvh
-
+              - Action:
+                - codebuild:*
+                - logs:*
+                Resource: "*"
+                Effect: Allow
+              - Action:
+                - cloudformation:DescribeStacks
+                - cloudformation:ListStackResources
+                Resource: "*"
+                Effect: Allow
+              - Action:
+                - cloudformation:CreateChangeSet
+                - cloudformation:DescribeChangeSet
+                - cloudformation:ExecuteChangeSet
+                - cloudformation:DeleteStack
+                Resource: arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/stack-ci-test-*
+                Effect: Allow
+              - Action:
+                - ec2:CreateSecurityGroup
+                - ec2:DeleteSecurityGroup
+                - ec2:AuthorizeSecurityGroupIngress
+                Resource: arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:security-group/*
+                Effect: Allow
+              - Action:
+                - ec2:RunInstances
+                - ec2:TerminateInstances
+                - ec2:DescribeInstances
+                - ec2:CreateTags
+                - ec2:DescribeImages
+                - ec2:DescribeSnapshots
+                - ec2:DescribeSecurityGroups
+                - ec2:DescribeExportImageTasks
+                - ec2:DescribeKeyPairs
+                - ec2:DescribeInstanceStatus
+                - ec2:CreateImage
+                - ec2:DeregisterImage
+                - ec2:DeleteSnapshot
+                Resource: "*"
+                Effect: Allow
+              - Action:
+                - ec2:CreateKeyPair
+                - ec2:DeleteKeyPair
+                Resource: arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:key-pair/ec2-key-*
+                Effect: Allow
+              - Action:
+                - s3:GetBucketLocation
+                - s3:ListBucket
+                Resource: arn:aws:s3:::{{vm_bucket}}
+                Effect: Allow
   DeveloperSandboxCICodeBuild:
     Type: AWS::CodeBuild::Project
     Properties:
