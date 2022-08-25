@@ -7,6 +7,7 @@ from exasol_script_languages_developer_sandbox.lib.asset_id import AssetId
 from exasol_script_languages_developer_sandbox.lib.aws_access.aws_access import AwsAccess
 from exasol_script_languages_developer_sandbox.lib.aws_access.export_image_task import ExportImageTask
 from exasol_script_languages_developer_sandbox.lib.logging import get_status_logger, LogType
+from exasol_script_languages_developer_sandbox.lib.config import ConfigObject
 from exasol_script_languages_developer_sandbox.lib.setup_ec2.cf_stack import find_ec2_instance_in_cf_stack
 from exasol_script_languages_developer_sandbox.lib.asset_printing.print_assets import print_assets
 from exasol_script_languages_developer_sandbox.lib.export_vm.vm_disk_image_format import VmDiskImageFormat
@@ -73,7 +74,7 @@ def export_vm_image(aws_access: AwsAccess, vm_image_format: VmDiskImageFormat, t
         raise RuntimeError(f"Export of VM failed: status message was {export_image_task.status_message}")
 
 
-def create_ami(aws_access: AwsAccess, ami_name: str, tag_value: str, instance_id: str) -> str:
+def create_ami(aws_access: AwsAccess, ami_name: str, tag_value: str, instance_id: str, cfg: ConfigObject) -> str:
     """
     Creates a new AMI with the given name (parameter ami_name) for the EC2-Instance identified by parameter instance_id.
     The AMI will be tagged with given tag_value.
@@ -87,7 +88,7 @@ def create_ami(aws_access: AwsAccess, ami_name: str, tag_value: str, instance_id
     ami = aws_access.get_ami(ami_id)
     while ami.is_pending:
         LOG.info(f"ami  with name '{ami.name}' and tag(s) '{tag_value}'  still pending...")
-        time.sleep(config.global_config.time_to_wait_for_polling)
+        time.sleep(cfg.time_to_wait_for_polling)
         ami = aws_access.get_ami(ami_id)
     if not ami.is_available:
         raise RuntimeError(f"Failed to create ami! ami state is '{ami.state}'")
@@ -97,7 +98,8 @@ def create_ami(aws_access: AwsAccess, ami_name: str, tag_value: str, instance_id
 def export_vm(aws_access: AwsAccess,
               instance_id: str,
               vm_image_formats: Tuple[str, ...],
-              asset_id: AssetId) -> None:
+              asset_id: AssetId,
+              cfg: ConfigObject) -> None:
     vm_bucket = find_vm_bucket(aws_access)
     vmimport_role = find_vm_import_role(aws_access)
     tag_value = asset_id.tag_value
@@ -105,7 +107,7 @@ def export_vm(aws_access: AwsAccess,
     has_errors = False
     try:
         try:
-            ami_id = create_ami(aws_access, asset_id.ami_name, tag_value, instance_id)
+            ami_id = create_ami(aws_access, asset_id.ami_name, tag_value, instance_id, cfg)
         except Exception:
             LOG.exception("Could not create AMI. Please remove snapshot if necessary!")
             has_errors = True
@@ -130,9 +132,10 @@ def export_vm(aws_access: AwsAccess,
 def run_export_vm(aws_access: AwsAccess,
                   stack_name: str,
                   vm_image_formats: Tuple[str, ...],
-                  asset_id: AssetId):
+                  asset_id: AssetId,
+                  cfg: ConfigObject):
     """
     Runs export only of the VM image.
     """
     ec_instance_id = find_ec2_instance_in_cf_stack(aws_access, stack_name)
-    export_vm(aws_access, ec_instance_id, vm_image_formats, asset_id)
+    export_vm(aws_access, ec_instance_id, vm_image_formats, asset_id, cfg)
