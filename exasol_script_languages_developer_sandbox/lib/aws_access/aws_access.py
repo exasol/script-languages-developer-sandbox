@@ -29,7 +29,7 @@ def log_function_start():
         @wraps(func)
         def wrapper(aws_access, *args, **kwargs):
             LOG.debug('Start {func_name} for aws profile "{aws_profile}"'.
-                      format(func_name=func.__name__, aws_profile=aws_access.aws_profile_for_logging()))
+                      format(func_name=func.__name__, aws_profile=aws_access.aws_profile_for_logging))
             result = func(aws_access, *args, **kwargs)
             return result
         return wrapper
