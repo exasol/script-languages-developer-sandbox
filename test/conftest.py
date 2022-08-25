@@ -69,3 +69,8 @@ def override_config():
         "source_ami_filters": config.global_config.source_ami_filters
     }
     config.global_config = ConfigObject(**test_config)
+
+
+@pytest.fixture()
+def test_dummy_ami_id():
+    return TEST_DUMMY_AMI_ID
