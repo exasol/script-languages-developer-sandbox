@@ -32,13 +32,13 @@ Resources:
                 - cloudformation:DescribeChangeSet
                 - cloudformation:ExecuteChangeSet
                 - cloudformation:DeleteStack
-                Resource: arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/stack-ci-test-*
+                Resource: !Sub  "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/stack-ci-test-*"
                 Effect: Allow
               - Action:
                 - ec2:CreateSecurityGroup
                 - ec2:DeleteSecurityGroup
                 - ec2:AuthorizeSecurityGroupIngress
-                Resource: arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:security-group/*
+                Resource: !Sub "arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:security-group/*"
                 Effect: Allow
               - Action:
                 - ec2:RunInstances
@@ -59,7 +59,7 @@ Resources:
               - Action:
                 - ec2:CreateKeyPair
                 - ec2:DeleteKeyPair
-                Resource: arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:key-pair/ec2-key-*
+                Resource: !Sub  "arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:key-pair/ec2-key-*"
                 Effect: Allow
               - Action:
                 - s3:GetBucketLocation
