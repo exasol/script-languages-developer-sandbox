@@ -1,3 +1,4 @@
+from functools import wraps
 from typing import Optional, Any, List
 
 import boto3
@@ -20,9 +21,25 @@ from exasol_script_languages_developer_sandbox.lib.export_vm.vm_disk_image_forma
 LOG = get_status_logger(LogType.AWS_ACCESS)
 
 
+def log_function_start():
+    """
+    Logging function which can be used to debug-log start of member function of AwsAccess
+    """
+    def decorator(func):
+        @wraps(func)
+        def wrapper(aws_access, *args, **kwargs):
+            LOG.debug('Start {func_name} for aws profile "{aws_profile}"'.
+                      format(func_name=func.__name__, aws_profile=aws_access.aws_profile_for_logging()))
+            result = func(aws_access, *args, **kwargs)
+            return result
+        return wrapper
+    return decorator
+
+
 class AwsAccess(object):
     def __init__(self, aws_profile: Optional[str]):
         self._aws_profile = aws_profile
+        LOG.info("Instantiated AwsAccess with {aws_profile}".format(aws_profile=aws_profile))
 
     @property
     def aws_profile_for_logging(self) -> str:
@@ -35,29 +52,29 @@ class AwsAccess(object):
     def aws_profile(self) -> Optional[str]:
         return self._aws_profile
 
+    @log_function_start()
     def create_new_ec2_key_pair(self, key_name: str, tag_value: str) -> str:
         """
         Create an EC-2 Key-Pair, identified by parameter 'key_name'
         """
-        LOG.debug(f"Running create_new_ec2_key_pair for aws profile {self.aws_profile_for_logging}")
         cloud_client = self._get_aws_client("ec2")
         tags = [{"ResourceType": "key-pair", "Tags": create_default_asset_tag(tag_value)}]
         key_pair = cloud_client.create_key_pair(KeyName=key_name, TagSpecifications=tags)
         return str(key_pair['KeyMaterial'])
 
+    @log_function_start()
     def delete_ec2_key_pair(self, key_name: str) -> None:
         """
         Delete the EC-2 Key-Pair, given by parameter 'key_name'
         """
-        LOG.debug(f"Running delete_ec2_key_pair for aws profile {self.aws_profile_for_logging}")
         cloud_client = self._get_aws_client("ec2")
         cloud_client.delete_key_pair(KeyName=key_name)
 
+    @log_function_start()
     def upload_cloudformation_stack(self, yml: str, stack_name: str, tags=tuple()) -> None:
         """
         Deploy the cloudformation stack.
         """
-        LOG.debug(f"Running upload_cloudformation_stack for aws profile {self.aws_profile_for_logging}")
         cloud_client = self._get_aws_client("cloudformation")
         try:
             cfn_deployer = Deployer(cloudformation_client=cloud_client)
@@ -76,6 +93,7 @@ class AwsAccess(object):
             LOG.error(f"Run 'aws cloudformation describe-stack-events --stack-name {stack_name}' to get details.")
             raise e
 
+    @log_function_start()
     def validate_cloudformation_template(self, cloudformation_yml) -> None:
         """
         This function pushes the YAML to AWS Cloudformation for validation
@@ -83,7 +101,6 @@ class AwsAccess(object):
         Pitfall: Boto3 expects the YAML string as parameter, whereas the AWS CLI expects the file URL as parameter.
         It requires to have the AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY env variables set correctly.
         """
-        LOG.debug(f"Running validate_cloudformation_template for aws profile {self.aws_profile_for_logging}")
         cloud_client = self._get_aws_client("cloudformation")
         cloud_client.validate_template(TemplateBody=cloudformation_yml)
 
@@ -97,6 +114,7 @@ class AwsAccess(object):
             result.extend(current_result["StackResourceSummaries"])
         return [StackResource(stack_resource) for stack_resource in result]
 
+    @log_function_start()
     def get_all_stack_resources(self, stack_name: str) -> List[StackResource]:
         """
         This functions uses Boto3 to get all AWS Cloudformation resources for a specific Cloudformation stack,
@@ -104,33 +122,32 @@ class AwsAccess(object):
         The AWS API truncates at a size of 1MB, and in order to get all chunks the method must be called
         passing the previous retrieved token until no token is returned.
         """
-        LOG.debug(f"Running get_all_codebuild_projects for aws profile {self.aws_profile_for_logging}")
         return self._get_stack_resources(stack_name=stack_name)
 
+    @log_function_start()
     def stack_exists(self, stack_name: str) -> bool:
         """
         This functions uses Boto3 to check if stack with name `stack_name` exists.
         """
-        LOG.debug(f"Running stack_exists for aws profile {self.aws_profile_for_logging}")
         try:
             result = self._get_stack_resources(stack_name=stack_name)
             return any([res.status != "DELETE_COMPLETE" for res in result])
         except botocore.exceptions.ClientError:
             return False
 
+    @log_function_start()
     def delete_stack(self, stack_name: str) -> None:
         """
         This functions uses Boto3 to delete a stack identified by parameter "stack_name".
         """
-        LOG.debug(f"Running delete_stack for aws profile {self.aws_profile_for_logging}")
         cf_client = self._get_aws_client('cloudformation')
         cf_client.delete_stack(StackName=stack_name)
 
+    @log_function_start()
     def describe_stacks(self) -> List[CloudformationStack]:
         """
         This functions uses Boto3 to describe all cloudformation stacks.
         """
-        LOG.debug(f"Running describe_stacks for aws profile {self.aws_profile_for_logging}")
         cf_client = self._get_aws_client('cloudformation')
         current_result = cf_client.describe_stacks()
         result = current_result["Stacks"]
@@ -140,11 +157,11 @@ class AwsAccess(object):
             result.extend(current_result["Stacks"])
         return [CloudformationStack(stack) for stack in result]
 
+    @log_function_start()
     def describe_instance(self, instance_id: str) -> EC2Instance:
         """
         Describes an AWS instance identified by parameter instance_id
         """
-        LOG.debug(f"Running describe_instance for aws profile {self.aws_profile_for_logging}")
         cloud_client = self._get_aws_client("ec2")
         instances_result = cloud_client.describe_instances(InstanceIds=[instance_id])
         reservations = instances_result["Reservations"]
@@ -155,12 +172,12 @@ class AwsAccess(object):
             raise RuntimeError(f"Unexpected number of instances in describe_instance(): {len(instances)}")
         return EC2Instance(instances[0])
 
+    @log_function_start()
     def create_image_from_ec2_instance(self, instance_id: str, name: str, tag_value: str, description: str) -> str:
         """
         Creates an AMI image from an EC-2 instance.
         Returns the image-id of the new AMI.
         """
-        LOG.debug(f"Running create_image_from_ec2_instance for aws profile {self.aws_profile_for_logging}")
         cloud_client = self._get_aws_client("ec2")
         tags = [{"ResourceType": "image", "Tags": create_default_asset_tag(tag_value)},
                 {"ResourceType": "snapshot", "Tags": create_default_asset_tag(tag_value)}]
@@ -169,6 +186,7 @@ class AwsAccess(object):
                                            NoReboot=False, TagSpecifications=tags)
         return result["ImageId"]
 
+    @log_function_start()
     def export_ami_image_to_vm(self, image_id: str, tag_value: str,
                                description: str, role_name: str, disk_format: VmDiskImageFormat,
                                s3_bucket: str, s3_prefix: str) -> str:
@@ -176,7 +194,6 @@ class AwsAccess(object):
         Creates an AMI image from an EC-2 instance.
         Returns the export_image_task_id.
         """
-        LOG.debug(f"Running create_image_from_ec2_instance for aws profile {self.aws_profile_for_logging}")
         cloud_client = self._get_aws_client("ec2")
         tags = [{"ResourceType": "export-image-task", "Tags": create_default_asset_tag(tag_value)}]
         result = cloud_client.export_image(ImageId=image_id, Description=description,
@@ -186,11 +203,11 @@ class AwsAccess(object):
 
         return result["ExportImageTaskId"]
 
+    @log_function_start()
     def get_export_image_task(self, export_image_task_id: str) -> ExportImageTask:
         """
         Get Export-Image-Task for given export_image_task_id.
         """
-        LOG.debug(f"Running create_image_from_ec2_instance for aws profile {self.aws_profile_for_logging}")
         cloud_client = self._get_aws_client("ec2")
         result = cloud_client.describe_export_image_tasks(ExportImageTaskIds=[export_image_task_id])
         assert "NextToken" not in result  # We expect only one result
@@ -200,11 +217,11 @@ class AwsAccess(object):
         export_image_task = export_image_tasks[0]
         return ExportImageTask(export_image_task)
 
+    @log_function_start()
     def get_ami(self, image_id: str) -> Ami:
         """
         Get AMI image for given image_id
         """
-        LOG.debug(f"Running get_ami for aws profile {self.aws_profile_for_logging}")
         cloud_client = self._get_aws_client("ec2")
 
         response = cloud_client.describe_images(ImageIds=[image_id])
@@ -213,11 +230,11 @@ class AwsAccess(object):
             raise RuntimeError(f"AwsAccess.get_ami() for image_id='{image_id}' returned {len(images)} elements: {images}")
         return Ami(images[0])
 
+    @log_function_start()
     def get_instance_status(self, instance_id: str) -> EC2InstanceStatus:
         """
         Get EC-2 instance status for given instance_id
         """
-        LOG.debug(f"Running get_instance_status for aws profile {self.aws_profile_for_logging}")
         cloud_client = self._get_aws_client("ec2")
 
         response = cloud_client.describe_instance_status(InstanceIds=[instance_id])
@@ -227,87 +244,88 @@ class AwsAccess(object):
                                f" returned {len(instance_statuses)} elements: {instance_statuses}")
         return EC2InstanceStatus(instance_statuses[0])
 
+    @log_function_start()
     def list_amis(self, filters: list) -> List[Ami]:
         """
         List AMI images with given tag filter
         """
-        LOG.debug(f"Running list_amis for aws profile {self.aws_profile_for_logging}")
         cloud_client = self._get_aws_client("ec2")
         response = cloud_client.describe_images(Filters=filters)
         return [Ami(ami) for ami in response["Images"]]
 
+    @log_function_start()
     def list_snapshots(self, filters: list) -> List[Snapshot]:
         """
         List EC2 volume snapthos with given tag filter
         """
-        LOG.debug(f"Running list_snapshots for aws profile {self.aws_profile_for_logging}")
         cloud_client = self._get_aws_client("ec2")
 
         response = cloud_client.describe_snapshots(Filters=filters)
         assert "NextToken" not in response
         return [Snapshot(snapshot) for snapshot in response["Snapshots"]]
 
+    @log_function_start()
     def list_export_image_tasks(self, filters: list) -> List[ExportImageTask]:
         """
         List export image tasks with given tag filter
         """
-        LOG.debug(f"Running list_export_image_tasks for aws profile {self.aws_profile_for_logging}")
         cloud_client = self._get_aws_client("ec2")
 
         response = cloud_client.describe_export_image_tasks(Filters=filters)
         assert "NextToken" not in response
         return [ExportImageTask(export_image_task) for export_image_task in response["ExportImageTasks"]]
 
+    @log_function_start()
     def list_ec2_key_pairs(self, filters: list) -> List[KeyPair]:
         """
         List ec-2 key-pairs with given tag filter
         """
-        LOG.debug(f"Running list_ec2_key_pairs for aws profile {self.aws_profile_for_logging}")
         cloud_client = self._get_aws_client("ec2")
 
         response = cloud_client.describe_key_pairs(Filters=filters)
         assert "NextToken" not in response
         return [KeyPair(keypair) for keypair in response["KeyPairs"]]
 
+    @log_function_start()
     def list_s3_objects(self, bucket: str, prefix: str) -> Optional[List[S3Object]]:
         """
         List s3 objects images with given tag filter
         """
-        LOG.debug(f"Running list_s3_objects for aws profile {self.aws_profile_for_logging}")
         cloud_client = self._get_aws_client("s3")
 
         response = cloud_client.list_objects_v2(Bucket=bucket, Prefix=prefix)
         if "Contents" in response:
             return [S3Object(s3object) for s3object in response["Contents"]]
 
+    @log_function_start()
     def get_s3_bucket_location(self, bucket: str) -> Optional[str]:
         """
         Get location (region) of s3 bucket
         Wraps: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html#S3.Client.get_bucket_location
         """
-        LOG.debug(f"Running get_s3_bucket_location for aws profile {self.aws_profile_for_logging}")
         cloud_client = self._get_aws_client("s3")
 
         response = cloud_client.get_bucket_location(Bucket=bucket)
         if "LocationConstraint" in response:
             return response["LocationConstraint"]
 
+    @log_function_start()
     def deregister_ami(self, ami_d: str) -> None:
         """
         De-registers an AMI
         """
-        LOG.debug(f"Running deregister_ami for aws profile {self.aws_profile_for_logging}")
         cloud_client = self._get_aws_client("ec2")
         cloud_client.deregister_image(ImageId=ami_d)
 
+    @log_function_start()
     def remove_snapshot(self, snapshot_id: str) -> None:
         """
         Removes a snapshot
         """
-        LOG.debug(f"Running remove_snapshot for aws profile {self.aws_profile_for_logging}")
         cloud_client = self._get_aws_client("ec2")
         cloud_client.delete_snapshot(SnapshotId=snapshot_id)
 
+    @log_function_start()
     def get_user(self) -> str:
         """
         Return the current IAM user name.
