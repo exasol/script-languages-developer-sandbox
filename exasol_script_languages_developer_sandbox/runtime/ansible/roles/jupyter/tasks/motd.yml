@@ -6,15 +6,15 @@
 
 - name: save the Json data to a Variable as a Fact
   set_fact:
-    jsondata: "{{ jupyter_server_config.stdout | from_json }}"
+    jupyter_server_config_jsondata: "{{ jupyter_server_config.stdout | from_json }}"
 
 - name: parse hashed password
   set_fact:
-    server_hashed_password: "{{ jsondata | json_query(password_query) }}"
+    jupyter_server_hashed_password: "{{ jupyter_server_config_jsondata | json_query(password_query) }}"
   vars:
     password_query: 'ServerApp.password'
 
-- name: Put motd shell script in place
+- name: Put motd python script in place
   ansible.builtin.template:
     src: '{{ item }}'
     dest: '/{{ item }}'
