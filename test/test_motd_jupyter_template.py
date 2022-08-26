@@ -26,7 +26,7 @@ def motd_file(tmp_path):
 
     python_code = python_template.render(user_name="test_user", jupyterlab=jupyterlab(),
                                          jupyter_server_config_file=str(jupyter_server_config_file),
-                                         server_hashed_password="dummy_password_hash",
+                                         jupyter_server_hashed_password="dummy_password_hash",
                                          heading_jupyter_update_password=jupyter_update_msg_heading)
     with open(python_file, "w") as f:
         f.write(python_code)
