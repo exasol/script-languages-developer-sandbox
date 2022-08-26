@@ -170,12 +170,14 @@ def test_jupyter_password_message_shown(new_ec2_from_ami):
 
     motd_message_watermark = "/bin/jupyter server password"
 
+    # 1. Initially the jupyter password message is expected to appear in the welcome message
     with fabric.Connection(ec2_instance, user='ubuntu',
                            connect_kwargs={"password": password}) as con:
         result = con.run("cat /var/run/motd.dynamic")
         assert result.ok
         assert motd_message_watermark in result.stdout
 
+    # 2. Now we create a new password for jupyterlab
     random_jupyter_password = generate_random_password(12)
     with fabric.Connection(ec2_instance, user='ubuntu',
                            connect_kwargs={"password": password}) as con:
@@ -187,6 +189,7 @@ def test_jupyter_password_message_shown(new_ec2_from_ami):
                       pty=True)
         assert res.ok
 
+    # 3. On the next login, the update message for the Jupyter password must not appear!
     with fabric.Connection(ec2_instance, user='ubuntu',
                            connect_kwargs={"password": password}) as con:
         result = con.run("cat /var/run/motd.dynamic")
