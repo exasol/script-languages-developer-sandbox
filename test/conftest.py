@@ -66,7 +66,7 @@ def local_stack():
     subprocess.run(shlex.split(command), env=env_variables)
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(scope="session")
 def test_config():
     test_config = {
         "time_to_wait_for_polling": 0.01,
