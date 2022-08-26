@@ -74,7 +74,7 @@ def test_export_vm(aws_vm_export_mock, default_asset_id, vm_formats_to_test, tes
     """
     export_vm(aws_access=aws_vm_export_mock, instance_id=INSTANCE_ID,
               vm_image_formats=tuple(vm_image_format.value for vm_image_format in vm_formats_to_test),
-              asset_id=default_asset_id, cfg=test_config)
+              asset_id=default_asset_id, configuration=test_config)
 
     aws_vm_export_mock.create_image_from_ec2_instance.assert_called_once_with(INSTANCE_ID,
                                                                               name=default_asset_id.ami_name,

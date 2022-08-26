@@ -5,6 +5,7 @@ from typing import Optional, Tuple, Generator
 from exasol_script_languages_developer_sandbox.lib.asset_id import AssetId
 from exasol_script_languages_developer_sandbox.lib.aws_access.aws_access import AwsAccess
 from exasol_script_languages_developer_sandbox.lib.aws_access.ec2_instance import EC2Instance
+from exasol_script_languages_developer_sandbox.lib.config import ConfigObject
 from exasol_script_languages_developer_sandbox.lib.logging import get_status_logger, LogType
 from exasol_script_languages_developer_sandbox.lib.setup_ec2.cf_stack import CloudformationStack, \
     CloudformationStackContextManager
@@ -36,9 +37,9 @@ def run_lifecycle_for_ec2(aws_access: AwsAccess,
 
 
 class EC2StackLifecycleContextManager:
-    def __init__(self, lifecycle_generator: Generator, cfg: ConfigObject):
+    def __init__(self, lifecycle_generator: Generator, configuration: ConfigObject):
         self._lifecycle_generator = lifecycle_generator
-        self._config = cfg
+        self._config = configuration
 
     def __enter__(self) -> Tuple[EC2Instance, str]:
         res = next(self._lifecycle_generator)
@@ -54,12 +55,12 @@ class EC2StackLifecycleContextManager:
 
 
 def run_setup_ec2(aws_access: AwsAccess, ec2_key_file: Optional[str], ec2_key_name: Optional[str],
-                  asset_id: AssetId, cfg: ConfigObject) -> None:
-    source_ami = find_source_ami(aws_access, cfg.source_ami_filters)
-    logging.info(f"Using source ami: '{source_ami.name}' from {source_ami.creation_date}")
+                  asset_id: AssetId, configuration: ConfigObject) -> None:
+    source_ami = find_source_ami(aws_access, configuration.source_ami_filters)
+    LOG.info(f"Using source ami: '{source_ami.name}' from {source_ami.creation_date}")
     execution_generator = run_lifecycle_for_ec2(aws_access, ec2_key_file, ec2_key_name, None,
                                                 asset_id.tag_value, source_ami.id)
-    with EC2StackLifecycleContextManager(execution_generator, cfg) as res:
+    with EC2StackLifecycleContextManager(execution_generator, configuration) as res:
         ec2_instance_description, key_file_location = res
 
         if not ec2_instance_description.is_running:
