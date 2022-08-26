@@ -168,16 +168,13 @@ def test_jupyter_password_message_shown(new_ec2_from_ami):
     """
     ec2_instance, password, old_password = new_ec2_from_ami
 
-    heading_path = Path(__file__).parent.parent / "exasol_script_languages_developer_sandbox" / "runtime" / \
-                    "ansible" / "roles" / "jupyter" / "files" / "heading_jupyter_update_password.txt"
-
-    heading = open(heading_path, "r").read()
+    motd_message_watermark = "/bin/jupyter server password"
 
     with fabric.Connection(ec2_instance, user='ubuntu',
                            connect_kwargs={"password": password}) as con:
         result = con.run("cat /var/run/motd.dynamic")
         assert result.ok
-        assert heading in result.stdout
+        assert motd_message_watermark in result.stdout
 
     random_jupyter_password = generate_random_password(12)
     with fabric.Connection(ec2_instance, user='ubuntu',
@@ -194,4 +191,4 @@ def test_jupyter_password_message_shown(new_ec2_from_ami):
                            connect_kwargs={"password": password}) as con:
         result = con.run("cat /var/run/motd.dynamic")
         assert result.ok
-        assert heading not in result.stdout
+        assert motd_message_watermark not in result.stdout
