@@ -35,7 +35,8 @@ def test_run_ansible_default_values(test_config):
     """
     ansible_access = AnsibleTestAccess()
     run_install_dependencies(ansible_access, test_config)
-    expected_ansible_run_context = AnsibleRunContext(playbook="slc_setup.yml", extra_vars={"slc_version": "master"})
+    expected_ansible_run_context = AnsibleRunContext(playbook="slc_setup.yml",
+                                                     extra_vars={"slc_version": test_config.slc_version})
     assert ansible_access.call_arguments.private_data_dir.startswith("/tmp")
     assert ansible_access.call_arguments.run_ctx == expected_ansible_run_context
 
@@ -48,7 +49,8 @@ def test_run_ansible_custom_playbook(test_config):
     ansible_run_context = AnsibleRunContext(playbook="my_playbook.yml", extra_vars=dict())
     run_install_dependencies(ansible_access, test_config, host_infos=tuple(), ansible_run_context=ansible_run_context)
 
-    expected_ansible_run_context = AnsibleRunContext(playbook="my_playbook.yml", extra_vars={"slc_version": "master"})
+    expected_ansible_run_context = AnsibleRunContext(playbook="my_playbook.yml",
+                                                     extra_vars={"slc_version": test_config.slc_version})
     assert ansible_access.call_arguments.private_data_dir.startswith("/tmp")
     assert ansible_access.call_arguments.run_ctx == expected_ansible_run_context
 
@@ -62,7 +64,8 @@ def test_run_ansible_custom_variables(test_config):
     run_install_dependencies(ansible_access, test_config, host_infos=tuple(), ansible_run_context=ansible_run_context)
 
     expected_ansible_run_context = AnsibleRunContext(playbook="my_playbook.yml",
-                                                     extra_vars={"slc_version": "master", "my_var": True})
+                                                     extra_vars={"slc_version": test_config.slc_version,
+                                                                 "my_var": True})
     assert ansible_access.call_arguments.private_data_dir.startswith("/tmp")
     assert ansible_access.call_arguments.run_ctx == expected_ansible_run_context
 
