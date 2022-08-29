@@ -16,8 +16,9 @@ from exasol_script_languages_developer_sandbox.lib.setup_ec2.source_ami import f
 
 LOG = get_status_logger(LogType.SETUP)
 
-# Python version of a typedef: Defines a type for the iterator we use for the state machine
-EC2LifecycleDataIterator = Iterator[Tuple[Optional[EC2Instance], Optional[str]]]
+# Python version of a typedef: Defines a type for the tuple and the iterator (of the tuple) we use for the state machine
+EC2LifecycleData = Tuple[Optional[EC2Instance], Optional[str]]
+EC2LifecycleDataIterator = Iterator[EC2LifecycleData]
 
 
 def run_lifecycle_for_ec2(aws_access: AwsAccess,
