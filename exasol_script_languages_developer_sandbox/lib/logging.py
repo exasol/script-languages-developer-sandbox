@@ -10,7 +10,7 @@ class LogType(Enum):
     SETUP = "setup"
     EXPORT = "export"
     VM_BUCKET = "vm_bucket"
-    CI_CODEBUILD = "ci_codebuild"
+    CI_CODEBUILD = "setup_ci_codebuild"
     AWS_ACCESS = "aws_access"
     ANSIBLE = "ansible"
     CREATE_VM = "create_vm"
