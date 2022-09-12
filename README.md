@@ -6,4 +6,4 @@ which can be used to develop new script-languages container for the Exasol DB.
 
 ## Links
 
-* [User Guide](./user_guide/user_guide.md)
+* [User Guide](doc/user_guide/user_guide.md)
