@@ -1,0 +1,28 @@
+version: 0.2
+
+env:
+  shell: bash
+  variables:
+    DEFAULT_PASSWORD: "scriptlanguages"
+    ASSET_ID: ""
+phases:
+
+  install:
+    runtime-versions:
+      python: 3.8
+    commands:
+      - git submodule update --init --recursive
+      - curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 -
+      - export PATH=$PATH:$HOME/.poetry/bin
+      - poetry env use $(command -v "python3.8")
+      - poetry install
+
+  pre_build:
+      commands:
+        - echo ASSET_ID_PARAMETER is "$ASSET_ID_PARAMETER"
+        - echo DEFAULT_PASSWORD is "$DEFAULT_PASSWORD"
+        - echo RELEASE_ID is "$RELEASE_ID"
+  build:
+      commands:
+        - poetry run python3 -m exasol_script_languages_developer_sandbox.main create-vm --default-password "$DEFAULT_PASSWORD" --asset-id "$ASSET_ID"
+        - poetry run python3 -m exasol_script_languages_developer_sandbox.main update-release --release-id "$RELEASE_ID" --asset-id "$ASSET_ID"
