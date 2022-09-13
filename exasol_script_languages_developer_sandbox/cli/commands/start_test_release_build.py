@@ -27,8 +27,7 @@ def start_test_release_build(
         release_title: str
 ):
     """
-    This command creates a release draft on Github and triggers the AWS release Codebuild to upload the
-    release artifacts onto the new Github release.
+    This command  triggers the AWS release Codebuild to generate a new developer sandbox test version.
     """
     set_log_level(log_level)
     gh_token = os.getenv("GITHUB_TOKEN")

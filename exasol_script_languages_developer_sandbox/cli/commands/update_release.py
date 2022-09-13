@@ -27,8 +27,8 @@ def update_release(
         asset_id: str,
         log_level: str):
     """
-    This command  triggers the AWS release Codebuild to upload the
-    release artifacts onto the given Github release, indicated by parameter 'upload_url'.
+    This command attaches the links of the release assets (AMI, VM images) to the Github release,
+    indicated by parameter 'release-id'.
     """
     set_log_level(log_level)
     run_update_release(AwsAccess(aws_profile), GithubReleaseAccess(os.getenv("GITHUB_TOKEN")),
