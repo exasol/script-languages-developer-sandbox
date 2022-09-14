@@ -37,7 +37,7 @@ def docker_test_container(test_config):
             AnsibleRunContext(playbook="slc_setup_test.yml",
                               extra_vars={"test_docker_container": test_container.name,
                                           "slc_dest_folder": f"{tmp_dir}/script-languages-release"})
-        # Need to set slc_version to master, as latest tag might not be working (security updates).
+        # Need to set slc_version to master, as latest tag might not be working (e.g. security updates).
         test_config.slc_version = "master"
         run_install_dependencies(AnsibleAccess(), configuration=test_config,
                                  host_infos=tuple(), ansible_run_context=ansible_run_context,
