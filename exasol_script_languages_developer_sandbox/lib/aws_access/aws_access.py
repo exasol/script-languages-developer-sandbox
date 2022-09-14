@@ -341,6 +341,9 @@ class AwsAccess(object):
         It forwards all variables from parameter env_variables as environment variables to the CodeBuild project.
         If a branch is given, it starts the codebuild for the given branch.
         After the build has triggered it waits until the batch build finished
+        :param project: Codebuild project name to start
+        :param environment_variables_overrides: List of environment variables which will be overwritten in build
+        :param branch: Branch on which the build will run
         :raises
             `RuntimeError` if build fails or AWS Batch build returns unknown status
         """
