@@ -337,10 +337,10 @@ class AwsAccess(object):
     @_log_function_start
     def start_codebuild(self, project: str, environment_variables_overrides: List[Dict[str, str]], branch: str) -> None:
         """
-        This functions uses Boto3 to start a batch build.
+        This functions uses Boto3 to start a build.
         It forwards all variables from parameter env_variables as environment variables to the CodeBuild project.
-        If a branch is given, it starts the codebuild for the given branch.
-        After the build has triggered it waits until the batch build finished
+        It starts the codebuild for the given branch.
+        After the build has triggered it waits until the build finished.
         :param project: Codebuild project name to start
         :param environment_variables_overrides: List of environment variables which will be overwritten in build
         :param branch: Branch on which the build will run
