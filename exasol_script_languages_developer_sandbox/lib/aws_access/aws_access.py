@@ -345,37 +345,37 @@ class AwsAccess(object):
             `RuntimeError` if build fails or AWS Batch build returns unknown status
         """
         codebuild_client = self._get_aws_client("codebuild")
-        ret_val = codebuild_client.start_build_batch(projectName=project,
-                                                     sourceVersion=branch,
-                                                     environmentVariablesOverride=list(
-                                                         environment_variables_overrides))
+        ret_val = codebuild_client.start_build(projectName=project,
+                                               sourceVersion=branch,
+                                               environmentVariablesOverride=list(
+                                                 environment_variables_overrides))
 
         def wait_for(seconds: int, interval: int) -> Iterable[int]:
             for _ in range(int(seconds / interval)):
                 yield interval
 
-        build_id = ret_val['buildBatch']['id']
+        build_id = ret_val['build']['id']
         LOG.debug(f"Codebuild for project {project} with branch {branch} triggered. Id is {build_id}.")
         interval = 30
         timeout_time_in_seconds = 60 * 60 * 2  # We wait for maximal 2h + (something)
         for seconds_to_wait in wait_for(seconds=timeout_time_in_seconds, interval=interval):
             time.sleep(seconds_to_wait)
             LOG.debug(f"Checking status of codebuild id {build_id}.")
-            build_response = codebuild_client.batch_get_build_batches(ids=[build_id])
+            build_response = codebuild_client.batch_get_builds(ids=[build_id])
             LOG.debug(f"Build response of codebuild id {build_id} is {build_response}")
-            if len(build_response['buildBatches']) != 1:
-                LOG.error(f"Unexpected return value from 'batch_get_build_batches': {build_response}")
-            build_status = build_response['buildBatches'][0]['buildBatchStatus']
+            if len(build_response['builds']) != 1:
+                LOG.error(f"Unexpected return value from 'batch_get_builds': {build_response}")
+            build_status = build_response['builds'][0]['buildStatus']
             LOG.info(f"Build status of codebuild id {build_id} is {build_status}")
             if build_status == 'SUCCEEDED':
                 break
             elif build_status in ['FAILED', 'FAULT', 'STOPPED', 'TIMED_OUT']:
                 raise RuntimeError(f"Build ({build_id}) failed with status: {build_status}")
             elif build_status != "IN_PROGRESS":
-                raise RuntimeError(f"Batch build {build_id} has unknown build status: {build_status}")
+                raise RuntimeError(f"Build {build_id} has unknown build status: {build_status}")
         # if loop does not break early, build wasn't successful
         else:
-            raise RuntimeError(f"Batch build {build_id} ran into timeout.")
+            raise RuntimeError(f"Build {build_id} ran into timeout.")
 
     def _get_aws_client(self, service_name: str) -> Any:
         if self._aws_profile is None:
