@@ -32,7 +32,7 @@ Resources:
                 - cloudformation:DescribeChangeSet
                 - cloudformation:ExecuteChangeSet
                 - cloudformation:DeleteStack
-                Resource: !Sub  "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/stack-ci-test-*"
+                Resource: !Sub  "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/*"
                 Effect: Allow
               - Action:
                 - ec2:CreateSecurityGroup
