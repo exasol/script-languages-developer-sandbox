@@ -54,7 +54,7 @@ Resources:
                 - ec2:CreateImage
                 - ec2:DeregisterImage
                 - ec2:DeleteSnapshot
-                - ec2:ExportImageTask
+                - ec2:ExportImage
                 Resource: "*"
                 Effect: Allow
               - Action:
