@@ -19,7 +19,7 @@ phases:
 
   pre_build:
       commands:
-        - echo ASSET_ID_PARAMETER is "$ASSET_ID_PARAMETER"
+        - echo ASSET_ID is "$ASSET_ID"
         - echo DEFAULT_PASSWORD is "$DEFAULT_PASSWORD"
         - echo RELEASE_ID is "$RELEASE_ID"
   build:
