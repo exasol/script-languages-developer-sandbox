@@ -63,8 +63,6 @@ def new_ec2_from_ami():
                                                        suffix=SLC_VERSION),
                        stack_prefix="stack",
                        ami_prefix="ami")
-    # Need to set slc_version to master, as latest tag might not be working (e.g. security updates).
-    default_config_object.slc_version = "master"
     run_create_vm(aws_access, None, None,
                   AnsibleAccess(), default_password, tuple(), asset_id,
                   default_config_object, user_name)
