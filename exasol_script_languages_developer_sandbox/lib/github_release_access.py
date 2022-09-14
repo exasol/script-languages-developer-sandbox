@@ -31,8 +31,8 @@ class GithubReleaseAccess:
         """
         release = self._get_repo.get_release(release_id)
         body = release.body
-        body += message_to_append
-        release.update_release(release.title, body)
+        body += "\n\n" + message_to_append
+        release.update_release(name=release.title, message=body, draft=True, prerelease=True)
 
     def upload(self, archive_path: str, label: str, release_id: int, content_type: str):
         """
