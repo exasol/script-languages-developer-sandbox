@@ -54,6 +54,7 @@ Resources:
                 - ec2:CreateImage
                 - ec2:DeregisterImage
                 - ec2:DeleteSnapshot
+                - ec2:ExportImageTask
                 Resource: "*"
                 Effect: Allow
               - Action:
@@ -65,6 +66,10 @@ Resources:
                 - s3:GetBucketLocation
                 - s3:ListBucket
                 Resource: arn:aws:s3:::{{vm_bucket}}
+                Effect: Allow
+              - Action:
+                - s3:PutObject
+                Resource: arn:aws:s3:::{{vm_bucket}}/slc_developer_sandbox/*
                 Effect: Allow
   DeveloperSandboxReleaseCodeBuild:
     Type: AWS::CodeBuild::Project
