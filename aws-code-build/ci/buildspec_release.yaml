@@ -5,6 +5,7 @@ env:
   variables:
     DEFAULT_PASSWORD: "scriptlanguages"
     ASSET_ID: ""
+    AWS_USER_NAME: "release_user"
 phases:
 
   install:

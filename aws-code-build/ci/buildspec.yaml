@@ -4,6 +4,7 @@ env:
   shell: bash
   variables:
     RUN_DEVELOPER_SANDBOX_CI_TEST: "true"
+    AWS_USER_NAME: "ci_user"
 
 phases:
 
