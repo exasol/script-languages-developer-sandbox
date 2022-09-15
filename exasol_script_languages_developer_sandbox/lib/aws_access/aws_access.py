@@ -1,6 +1,5 @@
-import time
 from functools import wraps
-from typing import Optional, Any, List, Dict, Iterable
+from typing import Optional, Any, List, Dict, Tuple
 
 import boto3
 import botocore
@@ -15,6 +14,7 @@ from exasol_script_languages_developer_sandbox.lib.aws_access.key_pair import Ke
 from exasol_script_languages_developer_sandbox.lib.aws_access.s3_object import S3Object
 from exasol_script_languages_developer_sandbox.lib.aws_access.snapshot import Snapshot
 from exasol_script_languages_developer_sandbox.lib.aws_access.stack_resource import StackResource
+from exasol_script_languages_developer_sandbox.lib.aws_access.waiter.codebuild_waiter import CodeBuildWaiter
 from exasol_script_languages_developer_sandbox.lib.logging import get_status_logger, LogType
 from exasol_script_languages_developer_sandbox.lib.tags import create_default_asset_tag
 from exasol_script_languages_developer_sandbox.lib.export_vm.vm_disk_image_format import VmDiskImageFormat
@@ -335,13 +335,13 @@ class AwsAccess(object):
         return cu["User"]["UserName"]
 
     @_log_function_start
-    def start_codebuild(self, project: str, environment_variables_overrides: List[Dict[str, str]], branch: str) -> None:
+    def start_codebuild(self, project: str, environment_variables_overrides: List[Dict[str, str]], branch: str) \
+            -> Tuple[int, CodeBuildWaiter]:
         """
         This functions uses Boto3 to start a build.
         It forwards all variables from parameter env_variables as environment variables to the CodeBuild project.
-        It starts the codebuild for the given branch and then waits until the build finishes or runs into the
-        hard-coded timeout (2h). If the build succeeds, it returns normally.
-        If the build finishes with an error or ran into the timeout, it throws a RuntimeError.
+        It starts the codebuild for the given branch and then immediately returns the build-id and of the new build
+        and a CodeBuildWaiter-object which can be used to wait for the build finish.
         :param project: Codebuild project name to start
         :param environment_variables_overrides: List of environment variables which will be overwritten in build
         :param branch: Branch on which the build will run
@@ -353,33 +353,9 @@ class AwsAccess(object):
                                                sourceVersion=branch,
                                                environmentVariablesOverride=list(
                                                  environment_variables_overrides))
-
-        def wait_for(seconds: int, interval: int) -> Iterable[int]:
-            for _ in range(int(seconds / interval)):
-                yield interval
-
         build_id = ret_val['build']['id']
         LOG.debug(f"Codebuild for project {project} with branch {branch} triggered. Id is {build_id}.")
-        interval = 30
-        timeout_time_in_seconds = 60 * 60 * 2  # We wait for maximal 2h + (something)
-        for seconds_to_wait in wait_for(seconds=timeout_time_in_seconds, interval=interval):
-            time.sleep(seconds_to_wait)
-            LOG.debug(f"Checking status of codebuild id {build_id}.")
-            build_response = codebuild_client.batch_get_builds(ids=[build_id])
-            LOG.debug(f"Build response of codebuild id {build_id} is {build_response}")
-            if len(build_response['builds']) != 1:
-                LOG.error(f"Unexpected return value from 'batch_get_builds': {build_response}")
-            build_status = build_response['builds'][0]['buildStatus']
-            LOG.info(f"Build status of codebuild id {build_id} is {build_status}")
-            if build_status == 'SUCCEEDED':
-                break
-            elif build_status in ['FAILED', 'FAULT', 'STOPPED', 'TIMED_OUT']:
-                raise RuntimeError(f"Build ({build_id}) failed with status: {build_status}")
-            elif build_status != "IN_PROGRESS":
-                raise RuntimeError(f"Build {build_id} has unknown build status: {build_status}")
-        # if loop does not break early, build wasn't successful
-        else:
-            raise RuntimeError(f"Build {build_id} ran into timeout.")
+        return build_id, CodeBuildWaiter(codebuild_client, build_id)
 
     def _get_aws_client(self, service_name: str) -> Any:
         if self._aws_profile is None:

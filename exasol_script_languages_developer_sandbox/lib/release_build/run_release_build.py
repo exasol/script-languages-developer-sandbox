@@ -6,8 +6,11 @@ from exasol_script_languages_developer_sandbox.lib.aws_access.aws_access import 
 from exasol_script_languages_developer_sandbox.lib.aws_access.stack_resource import StackResource
 from exasol_script_languages_developer_sandbox.lib.config import ConfigObject
 from exasol_script_languages_developer_sandbox.lib.github_release_access import GithubReleaseAccess
+from exasol_script_languages_developer_sandbox.lib.logging import get_status_logger, LogType
 from exasol_script_languages_developer_sandbox.lib.setup_release_codebuild.release_codebuild import \
     RELEASE_CODE_BUILD_STACK_NAME
+
+LOG = get_status_logger(LogType.RELEASE_BUILD)
 
 
 def get_environment_variable_override(env_variable: Tuple[str, str]) -> Dict[str, str]:
@@ -58,9 +61,10 @@ def _execute_release_build(aws_access: AwsAccess, branch: str, asset_id: str,
                      ("ASSET_ID", f"{asset_id}"),
                      ("GITHUB_TOKEN", gh_token)]
     environment_variables_overrides = list(map(get_environment_variable_override, env_variables))
-    aws_access.start_codebuild(matching_project.physical_id,
-                               environment_variables_overrides=environment_variables_overrides,
-                               branch=branch)
+    _, waiter = aws_access.start_codebuild(matching_project.physical_id,
+                                           environment_variables_overrides=environment_variables_overrides,
+                                           branch=branch)
+    waiter.wait()
 
 
 def run_start_release_build(aws_access: AwsAccess, config: ConfigObject,

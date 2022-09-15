@@ -10,6 +10,7 @@ packages = \
  'exasol_script_languages_developer_sandbox.lib.ansible',
  'exasol_script_languages_developer_sandbox.lib.asset_printing',
  'exasol_script_languages_developer_sandbox.lib.aws_access',
+ 'exasol_script_languages_developer_sandbox.lib.aws_access.waiter',
  'exasol_script_languages_developer_sandbox.lib.export_vm',
  'exasol_script_languages_developer_sandbox.lib.release_build',
  'exasol_script_languages_developer_sandbox.lib.setup_ci_codebuild',

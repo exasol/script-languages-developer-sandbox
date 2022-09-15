@@ -6,6 +6,7 @@ from dateutil.tz import tzutc
 
 from exasol_script_languages_developer_sandbox.lib.aws_access.aws_access import AwsAccess
 from exasol_script_languages_developer_sandbox.lib.aws_access.stack_resource import StackResource
+from exasol_script_languages_developer_sandbox.lib.aws_access.waiter.codebuild_waiter import CodeBuildWaiter
 from exasol_script_languages_developer_sandbox.lib.github_release_access import GithubReleaseAccess
 from exasol_script_languages_developer_sandbox.lib.release_build.run_release_build import run_start_release_build, \
     run_start_test_release_build
@@ -43,6 +44,7 @@ def test_release_build(test_config):
     """
     aws_access_mock: Union[AwsAccess, Mock] = create_autospec(AwsAccess)
     mock_cast(aws_access_mock.get_all_stack_resources).return_value = DUMMY_RESOURCES
+    mock_cast(aws_access_mock.start_codebuild).return_value = (123, create_autospec(CodeBuildWaiter))
     run_start_release_build(aws_access_mock, test_config, UPLOAD_URL, BRANCH, GITHUB_TOKEN)
     expected_env_variable_overrides = [
         {"name": "RELEASE_ID", "value": "123", "type": "PLAINTEXT"},
@@ -61,6 +63,7 @@ def test_test_release_build(test_config):
     Test that serialization and deserialization of KeyFileManager work!
     """
     aws_access_mock: Union[AwsAccess, Mock] = create_autospec(AwsAccess, spec_set=True)
+    mock_cast(aws_access_mock.start_codebuild).return_value = (123, create_autospec(CodeBuildWaiter))
     gh_release_access_mock: Union[GithubReleaseAccess, Mock] = create_autospec(GithubReleaseAccess, spec_set=True)
     release_title = "Test Release"
     release_id = 12345
