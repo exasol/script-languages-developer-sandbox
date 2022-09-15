@@ -20,7 +20,7 @@ class GithubReleaseAccess:
         Returns the internal ID of the new release.
         """
         release = self._get_repo.create_git_release(tag="", name=title, message="Test-Release",
-                                                    draft=True, prerelease=True, target_commitish=branch)
+                                                    draft=True, prerelease=False, target_commitish=branch)
         return release.id
 
     def update_release_message(self, release_id: int, message_to_append: str) -> None:
@@ -32,7 +32,7 @@ class GithubReleaseAccess:
         release = self._get_repo.get_release(release_id)
         body = release.body
         body += "\n\n" + message_to_append
-        release.update_release(name=release.title, message=body, draft=True, prerelease=True)
+        release.update_release(name=release.title, message=body, draft=True, prerelease=False)
 
     def upload(self, archive_path: str, label: str, release_id: int, content_type: str):
         """

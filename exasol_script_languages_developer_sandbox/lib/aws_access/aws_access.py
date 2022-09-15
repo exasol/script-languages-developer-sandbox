@@ -340,7 +340,7 @@ class AwsAccess(object):
         This functions uses Boto3 to start a build.
         It forwards all variables from parameter env_variables as environment variables to the CodeBuild project.
         It starts the codebuild for the given branch.
-        After the build has triggered it waits until the build finished.
+        After the build has triggered, it waits until the build finished.
         :param project: Codebuild project name to start
         :param environment_variables_overrides: List of environment variables which will be overwritten in build
         :param branch: Branch on which the build will run

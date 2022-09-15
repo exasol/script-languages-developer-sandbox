@@ -22,6 +22,12 @@ EC2LifecycleDataIterator = Iterator[EC2LifecycleData]
 
 
 def retrieve_user_name(user_name: Optional[str], aws_access: AwsAccess) -> str:
+    """
+    This function returns parameter "user_name" if valid. Otherwise, it tries to identify the user name from the AWS
+    profile.
+    Background: Within AWS codebuilds, which run under an IAM role,
+                the user name cannot be retrieved from the AWS profile, and we need to set it in the environment.
+    """
     if user_name:
         LOG.info(f"Using user name {user_name}")
         return user_name
