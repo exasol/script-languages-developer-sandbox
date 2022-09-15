@@ -47,7 +47,11 @@ Please feel free to contact us (opensource@exasol.com) if you are interested in 
 At the first login to the sandbox (image or AMI) you will be prompted to change your password.  
 The default password is: **scriptlanguages**
 
-However, we suggest to use ssh-keys for the connection. When you use the AWS AMI, this will work automatically. When you use the VM images, you need to deploy your ssh-keys.
+However, we suggest to use ssh-keys for the connection. When you use the AWS AMI, this will work automatically. When you use the VM images, you need to deploy your ssh-keys. After you enabled ssh-keys, we recommend to disable ssh password authentication:
+```shell
+sudo sed -i "s/PasswordAuthentication yes/PasswordAuthentication no/g" /etc/ssh/sshd_config
+sudo systemctl restart ssh.service
+```
 
 Also, we strongly recommend to change the Jupyter password as soon as possible. Details about how to do that will be shown in the login screen.
 
