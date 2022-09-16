@@ -1,13 +1,5 @@
 # Script-Languages-Developer-Sandbox User Guide
 
-## Requirements
-
-This package requires:
-* Python (>=3.8)
-* Poetry (>=1.2.0)
-* Docker (for integration tests)
-* AWS CLI
-
 ## Overview
 
 This packages aims to create a virtual machine image, in different formats, which can be used to build easily Exasol's script-languages-container, which are the runtime container for UDF's.
