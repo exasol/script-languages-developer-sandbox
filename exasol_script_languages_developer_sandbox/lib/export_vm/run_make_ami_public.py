@@ -19,6 +19,7 @@ def run_make_ami_public(aws_access: AwsAccess, asset_id: AssetId):
     }
     for ami in amis:
         if not ami.is_public:
+            LOG.info(f"Making {ami.id} public.")
             aws_access.modify_image_launch_permission(ami.id, make_public_launch_permission)
             ami_new = aws_access.get_ami(ami.id)
             if not ami_new.is_public:
