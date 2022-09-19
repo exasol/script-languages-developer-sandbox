@@ -8,7 +8,7 @@ class StackResource:
         self._aws_object = aws_object
 
     @property
-    def logica_id(self) -> str:
+    def logical_id(self) -> str:
         return self._aws_object["LogicalResourceId"]
 
     @property
@@ -44,7 +44,9 @@ class StackResource:
         return self.resource_type == "AWS::CodeBuild::Project"
 
     @property
+    def is_cloudfront_distribution(self) -> bool:
+        return self.resource_type == "AWS::CloudFront::Distribution"
+
+    @property
     def is_complete(self) -> bool:
-        return self.status == "CREATE_COMPLETE"
-
-
+        return self.status in ("CREATE_COMPLETE", "UPDATE_COMPLETE")

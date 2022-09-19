@@ -19,17 +19,25 @@ def find_vm_bucket(aws_access: AwsAccess) -> str:
     stack_resources = aws_access.get_all_stack_resources(STACK_NAME)
     for stack_resource in stack_resources:
         if stack_resource.is_s3_bucket and \
-           stack_resource.logica_id == BUCKET_NAME and \
+           stack_resource.logical_id == BUCKET_NAME and \
            stack_resource.is_complete:
             return stack_resource.physical_id
     raise RuntimeError("bucket not found")
+
+
+def find_url_for_bucket(aws_access: AwsAccess) -> str:
+    stack_resources = aws_access.get_all_stack_resources(STACK_NAME)
+    for stack_resource in stack_resources:
+        if stack_resource.is_cloudfront_distribution:
+            cf_distribution = aws_access.get_cloudfront_distribution(stack_resource.physical_id)
+            return cf_distribution.domain_name
 
 
 def find_vm_import_role(aws_access: AwsAccess) -> str:
     stack_resources = aws_access.get_all_stack_resources(STACK_NAME)
     for stack_resource in stack_resources:
         if stack_resource.is_iam_role and \
-           stack_resource.logica_id == ROLE_NAME and \
+           stack_resource.logical_id == ROLE_NAME and \
            stack_resource.is_complete:
             return stack_resource.physical_id
     raise RuntimeError("role not found")

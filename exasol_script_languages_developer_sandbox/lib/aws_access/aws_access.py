@@ -6,6 +6,7 @@ import botocore
 
 from exasol_script_languages_developer_sandbox.lib.aws_access.ami import Ami
 from exasol_script_languages_developer_sandbox.lib.aws_access.cloudformation_stack import CloudformationStack
+from exasol_script_languages_developer_sandbox.lib.aws_access.cloudfront_distribution import CfDistribution
 from exasol_script_languages_developer_sandbox.lib.aws_access.deployer import Deployer
 from exasol_script_languages_developer_sandbox.lib.aws_access.ec2_instance import EC2Instance
 from exasol_script_languages_developer_sandbox.lib.aws_access.ec2_instance_status import EC2InstanceStatus
@@ -298,18 +299,6 @@ class AwsAccess(object):
             return [S3Object(s3object) for s3object in response["Contents"]]
 
     @_log_function_start
-    def get_s3_bucket_location(self, bucket: str) -> Optional[str]:
-        """
-        Get location (region) of s3 bucket
-        Wraps: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html#S3.Client.get_bucket_location
-        """
-        cloud_client = self._get_aws_client("s3")
-
-        response = cloud_client.get_bucket_location(Bucket=bucket)
-        if "LocationConstraint" in response:
-            return response["LocationConstraint"]
-
-    @_log_function_start
     def deregister_ami(self, ami_d: str) -> None:
         """
         De-registers an AMI
@@ -368,6 +357,18 @@ class AwsAccess(object):
         """
         cloud_client = self._get_aws_client("ec2")
         cloud_client.modify_image_attribute(ImageId=ami_id, LaunchPermission=launch_permissions)
+
+    @_log_function_start
+    def get_cloudfront_distribution(self, cf_distribution_id: str) -> CfDistribution:
+        """
+        This functions uses Boto3 to get details about a cloudfront distribution.
+        See https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudfront.html#CloudFront.Client.get_distribution
+        for details.
+        :param cf_distribution_id: The id of the cloudfront distribution instance
+        """
+        cloud_client = self._get_aws_client("cloudfront")
+        ret_val = cloud_client.get_distribution(Id=cf_distribution_id)
+        return CfDistribution(ret_val["Distribution"])
 
     def _get_aws_client(self, service_name: str) -> Any:
         if self._aws_profile is None:

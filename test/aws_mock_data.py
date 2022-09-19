@@ -3,6 +3,7 @@ from dateutil.tz import tzutc
 
 from exasol_script_languages_developer_sandbox.lib.aws_access.ami import Ami
 from exasol_script_languages_developer_sandbox.lib.aws_access.cloudformation_stack import CloudformationStack
+from exasol_script_languages_developer_sandbox.lib.aws_access.cloudfront_distribution import CfDistribution
 from exasol_script_languages_developer_sandbox.lib.aws_access.export_image_task import ExportImageTask
 from exasol_script_languages_developer_sandbox.lib.aws_access.key_pair import KeyPair
 from exasol_script_languages_developer_sandbox.lib.aws_access.s3_object import S3Object
@@ -13,11 +14,13 @@ from test.conftest import DEFAULT_ASSET_ID
 
 TEST_ROLE_ID = 'VM-SLC-Bucket-VMImportRole-TEST'
 TEST_BUCKET_ID = 'vm-slc-bucket-vmslcbucket-TEST'
+TEST_CF_DISTRIBUTION_ID = 'vm-slc-bucket-cloudfront-distribution-TEST'
 
 TEST_AMI_ID = "AMI-IMAGE-12345"
 
 INSTANCE_ID = "test-instance"
 
+TEST_CF_DOMAIN = "vm-slc-test.cloudfront.net"
 
 def get_vm_bucket_cloudformation_mock_data():
     # The following is a snapshot from calling AwsAccess(a).get_all_stack_resources("VM-SLC-Bucket") on a running
@@ -33,7 +36,14 @@ def get_vm_bucket_cloudformation_mock_data():
                            'ResourceType': 'AWS::S3::Bucket',
                            'LastUpdatedTimestamp': datetime.datetime(2022, 8, 11, 17, 14, 55, 63000, tzinfo=tzutc()),
                            'ResourceStatus': 'CREATE_COMPLETE',
-                           'DriftInformation': {'StackResourceDriftStatus': 'NOT_CHECKED'}})]
+                           'DriftInformation': {'StackResourceDriftStatus': 'NOT_CHECKED'}}),
+            StackResource({'LogicalResourceId': 'CfDistributionDomainName',
+                           'PhysicalResourceId': TEST_CF_DISTRIBUTION_ID,
+                           'ResourceType': 'AWS::CloudFront::Distribution',
+                           'LastUpdatedTimestamp': datetime.datetime(2022, 8, 11, 17, 14, 55, 63000, tzinfo=tzutc()),
+                           'ResourceStatus': 'CREATE_COMPLETE',
+                           'DriftInformation': {'StackResourceDriftStatus': 'NOT_CHECKED'}})
+            ]
 
 
 def get_only_vm_stack_side_effect(stack_name: str):
@@ -116,6 +126,13 @@ def get_s3_object_mock_data():
         'ETag': '"32555a13671cd66c04959366c579b09b-209"',
         'Size': 2185813504,
         'StorageClass': 'STANDARD'
+    })
+
+
+def get_s3_cf_distribution_mock_data() -> CfDistribution:
+    return CfDistribution({
+        'Id': TEST_CF_DISTRIBUTION_ID,
+        'DomainName': TEST_CF_DOMAIN
     })
 
 
