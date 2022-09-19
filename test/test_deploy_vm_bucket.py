@@ -6,7 +6,7 @@ from exasol_script_languages_developer_sandbox.lib.aws_access.aws_access import 
 from exasol_script_languages_developer_sandbox.lib.aws_access.stack_resource import StackResource
 from exasol_script_languages_developer_sandbox.lib.vm_bucket.vm_slc_bucket import run_setup_vm_bucket, find_vm_bucket
 from test.cloudformation_validation import validate_using_cfn_lint
-from test.aws_local_stack_access import AwsLocalStackAccess
+
 
 
 def test_deploy_vm_bucket_template(vm_bucket_cloudformation_yml):
@@ -60,13 +60,3 @@ def test_find_fails_with_mock():
 
     with pytest.raises(RuntimeError):
         find_vm_bucket(aws_access_mock)
-
-
-def test_find_bucket(local_stack):
-    """
-    This test uses localstack to deploy the VM Bucket and then find it again.
-    """
-    aws_access = AwsLocalStackAccess(None)
-    run_setup_vm_bucket(aws_access)
-    bucket = find_vm_bucket(aws_access)
-    assert len(bucket) > 0

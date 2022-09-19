@@ -3,7 +3,8 @@ Resources:
     Type: 'AWS::S3::Bucket'
     Properties:
       AccessControl: 'Private'
-    Description: 'Bucket to store script-language developer sandbox VM images'
+    Metadata:
+      Comment: 'Bucket to store script-language developer sandbox VM images'
     DeletionPolicy: Retain
     UpdateReplacePolicy : Retain
   {{role_name}}:
