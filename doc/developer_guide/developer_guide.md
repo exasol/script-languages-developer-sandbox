@@ -1,5 +1,9 @@
 # Script-Languages-Developer-Sandbox Developer Guide
 
+## Overview
+
+The overall idea of this project is to set-up an AWS EC-2 instance, using cloudformation templates, then install all dependencies via _Ansible_, generate an AMI image based on the final EC-2 instance, and finally export the AMI image to the virtual image formats.
+
 ## Requirements
 
 This package requires:
@@ -21,7 +25,7 @@ bash install.sh
 
 ## Design Goals:
 
-We use AWS as backend, because it provides the possibility to run the whole workflow during a ci-test.
+script-languages-developer-sandbox use AWS as backend, because it provides the possibility to run the whole workflow during a ci-test.
 
 This project uses 
 - `boto3` to interact with AWS
@@ -34,26 +38,29 @@ A CLI command has normally a respective function in the `lib` submodule. Hence, 
 ## Commands
 
 There are generally three types of commands:
-- Those which are used during the release (release commands)
-- Those which can be used to deploy infrastructure onto AWS (deployment commands)
-- Those which can be used to identify problems or to test new/existing functionality (development commands)
+
+| Type | Explanation | 
+| ----- | --------- |
+| Release Commands | used during the release | 
+| Deployment Commands | used to deploy infrastructure onto AWS cloud | 
+| Development Commands | used to identify problems or for testing | 
 
 ### Release commands
 
-The followinds commands are used during the release AWS Codebuild job:
+The following commands are used during the release AWS Codebuild job:
 - `create-vm` - creates a new AMI and VM images
 - `update-release` - updates release notes of an existing Github release
-- `start-release-build` - starts the AWS release codebuild 
+- `start-release-build` - starts the release on AWS codebuild 
 
 ### Developer commands
 
-All other commands provide a subset of the features of the release commands, and can be use to identify problems or simulate the release provide:
+All other commands provide a subset of the features of the release commands, and can be used to identify problems or simulate the release:
 - `export-vm` - creates a new VM image from a running EC2-Instance
 - `install-dependencies` - starts an ansible-installation onto an existing EC-2 instance
-- `reset-password` - reset password on a remote EC-2-instance via ansible
+- `reset-password` - resets password on a remote EC-2-instance via ansible
 - `setup-ec2` - starts a new EC2 instance (based on an Ubuntu AMI)
 - `setup-ec2-and-install-dependencies` - starts a new EC2 instance and install dependencies via Ansible
-- `show-aws-assets` - show AWS entities associated with a specific keyword (called __asset-id__)
+- `show-aws-assets` - shows AWS entities associated with a specific keyword (called __asset-id__)
 - `start-test-release` - starts a Test Release flow
 
 ### Deployment commands
@@ -87,11 +94,11 @@ Also, the ssh password authentication will be enabled, and for security reasons 
 
 ### Export
 
-The export creates first an AMI based on the running EC2 instance. After that, the AMI will be exported as VM image in the default formats to a S3 bucket.
+The export creates an AMI based on the running EC2 instance and exports the AMI as VM image in the default formats to a S3 bucket.
 
 ## Release
 
-The release executes in a AWS Codebuild job, the following diagram shows the flow.
+The release is executed in a AWS Codebuild job, the following diagram shows the flow.
 ![image info](./img/create-vm-release.drawio.png)
 
 
@@ -105,10 +112,10 @@ The EC2-stack lives only during the creation of a new developer sandbox image.
 
 ## Tagging
 
-As all the involved resources might cause costs it's important to track all assets which were created during the execution of this project.
-All AWS entities (cloudformation stacks, AMI, EC2 key-pairs) are tagged/labeled with a specific keyword (calles __asset-id__) which allow tracking of them after creation.
-The S3 objects are identified by the prefix in the S3 bucket. Only the dynamically created entities are tagged with the asset-id, the permanent cloudformation stacks are not.
-The command `show-aws-assets` can be used to get a list of all assets which were created during the execution.
+Each of the involved resources might cause costs: cloudformation stacks, AMI, EC2 key-pairs.
+To enable you to keep track of all these resources the implementation tags them after creation with a specific keyword (called __asset-id__).
+The S3 objects are identified by the prefix in the S3 bucket. The command tags only the dynamically created entities with the asset-id but not the permanent cloudformation stacks.
+You can use the command `show-aws-assets` to get a list of all assets which were created during the execution.
 This is very useful if an error occured.
 If the creation of a sandbox finished normally it is expected to have only the AMI, images (S3 objects) and the export tasks (one for each image) listed.
 
