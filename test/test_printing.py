@@ -9,7 +9,7 @@ from exasol_script_languages_developer_sandbox.lib.aws_access.aws_access import 
 from test.aws_mock_data import get_ami_image_mock_data, TEST_AMI_ID, get_snapshot_mock_data, \
     get_export_image_task_mock_data, get_s3_object_mock_data, get_only_vm_stack_side_effect, TEST_BUCKET_ID, \
     get_ec2_cloudformation_mock_data, get_ec2_cloudformation_stack_resources_mock_data, get_ec2_key_pair_mock_data, \
-    get_s3_cf_distribution_mock_data, TEST_CF_DOMAIN
+    get_s3_cloudformation_mock_data
 from test.mock_cast import mock_cast
 
 
@@ -97,7 +97,7 @@ def test_printing_s3_object(default_asset_id, printing_mocks, filter_value, expe
 
     aws_access_mock: Union[AwsAccess, Mock] = create_autospec(AwsAccess)
     mock_cast(aws_access_mock.list_s3_objects).return_value = [get_s3_object_mock_data()]
-    mock_cast(aws_access_mock.get_cloudfront_distribution).return_value = get_s3_cf_distribution_mock_data()
+    mock_cast(aws_access_mock.describe_stacks).return_value = get_s3_cloudformation_mock_data()
     mock_cast(aws_access_mock.get_all_stack_resources).side_effect = get_only_vm_stack_side_effect
     asset_id = AssetId(filter_value) if filter_value else None
     print_with_printer(aws_access_mock, asset_id, (AssetTypes.VM_S3.value,), "*", printing_factory)
@@ -106,7 +106,7 @@ def test_printing_s3_object(default_asset_id, printing_mocks, filter_value, expe
 
     if expected_found_s3_object:
         s3_uri = f"s3://{TEST_BUCKET_ID}/{default_asset_id.bucket_prefix}/export-ami-123.vmdk"
-        url = f"https://{TEST_CF_DOMAIN}/{default_asset_id.bucket_prefix}/export-ami-123.vmdk"
+        url = f"https://test-s3.cloudfront.net/{default_asset_id.bucket_prefix}/export-ami-123.vmdk"
         table_printer_mock.add_row.assert_called_once_with(f'{default_asset_id.bucket_prefix}/export-ami-123.vmdk',
                                                            "2.19 GB", s3_uri, url)
     else:

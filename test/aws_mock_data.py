@@ -14,13 +14,11 @@ from test.conftest import DEFAULT_ASSET_ID
 
 TEST_ROLE_ID = 'VM-SLC-Bucket-VMImportRole-TEST'
 TEST_BUCKET_ID = 'vm-slc-bucket-vmslcbucket-TEST'
-TEST_CF_DISTRIBUTION_ID = 'vm-slc-bucket-cloudfront-distribution-TEST'
 
 TEST_AMI_ID = "AMI-IMAGE-12345"
 
 INSTANCE_ID = "test-instance"
 
-TEST_CF_DOMAIN = "vm-slc-test.cloudfront.net"
 
 def get_vm_bucket_cloudformation_mock_data():
     # The following is a snapshot from calling AwsAccess(a).get_all_stack_resources("VM-SLC-Bucket") on a running
@@ -34,12 +32,6 @@ def get_vm_bucket_cloudformation_mock_data():
             StackResource({'LogicalResourceId': 'VMSLCBucket',
                            'PhysicalResourceId': TEST_BUCKET_ID,
                            'ResourceType': 'AWS::S3::Bucket',
-                           'LastUpdatedTimestamp': datetime.datetime(2022, 8, 11, 17, 14, 55, 63000, tzinfo=tzutc()),
-                           'ResourceStatus': 'CREATE_COMPLETE',
-                           'DriftInformation': {'StackResourceDriftStatus': 'NOT_CHECKED'}}),
-            StackResource({'LogicalResourceId': 'CfDistributionDomainName',
-                           'PhysicalResourceId': TEST_CF_DISTRIBUTION_ID,
-                           'ResourceType': 'AWS::CloudFront::Distribution',
                            'LastUpdatedTimestamp': datetime.datetime(2022, 8, 11, 17, 14, 55, 63000, tzinfo=tzutc()),
                            'ResourceStatus': 'CREATE_COMPLETE',
                            'DriftInformation': {'StackResourceDriftStatus': 'NOT_CHECKED'}})
@@ -129,13 +121,6 @@ def get_s3_object_mock_data():
     })
 
 
-def get_s3_cf_distribution_mock_data() -> CfDistribution:
-    return CfDistribution({
-        'Id': TEST_CF_DISTRIBUTION_ID,
-        'DomainName': TEST_CF_DOMAIN
-    })
-
-
 def get_ec2_cloudformation_mock_data():
     return CloudformationStack({
         'StackId': 'test-stack-id',
@@ -180,3 +165,21 @@ def get_ec2_key_pair_mock_data():
         'CreateTime': datetime.datetime(2022, 8, 16, 15, 30, 41,
                                         tzinfo=tzutc())
     })
+
+
+def get_s3_cloudformation_mock_data():
+    return [CloudformationStack({
+        'StackId': 'test-s3-stack-id',
+        'StackName': "DEVELOPER-SANDBOX-VM-SLC-Bucket",
+        'ChangeSetId': 'test-stack-changeset-id-2',
+        'CreationTime': datetime.datetime(2022, 8, 16, 14, 30, 45, 559000, tzinfo=tzutc()),
+        'LastUpdatedTime': datetime.datetime(2022, 8, 16, 14, 30, 51, 667000, tzinfo=tzutc()),
+        'RollbackConfiguration': {},
+        'StackStatus': 'CREATE_COMPLETE',
+        'DisableRollback': False, 'NotificationARNs': [], 'Capabilities': ['CAPABILITY_IAM'],
+        'Tags': [{'Key': 'exa_slc_id', 'Value': DEFAULT_ASSET_ID.tag_value}],
+        'DriftInformation': {'StackDriftStatus': 'NOT_CHECKED'},
+        'Outputs': [{'OutputKey': 'CfDistributionDomainName',
+                     'OutputValue': 'test-s3.cloudfront.net', 'Description': ''}]
+        })
+    ]

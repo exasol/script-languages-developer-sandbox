@@ -26,11 +26,13 @@ def find_vm_bucket(aws_access: AwsAccess) -> str:
 
 
 def find_url_for_bucket(aws_access: AwsAccess) -> str:
-    stack_resources = aws_access.get_all_stack_resources(STACK_NAME)
-    for stack_resource in stack_resources:
-        if stack_resource.is_cloudfront_distribution:
-            cf_distribution = aws_access.get_cloudfront_distribution(stack_resource.physical_id)
-            return cf_distribution.domain_name
+    stack = [stack for stack in aws_access.describe_stacks() if stack.name == STACK_NAME]
+    if len(stack) != 1:
+        raise RuntimeError(f"stack {STACK_NAME} not found")
+    domain_output = [output for output in stack[0].outputs if output.output_key == "CfDistributionDomainName"]
+    if len(domain_output) != 1:
+        raise RuntimeError(f"Domain output for stack {STACK_NAME} not found")
+    return domain_output[0].output_value
 
 
 def find_vm_import_role(aws_access: AwsAccess) -> str:
