@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project aims to create a virtual machine image, in different formats, which can be used to build easily Exasol's script-languages-container, which are the runtime container for UDF's.
+This project aims to create a virtual machine image, in different formats, which can be used to easily build Exasol's script-languages-container, which are the runtime container for UDF's.
 
 The virtual machine image provides:
 * The script-languages-release repositories

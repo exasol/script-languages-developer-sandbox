@@ -23,9 +23,9 @@ cd githooks
 bash install.sh
 ```
 
-## Design Goals:
+## Design Goals
 
-script-languages-developer-sandbox use AWS as backend, because it provides the possibility to run the whole workflow during a ci-test.
+script-languages-developer-sandbox uses AWS as backend, because it provides the possibility to run the whole workflow during a ci-test.
 
 This project uses 
 - `boto3` to interact with AWS
