@@ -3,7 +3,6 @@ from dateutil.tz import tzutc
 
 from exasol_script_languages_developer_sandbox.lib.aws_access.ami import Ami
 from exasol_script_languages_developer_sandbox.lib.aws_access.cloudformation_stack import CloudformationStack
-from exasol_script_languages_developer_sandbox.lib.aws_access.cloudfront_distribution import CfDistribution
 from exasol_script_languages_developer_sandbox.lib.aws_access.export_image_task import ExportImageTask
 from exasol_script_languages_developer_sandbox.lib.aws_access.key_pair import KeyPair
 from exasol_script_languages_developer_sandbox.lib.aws_access.s3_object import S3Object
