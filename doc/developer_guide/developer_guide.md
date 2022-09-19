@@ -113,7 +113,7 @@ The EC2-stack lives only during the creation of a new developer sandbox image.
 ## Tagging
 
 Each of the involved resources might cause costs: cloudformation stacks, AMI, EC2 key-pairs.
-To enable you to keep track of all these resources the implementation tags them after creation with a specific keyword (called __asset-id__).
+To enable you to keep track of all these resources, the implementation tags them after creation with a specific keyword (called __asset-id__).
 The S3 objects are identified by the prefix in the S3 bucket. The command tags only the dynamically created entities with the asset-id but not the permanent cloudformation stacks.
 You can use the command `show-aws-assets` to get a list of all assets which were created during the execution.
 This is very useful if an error occured.
