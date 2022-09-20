@@ -45,20 +45,22 @@ Resources:
                 Resource:
                   - "*"
   S3CDNBucketPolicy:
-    Metadata:
-      Comment: 'Bucket policy to allow cloudfront to access the images'
+    Type: 'AWS::S3::BucketPolicy'
     Properties:
       Bucket: !Ref {{bucket_name}}
       PolicyDocument:
+        Version: 2012-10-17
         Statement:
-          - Action:
+          - Effect: Allow
+            Action:
               - 's3:GetObject'
-            Effect: 'Allow'
             Principal:
-              CanonicalUser: !GetAtt CfOriginAccessIdentity.S3CanonicalUserId
+              Service: "cloudfront.amazonaws.com"
             Resource:
               - !Sub "arn:aws:s3:::${ {{bucket_name}} }/slc_developer_sandbox/*"
-    Type: 'AWS::S3::BucketPolicy'
+            Condition:
+              StringEquals:
+                'AWS:SourceArn': !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${CfDistribution}"
 
   CfDistribution:
     Type: 'AWS::CloudFront::Distribution'
@@ -92,17 +94,20 @@ Resources:
           - DomainName: !GetAtt {{bucket_name}}.DomainName
             Id: !Sub 's3-origin-${ {{bucket_name}} }'
             OriginPath: ''
+            OriginAccessControlId: !GetAtt OAC.Id
             S3OriginConfig:
-              OriginAccessIdentity: !Sub 'origin-access-identity/cloudfront/${CfOriginAccessIdentity}'
+              OriginAccessIdentity: ''
         PriceClass: 'PriceClass_All'
 
-  CfOriginAccessIdentity:
-    Metadata:
-      Comment: 'Access S3 bucket content only through CloudFront'
+  OAC:
+    Type: 'AWS::CloudFront::OriginAccessControl'
     Properties:
-      CloudFrontOriginAccessIdentityConfig:
-        Comment: 'Access S3 bucket content only through CloudFront'
-    Type: 'AWS::CloudFront::CloudFrontOriginAccessIdentity'
+      OriginAccessControlConfig:
+          Description: Origin Access Control config for the VM S3 Bucket
+          Name: VM-Bucket-OAC
+          OriginAccessControlOriginType: s3
+          SigningBehavior: always
+          SigningProtocol: sigv4
 
 Outputs:
   S3BucketSecureURL:
