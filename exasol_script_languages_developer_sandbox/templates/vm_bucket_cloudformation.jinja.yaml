@@ -1,5 +1,5 @@
 Resources:
-  {{bucket_name}}:
+  VMBucket:
     Type: 'AWS::S3::Bucket'
     Properties:
       AccessControl: 'Private'
@@ -7,7 +7,7 @@ Resources:
       Comment: 'Bucket to store script-language developer sandbox VM images'
     DeletionPolicy: Retain
     UpdateReplacePolicy : Retain
-  {{role_name}}:
+  VMExportRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -34,8 +34,8 @@ Resources:
                   - s3:ListBucket
                   - s3:GetBucketAcl
                 Resource:
-                  - !Sub "arn:aws:s3:::${ {{bucket_name}} }/*"
-                  - !Sub "arn:aws:s3:::${ {{bucket_name}} }"
+                  - !Sub "arn:aws:s3:::${ VMBucket }/*"
+                  - !Sub "arn:aws:s3:::${ VMBucket }"
               - Effect: Allow
                 Action:
                   - ec2:ModifySnapshotAttribute
@@ -47,7 +47,7 @@ Resources:
   S3CDNBucketPolicy:
     Type: 'AWS::S3::BucketPolicy'
     Properties:
-      Bucket: !Ref {{bucket_name}}
+      Bucket: !Ref VMBucket
       PolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -57,7 +57,7 @@ Resources:
             Principal:
               Service: "cloudfront.amazonaws.com"
             Resource:
-              - !Sub "arn:aws:s3:::${ {{bucket_name}} }/slc_developer_sandbox/*"
+              - !Sub "arn:aws:s3:::${ VMBucket }/slc_developer_sandbox/*"
             Condition:
               StringEquals:
                 'AWS:SourceArn': !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${CfDistribution}"
@@ -84,17 +84,17 @@ Resources:
             QueryString: false
           MaxTTL: 31536000
           MinTTL: 86400
-          TargetOriginId: !Sub 's3-origin-${ {{bucket_name}} }'
+          TargetOriginId: !Sub 's3-origin-${ VMBucket }'
           ViewerProtocolPolicy: 'redirect-to-https'
         DefaultRootObject: 'index.html'
         Enabled: true
         HttpVersion: 'http1.1'
         IPV6Enabled: true
         Origins:
-          - DomainName: !GetAtt {{bucket_name}}.DomainName
-            Id: !Sub 's3-origin-${ {{bucket_name}} }'
+          - DomainName: !GetAtt VMBucket.DomainName
+            Id: !Sub 's3-origin-${ VMBucket }'
             OriginPath: ''
-            OriginAccessControlId: !GetAtt OAC.Id
+            OriginAccessControlId: !Ref OAC
             S3OriginConfig:
               OriginAccessIdentity: ''
         PriceClass: 'PriceClass_All'
@@ -110,17 +110,15 @@ Resources:
           SigningProtocol: sigv4
 
 Outputs:
-  S3BucketSecureURL:
-    Value: !Join
-      - ''
-      - - 'https://'
-        - !GetAtt
-          - {{bucket_name}}
-          - DomainName
-    Description: Name of S3 bucket
-  CfDistributionId:
+  {{VMBucketId}}:
+    Value: !Ref VMBucket
+    Description: Id of th S3 bucket
+  {{VMExportRoleId}}:
+    Value: !Ref VMExportRole
+    Description: Id of the VMExportRole
+  {{CfDistributionId}}:
     Description: 'Id for our cloudfront distribution'
     Value: !Ref CfDistribution
-  CfDistributionDomainName:
+  {{CfDistributionDomainName}}:
     Description: 'Domain name for our cloudfront distribution'
     Value: !GetAtt CfDistribution.DomainName

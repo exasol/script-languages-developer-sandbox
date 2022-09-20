@@ -1,4 +1,6 @@
 import datetime
+from typing import List
+
 from dateutil.tz import tzutc
 
 from exasol_script_languages_developer_sandbox.lib.aws_access.ami import Ami
@@ -13,9 +15,9 @@ from test.conftest import DEFAULT_ASSET_ID
 
 TEST_ROLE_ID = 'VM-SLC-Bucket-VMImportRole-TEST'
 TEST_BUCKET_ID = 'vm-slc-bucket-vmslcbucket-TEST'
-
 TEST_AMI_ID = "AMI-IMAGE-12345"
-
+TEST_CLOUDFRONT_ID = "test-cloudfrontet-TEST"
+TEST_CLOUDFRONT_DOMAIN_NAME = "test-s3.cloudfront.net"
 INSTANCE_ID = "test-instance"
 
 
@@ -166,7 +168,7 @@ def get_ec2_key_pair_mock_data():
     })
 
 
-def get_s3_cloudformation_mock_data():
+def get_s3_cloudformation_mock_data() -> List[CloudformationStack]:
     return [CloudformationStack({
         'StackId': 'test-s3-stack-id',
         'StackName': "DEVELOPER-SANDBOX-VM-SLC-Bucket",
@@ -178,7 +180,14 @@ def get_s3_cloudformation_mock_data():
         'DisableRollback': False, 'NotificationARNs': [], 'Capabilities': ['CAPABILITY_IAM'],
         'Tags': [{'Key': 'exa_slc_id', 'Value': DEFAULT_ASSET_ID.tag_value}],
         'DriftInformation': {'StackDriftStatus': 'NOT_CHECKED'},
-        'Outputs': [{'OutputKey': 'CfDistributionDomainName',
-                     'OutputValue': 'test-s3.cloudfront.net', 'Description': ''}]
+        'Outputs': [{'OutputKey': 'VMBucketId',
+                     'OutputValue': TEST_BUCKET_ID, 'Description': ''},
+                    {'OutputKey': 'VMExportRoleId',
+                     'OutputValue': TEST_ROLE_ID, 'Description': ''},
+                    {'OutputKey': 'CfDistributionId',
+                     'OutputValue': TEST_CLOUDFRONT_ID, 'Description': ''},
+                    {'OutputKey': 'CfDistributionDomainName',
+                     'OutputValue': TEST_CLOUDFRONT_DOMAIN_NAME, 'Description': ''}
+                    ]
         })
     ]
