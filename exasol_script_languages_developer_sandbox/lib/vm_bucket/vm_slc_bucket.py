@@ -17,6 +17,7 @@ LOG = get_status_logger(LogType.VM_BUCKET)
 
 
 def create_vm_bucket_cf_template() -> str:
+    # All output keys (class OutputKey) are parameters in the vm_bucket_cloudformation.jinja.yaml
     # Simply map the output key enums values to them self and pass them to jinja.
     # Thus, we ensure that the output keys in the cloudformation match with the values in class OutputKey
     output_keys_dict = {output_key.value: output_key.value for output_key in OutputKey}
