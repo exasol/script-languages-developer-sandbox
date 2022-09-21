@@ -95,6 +95,12 @@ Resources:
             Id: !Sub 's3-origin-${ VMBucket }'
             OriginPath: ''
             OriginAccessControlId: !Ref OAC
+            # Despite the fact that we use OAC, and not the deprecated OAI, we need to add this field.
+            # Otherwise, AWS complains during the deployment of the stack.
+            # According to the documentation an empty string in OriginAccessIdentity means:
+            # "If you want viewers to be able to access objects using either the CloudFront URL or the Amazon S3 URL, specify an empty OriginAccessIdentity element."
+            # However, as we set the Bucket Access Control to private, the images can be accessed only
+            # via the Cloudfront URL, and not the Amazon S3 URL.
             S3OriginConfig:
               OriginAccessIdentity: ''
         PriceClass: 'PriceClass_All'
