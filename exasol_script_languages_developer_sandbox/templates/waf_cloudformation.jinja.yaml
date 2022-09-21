@@ -4,7 +4,7 @@ Resources:
     Properties:
       Name: VMDownloadLimitationWebACL
       Scope: CLOUDFRONT
-      Description: This is a demo web ACL with AWS Managed Rules
+      Description: This Web ACL contains rule to control access to the VM Bucket cloudfront distribution.
       DefaultAction:
         Block: {}
       VisibilityConfig:
