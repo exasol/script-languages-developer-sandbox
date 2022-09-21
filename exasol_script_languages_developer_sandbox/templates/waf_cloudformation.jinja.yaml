@@ -6,7 +6,7 @@ Resources:
       Scope: CLOUDFRONT
       Description: This Web ACL contains rule to control access to the VM Bucket cloudfront distribution.
       DefaultAction:
-        Block: {}
+        Allow: {}
       VisibilityConfig:
         SampledRequestsEnabled: true
         CloudWatchMetricsEnabled: true
