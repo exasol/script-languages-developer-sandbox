@@ -62,6 +62,7 @@ All other commands provide a subset of the features of the release commands, and
 - `setup-ec2-and-install-dependencies` - starts a new EC2 instance and install dependencies via Ansible
 - `show-aws-assets` - shows AWS entities associated with a specific keyword (called __asset-id__)
 - `start-test-release` - starts a Test Release flow
+- `make-ami-public` - Changes permissions of an existing AMI such that it becomes public 
 
 ### Deployment commands
 
@@ -69,6 +70,7 @@ The following commands can be used to deploy the infrastructure onto a given AWS
 - `setup-ci-codebuild` - deploys the AWS Codebuild cloudformation stack which will run the ci-test
 - `setup-vm-bucket` - deploys the AWS Bucket cloudformation stack which will be used to deploy the VM images
 - `setup-release-codebuild` - deploys the AWS Codebuild cloudformation stack which will be used for the release-build
+- `setup-vm-bucket-waf` - deploys the AWS Codebuild cloudformation stack which contains the WAF Acl configuration for the Cloudfront distribution of the VM Bucket 
 
 ## Flow
 

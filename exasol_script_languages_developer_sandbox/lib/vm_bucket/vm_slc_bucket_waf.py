@@ -16,6 +16,11 @@ def get_cloudformation_template(allowed_ip: str) -> str:
 
 
 def run_setup_vm_bucket_waf(aws_access: AwsAccess, allowed_ip: str, config: ConfigObject) -> None:
+    """
+    Deploys the WAF Cloudformation stack.
+    It automatically deploys to AWS region indicated by config paramaer "waf_region".
+    """
+
     yml = get_cloudformation_template(allowed_ip=allowed_ip)
     aws_access.instantiate_for_region(region=config.waf_region).upload_cloudformation_stack(yml, STACK_NAME)
     LOG.info(f"Deployed cloudformation stack '{STACK_NAME}' in region '{config.waf_region}'")
@@ -32,5 +37,9 @@ def _find_vm_bucket_stack_output(aws_access: AwsAccess, output_key: str):
 
 
 def find_acl_arn(aws_access: AwsAccess, config: ConfigObject) -> str:
+    """
+    Finds the Arn of the WAF Acl which should be used for the Cloudfront distribution of the VM Bucket.
+    Assumes, that the WAF Cloudformation stack is correctly deployed.
+    """
     return _find_vm_bucket_stack_output(aws_access.instantiate_for_region(region=config.waf_region),
                                         OUTPUT_KEY_VM_DOWNLOAD_ACL_ARN)
