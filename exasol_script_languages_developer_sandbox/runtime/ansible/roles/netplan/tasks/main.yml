@@ -14,10 +14,10 @@
   with_items:
     - 'etc/netplan/01-network-manager.cfg'
 
-- name:  Run 01-network-manager.cfg generate
-  shell: "01-network-manager.cfg generate"
+- name:  Run netplan generate
+  shell: "netplan generate"
   become: "{{need_sudo}}"
 
-- name:  Run 01-network-manager.cfg apply
-  shell: "01-network-manager.cfg apply"
+- name:  Run netplan apply
+  shell: "netplan apply"
   become: "{{need_sudo}}"
