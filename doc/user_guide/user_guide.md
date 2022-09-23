@@ -142,4 +142,6 @@ For information about how to build script-languages-container please check:
 **Password**: `script-languages`  
 **Http Port**: 8888  
 
+There is a pre-loaded tutorial notebook available which guides you through the usage of `exaslct`:  __script-languages.ipynb__.
+
 Check [Jupyter Home](https://jupyter.org/) for more information.
