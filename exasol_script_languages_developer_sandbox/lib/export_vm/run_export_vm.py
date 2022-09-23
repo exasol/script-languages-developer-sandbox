@@ -5,7 +5,7 @@ from typing import Tuple
 from exasol_script_languages_developer_sandbox.lib.asset_id import AssetId
 from exasol_script_languages_developer_sandbox.lib.aws_access.aws_access import AwsAccess
 from exasol_script_languages_developer_sandbox.lib.aws_access.export_image_task import ExportImageTask
-from exasol_script_languages_developer_sandbox.lib.export_vm.rename_s3_objects import rename_s3_object
+from exasol_script_languages_developer_sandbox.lib.export_vm.rename_s3_objects import rename_image_in_s3
 from exasol_script_languages_developer_sandbox.lib.logging import get_status_logger, LogType
 from exasol_script_languages_developer_sandbox.lib.config import ConfigObject
 from exasol_script_languages_developer_sandbox.lib.setup_ec2.cf_stack import find_ec2_instance_in_cf_stack
@@ -74,7 +74,7 @@ def export_vm_image(aws_access: AwsAccess, vm_image_format: VmDiskImageFormat, t
     export_image_task = poll_export_image_task(aws_access, export_image_task, configuration)
     if not export_image_task.is_completed:
         raise RuntimeError(f"Export of VM failed: status message was {export_image_task.status_message}")
-    rename_s3_object(aws_access, export_image_task, vm_image_format, asset_id=asset_id)
+    rename_image_in_s3(aws_access, export_image_task, vm_image_format, asset_id=asset_id)
 
 
 def export_vm_images(aws_access: AwsAccess, vm_image_formats: Tuple[str, ...], tag_value: str,

@@ -1,4 +1,5 @@
-from typing import Union
+from __future__ import annotations
+
 from unittest.mock import call, create_autospec, MagicMock
 
 import pytest
@@ -55,7 +56,7 @@ def aws_vm_export_mock():
              3. Returns the mocked ExportImageTask object when calling get_export_image_task()
              4. Returns the mocked Ami object when calling get_ami() (see method get_ami_side_effect() for details
     """
-    aws_access_mock: Union[AwsAccess, MagicMock] = create_autospec(AwsAccess, spec_set=True)
+    aws_access_mock: AwsAccess | MagicMock = create_autospec(AwsAccess, spec_set=True)
     mock_cast(aws_access_mock.describe_stacks).return_value = get_s3_cloudformation_mock_data() + \
                                                               get_waf_cloudformation_mock_data()
     mock_cast(aws_access_mock.create_image_from_ec2_instance).return_value = TEST_AMI_ID

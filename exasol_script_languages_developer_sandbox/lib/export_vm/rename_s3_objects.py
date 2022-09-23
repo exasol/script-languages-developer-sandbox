@@ -7,22 +7,22 @@ from exasol_script_languages_developer_sandbox.lib.export_vm.vm_disk_image_forma
 def build_image_source(prefix: str, export_image_task_id: str, vm_image_format: VmDiskImageFormat) -> str:
     img_format = vm_image_format.value.lower()
     return "{bucket_prefix}{export_task_id}.{img_format}".format(
-                    bucket_prefix=prefix,
-                    export_task_id=export_image_task_id,
-                    img_format=img_format)
+        bucket_prefix=prefix,
+        export_task_id=export_image_task_id,
+        img_format=img_format)
 
 
 def build_image_destination(prefix: str, asset_id: AssetId, vm_image_format: VmDiskImageFormat) -> str:
     img_format = vm_image_format.value.lower()
     return "{bucket_prefix}exasol-script-languages-developer-sandbox-{asset_id}.{img_format}".format(
-                    bucket_prefix=prefix,
-                    asset_id=str(asset_id),
-                    img_format=img_format)
+        bucket_prefix=prefix,
+        asset_id=str(asset_id),
+        img_format=img_format)
 
 
-def rename_s3_object(aws_access: AwsAccess, export_image_task: ExportImageTask,
-                     vm_image_format: VmDiskImageFormat,
-                     asset_id: AssetId) -> None:
+def rename_image_in_s3(aws_access: AwsAccess, export_image_task: ExportImageTask,
+                       vm_image_format: VmDiskImageFormat,
+                       asset_id: AssetId) -> None:
     """
     Renames the resulting S3 object of an export-image-task.
     The source objects always have the format "$export-image-task-id.$format".
