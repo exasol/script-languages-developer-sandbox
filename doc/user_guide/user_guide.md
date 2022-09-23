@@ -43,7 +43,69 @@ We recommend the following requirements for the VM instance:
 | RAM  | 2GB     | 8GB         |
 | CPU  | 1 Core  | 2 Cores     |
 
-### Password
+### Use the AMI
+
+#### Overview
+
+1. Create a Security Group with open inbound ports for `ssh` (22) and `Jupyter` (8888)
+2. Starter the EC-2 instance
+
+#### Step-by-step
+
+1. Go to [AWS Console](https://aws.amazon.com/console/)
+2. Go to EC2 (in the search field at the top type EC2 and click on the result)
+3. Create a security group for ssh and Jupyter:
+    - In the navigation bar on the left select "Security Groups"
+    - Click button "Create Security Group"
+    - Choose name and VPC
+    - For outound rules keep the default
+    - Create 2 inbound rules: One of type `ssh`, the other of type "Custom TCP" with port 8888
+ 4. Go back to the EC2 console
+ 5. Launch the EC2 instance:
+     - In the navigation bar on the left select "Instances"
+     - Click button "Launch instances"
+     - At field "Application and OS Images" select the AMI id of the developer sandbox (found in the [release notes](https://github.com/exasol/script-languages-developer-sandbox/releases/latest))
+     - Select an appropriate instance type (at least "Small")
+     - Choose your key pair
+     - Choose the security group which your created in step 3.
+     - For the storage keep we recommend to keep the pre-selected 100GB volume
+     - Click button "Launch instance"
+6. As soon as the machine becomes available you can connect per ssh with user `ubuntu`: `ssh -i your_key.pem ubuntu@the_new_ec_instance`
+
+### Use the virtual machine image
+
+#### Boxes (QEMU) under Linux
+
+##### Overview
+
+1. Open the `VMDK` image
+2. Select Ubuntu 20.04 LTS as template
+3. Configure RAM
+4. Start the VM
+
+##### Step-by-step
+
+1. Download the `VMDK` file from the [release notes](https://github.com/exasol/script-languages-developer-sandbox/releases/latest).
+2. Open Boxes
+3. Create a new VM: Click the + Button
+4. Choose: "Create virtual machine from file"
+![image info](./img/tutorial-screenshot-create-img.png)
+5. Select the downloaded "VMDK" file from step 1
+6. Select "Ubuntu 20.04 LTS" as Template, and click "Next"
+![image info](./img/tutorial-screenshot-select-template.png)
+7. Select memory size (see section Hardware Requirements), then click "Create"
+![image info](./img/tutorial-screenshot-select-resources.png)
+8. The image will be imported and then will automatically start
+![image info](./img/tutorial-screenshot-importing.png)
+9. See section [Login](#Login) about how to login
+10. If you want to connect to the Jupyterlab, you need to find out the IP address of the VM:
+- Click the 3 dots in Boxes, then preferences![image info](./img/tutorial-screenshot-open-preferences.png)
+- Then the IP address will be shown: ![image info](./img/tutorial-screenshot-show-ip.png)
+- Use _IP-Address_:8888 to connect to the [Jupterlab](#Jupyter) 
+
+### Login
+
+Username: **ubuntu**
 
 At the first login to the sandbox (image or AMI) you will be prompted to change your password.  
 The default password is: **scriptlanguages**
@@ -76,8 +138,8 @@ For information about how to build script-languages-container please check:
 ### Jupyter
 
 **Location virtual environment**: `/home/ubuntu/jupyterenv`  
-**Location notebooks**: `/home/ubuntu/notebooks`
-**Password**: `script-languages`
+**Location notebooks**: `/home/ubuntu/notebooks`  
+**Password**: `script-languages`  
 **Http Port**: 8888  
 
 Check [Jupyter Home](https://jupyter.org/) for more information.
