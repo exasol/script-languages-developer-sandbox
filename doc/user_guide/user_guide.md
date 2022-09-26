@@ -62,7 +62,7 @@ We recommend the following requirements for the VM instance:
     - Create  inbound rules: 
       - One of type `ssh`
       - If you plan to connect to the Jupyter lab, add another rule of type "Custom TCP" with port 8888. 
-        - **Important**: With this rule you expose the Jupyter lab to the internet; anybody who has access to the password will be able to execute commands. For a minimum of security you should change the default Jupyter password. Details about how to do that will be shown in the login screen. But, you should consider to use only `ssh` with port forwarding.
+        - **Important**: With this rule you expose the Jupyter lab to the internet; anybody who has access to the password will be able to execute commands. For a minimum of security you should change the default Jupyter password. Details about how to do that will be shown in the login screen. However, you should consider to use only `ssh` with port forwarding.
  4. Go back to the EC2 console
  5. Launch the EC2 instance:
      - In the navigation bar on the left select "Instances"
