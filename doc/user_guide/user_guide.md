@@ -54,12 +54,14 @@ We recommend the following requirements for the VM instance:
 
 1. Go to [AWS Console](https://aws.amazon.com/console/)
 2. Go to EC2 (in the search field at the top type EC2 and click on the result)
-3. Create a security group for ssh and Jupyter:
+3. Create a security group for ssh and (optionally) Jupyter:
     - In the navigation bar on the left select "Security Groups"
     - Click button "Create Security Group"
     - Choose name and VPC
-    - For outound rules keep the default
-    - Create 2 inbound rules: One of type `ssh`, the other of type "Custom TCP" with port 8888
+    - For outbound rules keep the default
+    - Create  inbound rules: 
+      - One of type `ssh`
+      - If you plan to connect to the Jupyter lab, add another rule of type "Custom TCP" with port 8888. **Important**: With this rule you expose the Jupyter lab to the internet; anybody who has access to the password will be able to execute commands. For a minimum of security you should change the default Jupyter password. Details about how to do that will be shown in the login screen. But, you should consider to use only `ssh`.
  4. Go back to the EC2 console
  5. Launch the EC2 instance:
      - In the navigation bar on the left select "Instances"
