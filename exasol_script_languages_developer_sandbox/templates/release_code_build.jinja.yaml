@@ -68,6 +68,7 @@ Resources:
                 Effect: Allow
               - Action:
                 - s3:PutObject
+                - s3:CopyObject
                 Resource: arn:aws:s3:::{{vm_bucket}}/slc_developer_sandbox/*
                 Effect: Allow
   DeveloperSandboxReleaseCodeBuild:
