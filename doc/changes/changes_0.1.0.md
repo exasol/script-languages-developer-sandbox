@@ -1,10 +1,14 @@
-# script-languages-container-ci-setup 0.1.0, released t.b.d.
+# script-languages-container-ci-setup 0.1.0, released 2022-10-06
 
 Code name: Initial release
 
 ## Summary
 
-t.b.d.
+Initial release of script-languages-container-ci-setup. Provides the creation of a developer sandbox AMI and virtual machine images for a specific version of the script-languages-release project.
+
+## Script-Languages-Release
+
+Version: 5.0.0
 
 ## Bug Fixes
  
