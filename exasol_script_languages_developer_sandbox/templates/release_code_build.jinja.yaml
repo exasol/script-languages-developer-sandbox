@@ -52,9 +52,8 @@ Resources:
                 - ec2:DescribeKeyPairs
                 - ec2:DescribeInstanceStatus
                 - ec2:CreateImage
-                - ec2:DeregisterImage
-                - ec2:DeleteSnapshot
                 - ec2:ExportImage
+                - ec2:ModifyImageAttribute
                 Resource: "*"
                 Effect: Allow
               - Action:
