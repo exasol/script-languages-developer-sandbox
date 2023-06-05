@@ -26,7 +26,7 @@ jobs:
     - name: Install Poetry
       uses: abatilo/actions-poetry@v2
       with:
-        poetry-version: 1.2.0
+        poetry-version: 1.4.0
 
     - name: Setup poetry env
       run:  bash scripts/setup_poetry_env.sh "python3.8"

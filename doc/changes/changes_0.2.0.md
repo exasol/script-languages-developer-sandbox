@@ -24,4 +24,4 @@ n/a
 
 ## Refactoring
 
-n/a
+ - #73: Removed setup.py
