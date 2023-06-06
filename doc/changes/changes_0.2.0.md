@@ -25,3 +25,7 @@ n/a
 ## Refactoring
 
 n/a
+
+## Security
+
+ - #77: Update Ubuntu packages
