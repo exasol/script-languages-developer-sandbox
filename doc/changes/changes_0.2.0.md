@@ -29,5 +29,5 @@ n/a
 ## Security
 
  - #77: Update Ubuntu packages and added `cloudformation:ListStacks` to the roles for the CI runs
- - #88: Updated many dependencies in poetry.lock file for security reason
+ - #88: Updated many dependencies in poetry.lock file for security reason (Ansible and ansible-core not updated because it requires python version change)
 
