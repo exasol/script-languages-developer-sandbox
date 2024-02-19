@@ -40,8 +40,8 @@ def test_motd_jupyter_template_prints_password_message(motd_file):
     """
     python_file, jupyter_server_config_file = motd_file
     mock_data = {
-        "ServerApp": {
-        "password": "dummy_password_hash"
+        "IdentityProvider": {
+        "hashed_password": "dummy_password_hash"
         }
     }
     with open(jupyter_server_config_file, "w") as f:
@@ -58,8 +58,8 @@ def test_motd_jupyter_template_prints_password_message_not_if_passward_was_chang
     """
     python_file, jupyter_server_config_file = motd_file
     mock_data = {
-        "ServerApp": {
-        "password": "NOT_MATCHING_PASSWORD"
+        "IdentityProvider": {
+        "hashed_password": "NOT_MATCHING_PASSWORD"
         }
     }
     with open(jupyter_server_config_file, "w") as f:
